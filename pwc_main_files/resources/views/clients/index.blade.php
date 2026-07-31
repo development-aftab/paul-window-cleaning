@@ -861,6 +861,8 @@
         $(document).ready(function() {
             var currentSearchVal = '';
             var currentRouteFilter = '';
+            var currentClientTypeFilter = '';
+            var currentPaymentTypeFilter = '';
             var expandedParentIds = new Set();
 
             function resolveBranchContainer($table) {
@@ -1336,6 +1338,16 @@
                         if (!routeMatch) return false;
                     }
 
+                    if (currentClientTypeFilter) {
+                        var rowClientType = ($row.attr('data-client-type') || '').trim();
+                        if (rowClientType !== currentClientTypeFilter) return false;
+                    }
+
+                    if (currentPaymentTypeFilter) {
+                        var rowPaymentType = ($row.attr('data-payment-type') || '').trim();
+                        if (rowPaymentType !== currentPaymentTypeFilter) return false;
+                    }
+
                     var searchVal = currentSearchVal;
                     if (!searchVal) return true;
 
@@ -1401,58 +1413,16 @@
 
             // Client Type filter change handler (without reload)
             $('#filterByClientType').on('change', function() {
-                var clientType = $(this).val();
-
-                if (clientsTable) {
-                    if (clientType) {
-                        // Filter by client type in the table
-                        clientsTable.rows().every(function() {
-                            var row = this.node();
-                            var $row = $(row);
-                            var rowClientType = $row.data('client-type');
-
-                            if (rowClientType === clientType) {
-                                $row.show();
-                            } else {
-                                $row.hide();
-                            }
-                        });
-                    } else {
-                        // Show all rows
-                        clientsTable.rows().every(function() {
-                            $(this.node()).show();
-                        });
-                    }
-                    clientsTable.draw(false); // Redraw without resetting pagination
-                }
+                currentClientTypeFilter = $(this).val() || '';
+                if (clientsTable) clientsTable.draw();
+                if (potentialTable) potentialTable.draw();
             });
 
             // Payment Type filter change handler (without reload)
             $('#filterByPaymentType').on('change', function() {
-                var paymentType = $(this).val();
-
-                if (clientsTable) {
-                    if (paymentType) {
-                        // Filter by payment type in the table
-                        clientsTable.rows().every(function() {
-                            var row = this.node();
-                            var $row = $(row);
-                            var rowPaymentType = $row.data('payment-type');
-
-                            if (rowPaymentType === paymentType) {
-                                $row.show();
-                            } else {
-                                $row.hide();
-                            }
-                        });
-                    } else {
-                        // Show all rows
-                        clientsTable.rows().every(function() {
-                            $(this.node()).show();
-                        });
-                    }
-                    clientsTable.draw(false); // Redraw without resetting pagination
-                }
+                currentPaymentTypeFilter = $(this).val() || '';
+                if (clientsTable) clientsTable.draw();
+                if (potentialTable) potentialTable.draw();
             });
 
             // Route filter change handler for staff

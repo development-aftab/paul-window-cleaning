@@ -66,7 +66,7 @@ class ClientsController extends Controller
 
     public function create()
     {
-        $route = StaffRoute::where('status', 1)->get();
+        $route = StaffRoute::where('status', 1)->orderBy('name')->get();
         return view('clients.create', ['route' => $route]);
     }
 
@@ -650,7 +650,7 @@ class ClientsController extends Controller
         $client = Client::with(['childClients' => function ($query) {
             $query->with('clientRouteStaff.route')->orderBy('created_at', 'desc');
         }])->findOrFail($id);
-        $route = StaffRoute::get();
+        $route = StaffRoute::orderBy('name')->get();
         return view('clients.edit', ['client' => $client], ['route' => $route]);
     }
 
