@@ -638,6 +638,16 @@
                                             <div class="col-md-2">
                                                 <div class="d-flex align-items-start mb-3">
                                                     <div class="form-floating txt_field flex-grow-1 me-2">
+                                                        @php
+                                                            $startDateFormatted = '';
+                                                            if ($branch->start_date) {
+                                                                try {
+                                                                    $startDateFormatted = \Carbon\Carbon::createFromFormat('d/m/Y', $branch->start_date)->format('m-d-Y');
+                                                                } catch (\Exception $e) {
+                                                                    $startDateFormatted = $branch->start_date;
+                                                                }
+                                                            }
+                                                        @endphp
                                                         <input type="text" class="form-control" value="{{ $startDateFormatted }}" name="start_date" id="startDateStaff" placeholder="mm-dd-yyyy" readonly>
                                                         <label for="start_date">Start Date *</label>
                                                     </div>
@@ -669,6 +679,16 @@
                                             <div class="col-md-2 second_start_date" style="{{ in_array($branch->service_frequency, ['biMonthly', 'biAnnually']) ? '' : 'display:none' }}">
                                                 <div class="d-flex align-items-start mb-3">
                                                     <div class="form-floating txt_field flex-grow-1 me-2">
+                                                        @php
+                                                            $secondStartDateFormatted = '';
+                                                            if ($branch->second_start_date) {
+                                                                try {
+                                                                    $secondStartDateFormatted = \Carbon\Carbon::createFromFormat('d/m/Y', $branch->second_start_date)->format('m-d-Y');
+                                                                } catch (\Exception $e) {
+                                                                    $secondStartDateFormatted = $branch->second_start_date;
+                                                                }
+                                                            }
+                                                        @endphp
                                                         <input type="text" class="form-control" value="{{ $secondStartDateFormatted }}" name="start_date_second" id="startDateSecondStaff" placeholder="mm-dd-yyyy" readonly>
                                                         <label for="startDateSecondStaff">Second Start Date</label>
                                                     </div>
@@ -863,6 +883,19 @@
                                                         </div>
                                                     </div>
                                                 @endfor
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h4>Notes</h4>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-floating txt_field mb-3">
+                                                    <textarea rows="4" class="form-control" name="additional_note" id="additional_note" placeholder="Additional Notes" style="height: 100px">{{ $branch->additional_note ?? '' }}</textarea>
+                                                    <label for="additional_note">Notes (misc info about this client or job)</label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

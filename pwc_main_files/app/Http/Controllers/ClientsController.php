@@ -34,7 +34,12 @@ class ClientsController extends Controller
         $this->middleware('permission:clients-list|clients-create|clients-edit|clients-delete', ['only' => ['index', 'store']]);
         $this->middleware('permission:clients-create', ['only' => ['create', 'store']]);
         $this->middleware('permission:clients-create|clients-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:clients-delete', ['only' => ['destroy']]);
+        $this->middleware(function ($request, $next) {
+            if (auth()->user()->can('clients-delete') || auth()->user()->hasRole('staff')) {
+                return $next($request);
+            }
+            abort(403, 'This action is unauthorized.');
+        })->only(['destroy']);
         $this->middleware('permission:clients-list', ['only' => ['show']]);
     }
 
@@ -129,7 +134,7 @@ class ClientsController extends Controller
                     'end_date' => $endDateFormatted ?? null,
                     'front_image' => $frontImagePath,
                     'back_image' => $backImagePath,
-                    'additional_note' => $request->input('note')[$index][0] ?? null,
+                    'additional_note' => $request->input('additional_note')[$index] ?? ($request->input('note')[$index][0] ?? null),
                     'status' => $status ?? 1,
                     'is_child' => ($index == 0) ? 0 : 1,
                 ]);
@@ -485,6 +490,13 @@ class ClientsController extends Controller
         DB::beginTransaction();
         try {
             $client = Client::findOrFail($id);
+
+            if (auth()->user()->hasRole('staff') && !auth()->user()->can('clients-delete')) {
+                if ($client->staff_id != auth()->id() || $client->status != 0) {
+                    abort(403, 'You can only delete your own potential clients.');
+                }
+            }
+
             $this->deleteClientData($client);
             $clientsToDeactivate = [$client];
             if ($client->parent_id == null) {

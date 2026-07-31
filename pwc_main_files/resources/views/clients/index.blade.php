@@ -609,23 +609,6 @@
                                         </select>
                                     </div>
 
-                                    <div class="sorting_filtering_wrapper">
-                                        <select class="form-select" id="filterByClientTypeStaff"
-                                            aria-label="Filter by Client Type">
-                                            <option value="">Client Types</option>
-                                            <option value="residential">Residential</option>
-                                            <option value="commercial">Commercial</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="sorting_filtering_wrapper">
-                                        <select class="form-select" id="filterByPaymentTypeStaff"
-                                            aria-label="Filter by Payment Type">
-                                            <option value="">Payment Types</option>
-                                            <option value="cash">Cash</option>
-                                            <option value="invoice">Invoice</option>
-                                        </select>
-                                    </div>
 
                                     @can('clients-create')
                                         <a class="btn btn-primary" href="{{ route('clients.create') }}">Create Client</a>
@@ -757,6 +740,17 @@
                                                                                     Route </a>
                                                                             </li>
                                                                         @endif
+                                                                        @if ($client->status == 0)
+                                                                            <li>
+                                                                                {!! Form::open(['method' => 'DELETE', 'route' => ['clients.destroy', $client->id], 'class' => 'delete-form']) !!}
+                                                                                <a class="dropdown-item"
+                                                                                    href="javascript:void(0)"
+                                                                                    onclick="showDeleteConfirmation(this)">
+                                                                                    Delete
+                                                                                </a>
+                                                                                {!! Form::close() !!}
+                                                                            </li>
+                                                                        @endif
                                                                     </ul>
                                                                 </div>
                                                             </td>
@@ -828,6 +822,17 @@
                                                                                     <li><a class="dropdown-item"
                                                                                             href="{{ route('branch.edit', $child->id) }}">Assign
                                                                                             Route </a>
+                                                                                    </li>
+                                                                                @endif
+                                                                                @if ($child->status == 0)
+                                                                                    <li>
+                                                                                        {!! Form::open(['method' => 'DELETE', 'route' => ['clients.destroy', $child->id], 'class' => 'delete-form']) !!}
+                                                                                        <a class="dropdown-item"
+                                                                                            href="javascript:void(0)"
+                                                                                            onclick="showDeleteConfirmation(this)">
+                                                                                            Delete
+                                                                                        </a>
+                                                                                        {!! Form::close() !!}
                                                                                     </li>
                                                                                 @endif
                                                                             </ul>
@@ -1455,62 +1460,6 @@
                 var routeId = $(this).val();
                 currentRouteFilter = routeId === 'all' ? '' : $(this).find('option:selected').text().trim();
                 if (clientsTable) clientsTable.draw();
-            });
-
-            // Client Type filter for Staff (without reload)
-            $('#filterByClientTypeStaff').on('change', function() {
-                var clientType = $(this).val();
-
-                if (clientsTable) {
-                    if (clientType) {
-                        // Filter by client type in the table
-                        clientsTable.rows().every(function() {
-                            var row = this.node();
-                            var $row = $(row);
-                            var rowClientType = $row.data('client-type');
-
-                            if (rowClientType === clientType) {
-                                $row.show();
-                            } else {
-                                $row.hide();
-                            }
-                        });
-                    } else {
-                        // Show all rows
-                        clientsTable.rows().every(function() {
-                            $(this.node()).show();
-                        });
-                    }
-                    clientsTable.draw(false); // Redraw without resetting pagination
-                }
-            });
-
-            // Payment Type filter for Staff (without reload)
-            $('#filterByPaymentTypeStaff').on('change', function() {
-                var paymentType = $(this).val();
-
-                if (clientsTable) {
-                    if (paymentType) {
-                        // Filter by payment type in the table
-                        clientsTable.rows().every(function() {
-                            var row = this.node();
-                            var $row = $(row);
-                            var rowPaymentType = $row.data('payment-type');
-
-                            if (rowPaymentType === paymentType) {
-                                $row.show();
-                            } else {
-                                $row.hide();
-                            }
-                        });
-                    } else {
-                        // Show all rows
-                        clientsTable.rows().every(function() {
-                            $(this.node()).show();
-                        });
-                    }
-                    clientsTable.draw(false); // Redraw without resetting pagination
-                }
             });
 
             // Re-init on tab shown (for layout/visibility)
