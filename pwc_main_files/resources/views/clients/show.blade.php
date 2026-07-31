@@ -243,7 +243,7 @@
 
                                         <div class="col-md-12">
                                             <div class="unbelivable_sec">
-                                                <h3>Closed Days</h3>
+                                                <h3>Closed</h3>
                                                 <div class="custom_checkbox_wrapper unavailable_days">
                                                     @foreach (['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as $day)
                                                         <div class="custom_radio">
@@ -563,7 +563,7 @@
 
                                         <div class="col-md-12">
                                             <div class="unbelivable_sec">
-                                                <h3>Closed Days</h3>
+                                                <h3>Closed</h3>
                                                 <div class="custom_checkbox_wrapper unavailable_days">
                                                     @foreach (['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as $day)
                                                         <div class="custom_radio">
@@ -587,7 +587,7 @@
                     <div class="col-md-12">
                         <div class="custom_div">
                             <div class="clients_tab">
-                                <ul class="nav nav-pills" id="pills-tab" role="tablist"> 
+                                <ul class="nav nav-pills" id="pills-tab" role="tablist">
                                     <li class="nav-item" role="presentation">
                                         <button class="nav-link" id="pills-images-tab" data-bs-toggle="pill"
                                             data-bs-target="#pills-images" type="button" role="tab"
