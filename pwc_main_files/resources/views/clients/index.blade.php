@@ -205,11 +205,16 @@
                                                                 $scheduleUpdated = $client->clientSchedule->max(
                                                                     'updated_at',
                                                                 );
-                                                                $mostRecent =
-                                                                    $scheduleUpdated &&
-                                                                    $scheduleUpdated > $clientUpdated
-                                                                        ? $scheduleUpdated
-                                                                        : $clientUpdated;
+                                                                $branchUpdated = $client->childClients->max(
+                                                                    'updated_at',
+                                                                );
+                                                                $mostRecent = collect([
+                                                                    $clientUpdated,
+                                                                    $scheduleUpdated,
+                                                                    $branchUpdated,
+                                                                ])
+                                                                    ->filter()
+                                                                    ->max();
                                                             @endphp
                                                             <td class="d-none">{{ $mostRecent }}</td>
                                                             <td>
@@ -690,11 +695,16 @@
                                                                 $scheduleUpdated = $client->clientSchedule->max(
                                                                     'updated_at',
                                                                 );
-                                                                $mostRecent =
-                                                                    $scheduleUpdated &&
-                                                                    $scheduleUpdated > $clientUpdated
-                                                                        ? $scheduleUpdated
-                                                                        : $clientUpdated;
+                                                                $branchUpdated = $client->childClients->max(
+                                                                    'updated_at',
+                                                                );
+                                                                $mostRecent = collect([
+                                                                    $clientUpdated,
+                                                                    $scheduleUpdated,
+                                                                    $branchUpdated,
+                                                                ])
+                                                                    ->filter()
+                                                                    ->max();
                                                             @endphp
                                                             <td class="d-none">{{ $mostRecent }}</td>
                                                             <td>

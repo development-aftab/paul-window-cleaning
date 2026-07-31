@@ -48,10 +48,10 @@ class ClientsController extends Controller
             ->sortByDesc(function ($client) {
                 $clientUpdated = $client->updated_at ?? $client->created_at;
                 $scheduleUpdated = $client->clientSchedule->max('updated_at');
-                if ($scheduleUpdated && $scheduleUpdated > $clientUpdated) {
-                    return $scheduleUpdated;
-                }
-                return $clientUpdated;
+                $branchUpdated = $client->childClients->max('updated_at');
+                return collect([$clientUpdated, $scheduleUpdated, $branchUpdated])
+                    ->filter()
+                    ->max();
             })->values();
         $routes = StaffRoute::get();
 

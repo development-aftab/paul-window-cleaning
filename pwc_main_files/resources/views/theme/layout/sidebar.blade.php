@@ -402,7 +402,7 @@
                                     class="nav_list @if (request()->is('deposits')) active @endif"
                                     aria-current="page">
                                     <div class="sidebar_icon"><i class="fa-solid fa-wallet"></i></div>
-                                    Deposits
+                                    Total Undeposited Cash
                                 </a>
                             </div>
                         </div>
