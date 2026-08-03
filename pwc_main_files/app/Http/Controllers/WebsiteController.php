@@ -161,14 +161,15 @@ class WebsiteController extends Controller
         $staffRoute = StaffRoute::where('status', 1)
             ->when(Auth::user()->hasRole('staff'), function ($query) use ($myAssignRoutes) {
                 return $query->whereIn('id', $myAssignRoutes);
-            })->get()->map(function ($route) use ($currentWeekStart, $currentWeekEnd) {
-                $weekSchedules = $route->clientRoute->flatMap(function ($clientRoute) use ($currentWeekStart, $currentWeekEnd) {
-                    return $clientRoute->clientSchedule->filter(function ($clientSchedule) use ($currentWeekStart, $currentWeekEnd) {
-                        $scheduleStartDate = Carbon::parse($clientSchedule->start_date);
-                        $scheduleEndDate = Carbon::parse($clientSchedule->end_date);
-
-                        return ($scheduleStartDate <= $currentWeekEnd && $scheduleEndDate >= $currentWeekStart);
-                    });
+            })
+            ->with(['clientRoute.clientSchedule' => function ($query) use ($currentWeekStart, $currentWeekEnd) {
+                $query->where('start_date', '<=', $currentWeekEnd->format('Y-m-d'))
+                    ->where('end_date', '>=', $currentWeekStart->format('Y-m-d'))
+                    ->select('id', 'client_id', 'start_date', 'end_date', 'status');
+            }])
+            ->get()->map(function ($route) {
+                $weekSchedules = $route->clientRoute->flatMap(function ($clientRoute) {
+                    return $clientRoute->clientSchedule;
                 });
                 $grouped = $weekSchedules->groupBy(function ($clientSchedule) {
                     return $clientSchedule->client_id . '_' . $clientSchedule->start_date;
