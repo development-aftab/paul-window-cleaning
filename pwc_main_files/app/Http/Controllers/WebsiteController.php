@@ -1075,6 +1075,7 @@ class WebsiteController extends Controller
 
         $start_week_date = $request->query('start_date');
         $end_week_date = $request->query('end_date');
+        $selectedMonth = $request->query('month');
         $clientSchedule = ClientSchedule::with('clientSchedulePrice.clientPaymentPrice')
             ->where('client_id', $client->id)
             ->where('start_date', $start_week_date)
@@ -1086,7 +1087,7 @@ class WebsiteController extends Controller
         }
         $clientPriceSum = $this->calculateTotalSum($clientSchedule);
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
-        return view('dashboard.client_invoice', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices'));
+        return view('dashboard.client_invoice', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices', 'selectedMonth'));
     }
 
     public function viewClientInvoice(Request $request, $id)
@@ -1116,6 +1117,7 @@ class WebsiteController extends Controller
         $client = Client::with('clientSchedule.clientSchedulePrice.clientPaymentPrice')->findOrFail($id);
         $start_week_date = $request->query('start_date');
         $end_week_date = $request->query('end_date');
+        $selectedMonth = $request->query('month');
 
         $clientSchedule = ClientSchedule::with('clientSchedulePrice.clientPaymentPrice')
             ->where('client_id', $client->id)
@@ -1131,7 +1133,7 @@ class WebsiteController extends Controller
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
 
         // return ['clientPriceSum' => $clientPriceSum, 'multiPrices' => $multiPrices];
-        return view('dashboard.client_cash', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices'));
+        return view('dashboard.client_cash', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices', 'selectedMonth'));
     }
 
     public function viewClientCash(Request $request, $id)
@@ -3743,7 +3745,11 @@ class WebsiteController extends Controller
             'type' => 'client_payment_updated',
         ]);
         if (isset($client->clientRouteStaff[0])) {
-            return redirect()->route('staffroutes.show', [$client->clientRouteStaff[0]->route_id])->with(['title' => 'Payment Updated', 'message' => 'Client Cash Updated Successfully.', 'type' => 'success']);
+            $routeParams = [$client->clientRouteStaff[0]->route_id];
+            if ($request->filled('month')) {
+                $routeParams['month'] = $request->month;
+            }
+            return redirect()->route('staffroutes.show', $routeParams)->with(['title' => 'Payment Updated', 'message' => 'Client Cash Updated Successfully.', 'type' => 'success']);
         } else {
             return redirect()->back()->with(['title' => 'Payment Updated', 'message' => 'Client Cash Updated Successfully.', 'type' => 'success']);
         }

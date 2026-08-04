@@ -30,6 +30,7 @@
                                                 <input type="hidden" name="client_id" value="{{ $client->id }}">
                                                 <input type="hidden" name="schedule_id" value="{{ $clientSchedule->id }}">
                                                 <input type="hidden" name="final_price" value="{{ $clientPriceSum ?? '' }}">
+                                                <input type="hidden" name="month" value="{{ $selectedMonth ?? '' }}">
 {{--                                                <span>(Invoice)</span>--}}
                                             </div>
                                             <h3 class="pricePlus">

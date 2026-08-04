@@ -520,11 +520,11 @@
                                                             @elseif($route['clientSchedule'] == 'pending')
                                                                 <div class="mark_as_complete_wrapper">
                                                                     @if ($route['payment_type'] == 'invoice')
-                                                                        <a href="{{ url('client_invoice/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}">
+                                                                        <a href="{{ url('client_invoice/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}&month={{ urlencode($selectedMonth ?? '') }}">
                                                                             <h5>Report Status</h5>
                                                                         </a>
                                                                     @elseif($route['payment_type'] == 'cash')
-                                                                        <a href="{{ url('client_cash' . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}">
+                                                                        <a href="{{ url('client_cash' . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}&month={{ urlencode($selectedMonth ?? '') }}">
                                                                             <h5>Report Status</h5>
                                                                         </a>
                                                                     @endif
@@ -706,11 +706,11 @@
                                                                                 @elseif($route['clientSchedule'] == 'pending')
                                                                                     <div class="mark_as_complete_wrapper">
                                                                                         @if ($route['payment_type'] == 'invoice')
-                                                                                            <a href="{{ url('client_invoice/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}">
+                                                                                            <a href="{{ url('client_invoice/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}&month={{ urlencode($selectedMonth ?? '') }}">
                                                                                                 <h5>Report Status</h5>
                                                                                             </a>
                                                                                         @elseif($route['payment_type'] == 'cash')
-                                                                                            <a href="{{ url('client_cash' . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}">
+                                                                                            <a href="{{ url('client_cash' . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}&month={{ urlencode($selectedMonth ?? '') }}">
                                                                                                 <h5>Report Status</h5>
                                                                                             </a>
                                                                                         @endif
@@ -888,11 +888,11 @@
                                                             </div>
                                                             <div class="mark_as_complete_wrapper">
                                                                 @if ($route['payment_type'] == 'invoice')
-                                                                    <a href="{{ url('client_invoice/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}">
+                                                                    <a href="{{ url('client_invoice/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}&month={{ urlencode($selectedMonth ?? '') }}">
                                                                         <h5>Report Status</h5>
                                                                     </a>
                                                                 @elseif($route['payment_type'] == 'cash')
-                                                                    <a href="{{ url('client_cash' . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}">
+                                                                    <a href="{{ url('client_cash' . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}&month={{ urlencode($selectedMonth ?? '') }}">
                                                                         <h5>Report Status</h5>
                                                                     </a>
                                                                 @endif
