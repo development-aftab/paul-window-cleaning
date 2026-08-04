@@ -187,29 +187,35 @@ class StaffRoutesController extends Controller
             'clientRoute.clientSchedule.clientSchedulePrice.clientPaymentPrice'
         ])->findOrFail($id);
 
-        $currentYear     = now()->year;
-//        $currentMonthNum = now()->month;
-//
-//        $monthPeriodMap = [
-//            1  => "January - February",
-//            2  => "February - March",
-//            3  => "March",
-//            4  => "March - April",
-//            5  => "April - May",
-//            6  => "May - June",
-//            7  => "June - July",
-//            8  => "July - August",
-//            9  => "August - September",
-//            10 => "September - October",
-//            11 => "October - November",
-//            12 => "November - December",
-//        ];
-//
-//        $currentPeriod = $monthPeriodMap[$currentMonthNum];
-//        $selectedMonth = $request->input('month', "$currentPeriod $currentYear");
-        $currentMonth = now()->format('F');
-        $nextMonth = now()->addMonthNoOverflow()->format('F');
-        $selectedMonth = $request->input('month', "$currentMonth - $nextMonth $currentYear");
+        $currentYear = now()->year;
+        $currentDate = now();
+
+        $firstMondayOfCurrentYear = \Carbon\Carbon::parse("first Monday of January $currentYear");
+        $defaultCycleStartDates = [
+            "January - February"  => $firstMondayOfCurrentYear->copy()->addDays(0),
+            "February - March"    => $firstMondayOfCurrentYear->copy()->addWeeks(4),
+            "March"               => $firstMondayOfCurrentYear->copy()->addWeeks(8),
+            "March - April"       => $firstMondayOfCurrentYear->copy()->addWeeks(12),
+            "April - May"         => $firstMondayOfCurrentYear->copy()->addWeeks(16),
+            "May - June"          => $firstMondayOfCurrentYear->copy()->addWeeks(20),
+            "June - July"         => $firstMondayOfCurrentYear->copy()->addWeeks(24),
+            "July - August"       => $firstMondayOfCurrentYear->copy()->addWeeks(28),
+            "August - September"  => $firstMondayOfCurrentYear->copy()->addWeeks(32),
+            "September - October" => $firstMondayOfCurrentYear->copy()->addWeeks(36),
+            "October - November"  => $firstMondayOfCurrentYear->copy()->addWeeks(40),
+            "November - December" => $firstMondayOfCurrentYear->copy()->addWeeks(44),
+            "December - January"  => $firstMondayOfCurrentYear->copy()->addWeeks(48),
+        ];
+
+        $defaultCycleName = "January - February";
+        foreach ($defaultCycleStartDates as $range => $startDate) {
+            if ($currentDate->gte($startDate) && $currentDate->lt($startDate->copy()->addWeeks(4))) {
+                $defaultCycleName = $range;
+                break;
+            }
+        }
+
+        $selectedMonth = $request->input('month', "$defaultCycleName $currentYear");
 
         preg_match('/\d{4}/', $selectedMonth, $yearMatch);
         $selectedYear = $yearMatch[0] ?? $currentYear;
