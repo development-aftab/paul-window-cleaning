@@ -119,33 +119,27 @@
                                 @foreach ($mergedSchedules as $key => $schedule)
                                     @php
                                         $cashTotal = 0;
+                                        $cashPendingTotal = 0;
+                                        $cashPaidTotal = 0;
                                         $invoiceTotal = 0;
 
                                         foreach ($schedule['routes'] as $route) {
                                             $amount = $route['invoice_amount'] ?? 0;
                                             if (($route['payment_type'] ?? '') === 'cash') {
                                                 $cashTotal += $amount;
+                                                if (($route['payment_status'] ?? '') === 'paid') {
+                                                    $cashPaidTotal += $amount;
+                                                } else {
+                                                    $cashPendingTotal += $amount;
+                                                }
                                             } elseif (($route['payment_type'] ?? '') === 'invoice') {
                                                 $invoiceTotal += $amount;
                                             }
                                         }
                                         $total = $cashTotal + $invoiceTotal;
-                                        $completedTotal = $schedule['routes']->where('is_completed', 'completed')->sum('invoice_amount');
-
-                                        $total = $cashTotal + $invoiceTotal;
+                                        $grandTotal = $invoiceTotal + $cashPaidTotal;
 
                                         $routeId = $staffRoute->id ?? null;
-
-                                        $weekKey = 'week' . ($schedule['week_number'] - 1);
-
-                                        $carbonDate = \Carbon\Carbon::parse($schedule['start_date']);
-                                        $monthKey = strtolower($carbonDate->format('F')); // 'january'
-                                        $yearKey = $carbonDate->format('Y'); // '2026'
-
-                                        $totalCashReceived = 0;
-                                        if ($routeId) {
-                                            $totalCashReceived = App\Models\Deposit::where('route_id', $routeId)->where('week', $weekKey)->where('month', $monthKey)->where('year', $yearKey)->sum('deposit_amount');
-                                        }
                                     @endphp
                                     <div class="staff_routes_week_wrapper">
                                         <div class="details_routes_wrapper">
@@ -171,11 +165,11 @@
                                                     </div>
                                                     <div>
                                                         <label>Expected Cash Received :</label>
-                                                        <span>${{ number_format($cashTotal, 2) }}</span>
+                                                        <span>${{ number_format($cashPendingTotal, 2) }}</span>
                                                     </div>
                                                     <div class="week_details_wrapper_total">
                                                         <label>Cash rec. to date :</label>
-                                                        <span>${{ number_format($totalCashReceived, 2) }}</span>
+                                                        <span>${{ number_format($cashPaidTotal, 2) }}</span>
                                                     </div>
                                                     <div>
                                                         <label>Invoice Total :</label>
@@ -183,7 +177,7 @@
                                                     </div>
                                                     <div class="week_details_wrapper_total">
                                                         <label>Grand Total :</label>
-                                                        <span>${{ number_format($completedTotal, 2) }}</span>
+                                                        <span>${{ number_format($grandTotal, 2) }}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -557,33 +551,27 @@
                                         @foreach ($mergedSchedules as $key => $schedule)
                                             @php
                                                 $cashTotal = 0;
+                                                $cashPendingTotal = 0;
+                                                $cashPaidTotal = 0;
                                                 $invoiceTotal = 0;
 
                                                 foreach ($schedule['routes'] as $route) {
                                                     $amount = $route['invoice_amount'] ?? 0;
                                                     if (($route['payment_type'] ?? '') === 'cash') {
                                                         $cashTotal += $amount;
+                                                        if (($route['payment_status'] ?? '') === 'paid') {
+                                                            $cashPaidTotal += $amount;
+                                                        } else {
+                                                            $cashPendingTotal += $amount;
+                                                        }
                                                     } elseif (($route['payment_type'] ?? '') === 'invoice') {
                                                         $invoiceTotal += $amount;
                                                     }
                                                 }
                                                 $total = $cashTotal + $invoiceTotal;
-                                                $completedTotal = $schedule['routes']->where('is_completed', 'completed')->sum('invoice_amount');
-
-                                                $total = $cashTotal + $invoiceTotal;
+                                                $grandTotal = $invoiceTotal + $cashPaidTotal;
 
                                                 $routeId = $staffRoute->id ?? null;
-
-                                                $weekKey = 'week' . ($schedule['week_number'] - 1);
-
-                                                $carbonDate = \Carbon\Carbon::parse($schedule['start_date']);
-                                                $monthKey = strtolower($carbonDate->format('F')); // 'january'
-                                                $yearKey = $carbonDate->format('Y'); // '2026'
-
-                                                $totalCashReceived = 0;
-                                                if ($routeId) {
-                                                    $totalCashReceived = App\Models\Deposit::where('route_id', $routeId)->where('week', $weekKey)->where('month', $monthKey)->where('year', $yearKey)->sum('deposit_amount');
-                                                }
                                             @endphp
                                             <div class="staff_routes_week_wrapper">
                                                 @include('staffroutes.partials.log_hours_button', ['schedule' => $schedule, 'staffRoute' => $staffRoute])
@@ -610,11 +598,11 @@
                                                             </div>
                                                             <div>
                                                                 <label>Expected Cash Received :</label>
-                                                                <span>${{ number_format($cashTotal, 2) }}</span>
+                                                                <span>${{ number_format($cashPendingTotal, 2) }}</span>
                                                             </div>
                                                             <div class="week_details_wrapper_total">
                                                                 <label>Cash rec. to date :</label>
-                                                                <span>${{ number_format($totalCashReceived, 2) }}</span>
+                                                                <span>${{ number_format($cashPaidTotal, 2) }}</span>
                                                             </div>
                                                             <div>
                                                                 <label>Invoice Total :</label>
@@ -622,7 +610,7 @@
                                                             </div>
                                                             <div class="week_details_wrapper_total">
                                                                 <label>Grand Total :</label>
-                                                                <span>${{ number_format($completedTotal, 2) }}</span>
+                                                                <span>${{ number_format($grandTotal, 2) }}</span>
                                                             </div>
                                                         </div>
                                                     </div>

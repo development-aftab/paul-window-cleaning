@@ -178,13 +178,13 @@ class StaffRoutesController extends Controller
                     $clientQuery->where('status', 1);
                 });
             },
-            // 'clientRoute.clientSchedule.clientSchedulePrice.clientPaymentPrice'
             'clientRoute.clientSchedule.clientSchedulePrice' => function ($query) {
                 $query->join('client_price_lists', 'client_schedule_prices.price_id', '=', 'client_price_lists.id')
                     ->orderBy('client_price_lists.position', 'asc')
                     ->select('client_schedule_prices.*');
             },
-            'clientRoute.clientSchedule.clientSchedulePrice.clientPaymentPrice'
+            'clientRoute.clientSchedule.clientSchedulePrice.clientPaymentPrice',
+            'clientRoute.clientSchedule.clientSchedulePayment'
         ])->findOrFail($id);
 
         $currentYear = now()->year;
@@ -377,6 +377,7 @@ class StaffRoutesController extends Controller
                         'client_unavailable_days' => optional($firstSchedule->clientName)->clientDay ?? [],
                         'client_job'              => optional($firstSchedule->clientName)->description ?? null,
                         'payment_type'            => $firstSchedule->clientName->payment_type ?? null,
+                        'payment_status'          => optional($firstSchedule->clientSchedulePayment)->status,
                         'service_frequency'       => optional($firstSchedule->clientName)->service_frequency ?? null,
                         'invoice_amount'          => $mergedInvoiceAmount,
                         'multiPrice'              => $mergedMultiPrice,
