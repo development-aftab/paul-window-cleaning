@@ -4155,8 +4155,8 @@ class WebsiteController extends Controller
                                 ->map(fn ($price) => $price->clientPaymentPrice?->name)
                                 ->filter()
                                 ->implode(', ');
-                            $serviceDate = $schedule->start_date
-                                ? \Carbon\Carbon::parse($schedule->start_date)->format('m/d/Y')
+                            $serviceDate = $schedule->service_date
+                                ? \Carbon\Carbon::parse($schedule->service_date)->format('m/d/Y')
                                 : '';
 
                             $bulletRun = $billedRich->createTextRun("\u{25CF} ");
@@ -4196,8 +4196,8 @@ class WebsiteController extends Controller
                             $firstUnpaid = false;
                             $clientName = $schedule->clientName->name ?? 'Unknown';
                             $amount = $schedule->clientSchedulePayment->final_price ?? 0;
-                            $serviceDate = $schedule->start_date
-                                ? \Carbon\Carbon::parse($schedule->start_date)->format('m/d/Y')
+                            $serviceDate = $schedule->service_date
+                                ? \Carbon\Carbon::parse($schedule->service_date)->format('m/d/Y')
                                 : '';
 
                             $bulletRun = $unpaidRich->createTextRun("\u{25CF} ");
