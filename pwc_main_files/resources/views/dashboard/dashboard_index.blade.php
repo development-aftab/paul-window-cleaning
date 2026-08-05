@@ -71,7 +71,7 @@
         <section class="homePage_section">
             <div class="container-fluid custom_container">
                 <div class="row custom_row">
-                    <div class="col-md-12">
+                    <div class="col-md-8">
                         <div class="cards_dashboard_index_wrapper shadow_box_wrapper">
                             <div>
                                 <h4>This is Week {{ $weekNumber ?? '' }} :</h4>
@@ -271,7 +271,7 @@
                     </div>
                     <div class="col-md-4">
                         <div class="notification_dashboard_wrapper shadow_box_wrapper">
-                            <h3>My Potential Clients</h3>
+                            <h3>Potential Accounts</h3>
 
                             <div class="service_complete_wrapper">
                                 <ul class="notification_ul-wrapper">
