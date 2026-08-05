@@ -19,5 +19,8 @@ class AssignRoute extends Model
     public function getClientCount(){
         return $this->hasMany(ClientRoute::class,'route_id','route_id');
     }
+    public function staff(){
+        return $this->belongsTo(User::class, 'staff_id', 'id');
+    }
 }
 

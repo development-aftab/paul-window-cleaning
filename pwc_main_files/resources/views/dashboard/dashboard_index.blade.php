@@ -2,9 +2,69 @@
 
 @push('css')
     {{-- <link href="{{ asset('plugins/components/morrisjs/morris.css') }}" rel="stylesheet"> --}}
+    <style>
+        .staff_routes_group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .staff_routes_group_name {
+            color: var(--dark_blue);
+            font-family: 'Hellix-Bold';
+            font-size: 16px;
+        }
+
+        .staff_routes_group_scroll {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 12px;
+            overflow-x: auto;
+            width: 100%;
+            min-width: 0;
+            padding-bottom: 8px;
+        }
+
+        .new_yorks-cards_wrapper_compact {
+            flex: 0 0 150px;
+            width: 150px;
+            padding: 6px;
+            border-radius: 12px;
+            row-gap: 4px;
+        }
+
+        .new_yorks-cards_wrapper_compact div h2 {
+            font-size: 14px;
+        }
+
+        .new_yorks-cards_wrapper_compact div:has(.jobs_icon_wrapper) {
+            padding: 8px;
+            row-gap: 8px;
+        }
+
+        .new_yorks-cards_wrapper_compact .jobs_icon_wrapper div label,
+        .new_yorks-cards_wrapper_compact .jobs_icon_wrapper div span {
+            font-size: 11px;
+        }
+
+        .new_yorks-cards_wrapper_compact .jobs_icon_wrapper div:has(img) {
+            width: 24px;
+            height: 24px;
+        }
+
+        .new_yorks-cards_wrapper_compact .jobs_icon_wrapper div:has(img) img {
+            width: 12px;
+        }
+    </style>
 @endpush
 @section('navbar-title')
-    <h2 class="navbar_PageTitle">Hello, {{ Auth()->user()->name ?? '' }}</h2>
+    <h2 class="navbar_PageTitle">
+        Hello {{ Auth()->check() ? (auth()->user()->hasRole('admin') ? 'Paul' : Auth()->user()->name) : '' }}
+    </h2>
 @endsection
 @section('content')
     @if (auth()->user()->hasRole('admin'))
@@ -14,84 +74,90 @@
                     <div class="col-md-12">
                         <div class="cards_dashboard_index_wrapper shadow_box_wrapper">
                             <div>
-                                <h3>This is Week {{ $weekNumber ?? '' }}</h3>
-                                <img src="{{ asset('website') }}/assets/images/Arrow-up-right_dashboard.svg">
+                                <h4>This is Week {{ $weekNumber ?? '' }} :</h4>
+                                <h4>{{ $currentMonth ?? '' }} {{ $startOfWeek ?? '' }} - {{ $endOfWeek ?? '' }} ,  {{ $currentYear ?? '' }}</h4>
                             </div>
+
                             <div>
-                                <h4>{{ $currentMonth ?? '' }}</h4>
-                                <h4>{{ $startOfWeek ?? '' }} - {{ $endOfWeek ?? '' }} ,  {{ $currentYear ?? '' }}</h4>
-                            </div>
-
-                            <div class="row">
-                                @forelse($staffRoute->shuffle()->slice(0, 4) as $route)
-                                    <div class="col-md-3">
-                                        <div class="new_yorks-cards_wrapper">
-                                            <div>
-                                                <h2>{{ $route->name ?? '' }}</h2>
-                                                <div class="jobs_icon_wrapper">
+                                @forelse($staffRoute->groupBy('staff_name') as $staffName => $routesForStaff)
+                                    <div class="staff_routes_group">
+                                        <div class="staff_routes_group_name">{{ $staffName }}</div>
+                                        <div class="staff_routes_group_scroll">
+                                            @foreach ($routesForStaff as $route)
+                                                <div class="new_yorks-cards_wrapper new_yorks-cards_wrapper_compact">
                                                     <div>
-                                                        <div>
-                                                            <label>Jobs Scheduled:</label>
-                                                            <span>{{ $route->jobs_total ?? 0 }}</span>
-                                                        </div>
-                                                        <div>
-                                                            <label>Jobs Completed:</label>
-                                                            <span>{{ $route->jobs_completed ?? 0 }}</span>
-                                                        </div>
-                                                        <div>
-                                                            <label>Jobs Pending</label>
-                                                            <span>{{ $route->jobs_pending ?? 0 }}</span>
+                                                        <h2>{{ $route->name ?? '' }}</h2>
+                                                        <div class="jobs_icon_wrapper">
+                                                            <div>
+                                                                <div>
+                                                                    <label>Scheduled:</label>
+                                                                    <span>{{ $route->jobs_total ?? 0 }}</span>
+                                                                </div>
+                                                                <div>
+                                                                    <label>Completed:</label>
+                                                                    <span>{{ $route->jobs_completed ?? 0 }}</span>
+                                                                </div>
+                                                                <div>
+                                                                    <label>Pending</label>
+                                                                    <span>{{ $route->jobs_pending ?? 0 }}</span>
+                                                                </div>
+                                                            </div>
+                                                            <a href="{{ route('staffroutes.show', [$route->id]) }}">
+                                                                <div>
+                                                                    <img src="{{ asset('website') }}/assets/images/Arrow-up-right_white.svg">
+                                                                </div>
+                                                            </a>
                                                         </div>
                                                     </div>
-                                                    <a href="{{ route('staffroutes.show', [$route->id]) }}">
-                                                        <div>
-                                                            <img src="{{ asset('website') }}/assets/images/Arrow-up-right_white.svg">
-                                                        </div>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                            @php
-                                                $totalJobs = ($route->jobs_pending ?? 0) + ($route->jobs_completed ?? 0);
-                                                $completedPercentage = $totalJobs > 0 ? round(($route->jobs_completed / $totalJobs) * 100) : 0;
+                                                    @php
+                                                            $totalJobs = ($route->jobs_pending ?? 0) + ($route->jobs_completed ?? 0);
+                                                            $completedPercentage = $totalJobs > 0 ? round(($route->jobs_completed / $totalJobs) * 100) : 0;
 
-                                                // Determine color, icon and background based on percentage
-                                                if ($completedPercentage <= 20) {
-                                                    $progressColor = '#ff5500';
-                                                    $progressBg = '#fbf2ec';
-                                                    $progressIcon = 'fa-hourglass-start';
-                                                    $progressText = 'Completed';
-                                                } elseif ($completedPercentage <= 50) {
-                                                    $progressColor = '#ff9800';
-                                                    $progressBg = '#FFF3E0';
-                                                    $progressIcon = 'fa-spinner';
-                                                    $progressText = 'In Progress';
-                                                } elseif ($completedPercentage <= 80) {
-                                                    $progressColor = '#ff9800';
-                                                    $progressBg = '#FFF3E0';
-                                                    $progressIcon = 'fa-hourglass-half';
-                                                    $progressText = 'Nearly';
-                                                } elseif ($completedPercentage < 100) {
-                                                    $progressColor = '#ff9800';
-                                                    $progressBg = '#FFF3E0';
-                                                    $progressIcon = 'fa-check-circle';
-                                                    $progressText = 'Almost Done';
-                                                } else {
-                                                    $progressColor = '#4caf50';
-                                                    $progressBg = '#b5fbd0';
-                                                    $progressIcon = 'fa-check-circle';
-                                                    $progressText = 'Completed';
-                                                }
-                                            @endphp
-                                            <div style="background: {{ $progressBg }}; border-radius: 10px; padding: 6px 7px;">
-                                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                                                    <i class="fa-solid {{ $progressIcon }}" style="color: {{ $progressColor }}; font-size: 14px;"></i>
-                                                    <h5 style="color: {{ $progressColor }}; margin: 0; font-size: 14px;">{{ $completedPercentage }}% {{ $progressText }}</h5>
-                                                </div>
-                                                <div style="width: 100%; background-color: #e0e0e0; border-radius: 10px; height: 8px; overflow: hidden; margin-bottom: 5px;">
-                                                    <div style="width: {{ $completedPercentage }}%; background-color: {{ $progressColor }}; height: 100%; transition: width 0.3s ease, background-color 0.3s ease;">
+                                                            // Determine color, icon and background based on percentage
+                                                            if ($totalJobs === 0) {
+                                                                $progressColor = '#9e9e9e';
+                                                                $progressBg = '#eeeeee';
+                                                                $progressIcon = 'fa-ban';
+                                                                $progressText = 'Inactive';
+                                                            } elseif ($completedPercentage <= 20) {
+                                                                $progressColor = '#ff5500';
+                                                                $progressBg = '#fbf2ec';
+                                                                $progressIcon = 'fa-hourglass-start';
+                                                                $progressText = 'Completed';
+                                                            } elseif ($completedPercentage <= 50) {
+                                                                $progressColor = '#ff9800';
+                                                                $progressBg = '#FFF3E0';
+                                                                $progressIcon = 'fa-spinner';
+                                                                $progressText = 'In Progress';
+                                                            } elseif ($completedPercentage <= 80) {
+                                                                $progressColor = '#ff9800';
+                                                                $progressBg = '#FFF3E0';
+                                                                $progressIcon = 'fa-hourglass-half';
+                                                                $progressText = 'Nearly';
+                                                            } elseif ($completedPercentage < 100) {
+                                                                $progressColor = '#ff9800';
+                                                                $progressBg = '#FFF3E0';
+                                                                $progressIcon = 'fa-check-circle';
+                                                                $progressText = 'Almost Done';
+                                                            } else {
+                                                                $progressColor = '#4caf50';
+                                                                $progressBg = '#b5fbd0';
+                                                                $progressIcon = 'fa-check-circle';
+                                                                $progressText = 'Completed';
+                                                            }
+                                                    @endphp
+                                                    <div style="background: {{ $progressBg }}; border-radius: 8px; padding: 4px 5px;">
+                                                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+                                                            <i class="fa-solid {{ $progressIcon }}" style="color: {{ $progressColor }}; font-size: 11px;"></i>
+                                                            <h5 style="color: {{ $progressColor }}; margin: 0; font-size: 11px;">{{ $totalJobs === 0 ? $progressText : $completedPercentage . '% ' . $progressText }}</h5>
+                                                        </div>
+                                                        <div style="width: 100%; background-color: #e0e0e0; border-radius: 10px; height: 6px; overflow: hidden; margin-bottom: 3px;">
+                                                            <div style="width: {{ $totalJobs === 0 ? 100 : $completedPercentage }}%; background-color: {{ $progressColor }}; height: 100%; transition: width 0.3s ease, background-color 0.3s ease;">
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            @endforeach
                                         </div>
                                     </div>
                                 @empty
@@ -100,40 +166,40 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-8">
-                        <div class="chart_wrapper_sec shadow_box_wrapper">
-                            <div class="statistics_wrapper">
-                                <h3>Gross Commercial Sales</h3>
-                                <div class="date_range_picker_wrapper">
-                                    <label class="form-label"><i class="fa-regular fa-calendar"></i></label>
-                                    <input class="form-control form-control-solid" placeholder="Pick date rage" id="kt_daterangepicker_1" />
-                                </div>
-                            </div>
-                            <div class="chart_wrapper">
-                                <canvas id="line-chart"></canvas>
-                                <svg style="display: none;">
-                                    <defs>
-                                        <linearGradient id="gradient1" x1="0%" y1="0%" x2="0%" y2="100%">
-                                            <stop offset="20%" style="stop-color:#2280C2;stop-opacity:1" />
-                                            <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
-                                        </linearGradient>
-                                    </defs>
-                                </svg>
-                                <svg style="display: none;">
-                                    <defs>
-                                        <linearGradient id="gradient2" x1="0%" y1="0%" x2="0%" y2="100%">
-                                            <stop offset="10%" style="stop-color:#2010801A;stop-opacity:1" />
-                                            <stop offset="0%" style="stop-color:#20108000;stop-opacity:1" />
-                                        </linearGradient>
-                                    </defs>
-                                </svg>
-                            </div>
+{{--                    <div class="col-md-8">--}}
+{{--                        <div class="chart_wrapper_sec shadow_box_wrapper">--}}
+{{--                            <div class="statistics_wrapper">--}}
+{{--                                <h3>Gross Commercial Sales</h3>--}}
+{{--                                <div class="date_range_picker_wrapper">--}}
+{{--                                    <label class="form-label"><i class="fa-regular fa-calendar"></i></label>--}}
+{{--                                    <input class="form-control form-control-solid" placeholder="Pick date rage" id="kt_daterangepicker_1" />--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                            <div class="chart_wrapper">--}}
+{{--                                <canvas id="line-chart"></canvas>--}}
+{{--                                <svg style="display: none;">--}}
+{{--                                    <defs>--}}
+{{--                                        <linearGradient id="gradient1" x1="0%" y1="0%" x2="0%" y2="100%">--}}
+{{--                                            <stop offset="20%" style="stop-color:#2280C2;stop-opacity:1" />--}}
+{{--                                            <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />--}}
+{{--                                        </linearGradient>--}}
+{{--                                    </defs>--}}
+{{--                                </svg>--}}
+{{--                                <svg style="display: none;">--}}
+{{--                                    <defs>--}}
+{{--                                        <linearGradient id="gradient2" x1="0%" y1="0%" x2="0%" y2="100%">--}}
+{{--                                            <stop offset="10%" style="stop-color:#2010801A;stop-opacity:1" />--}}
+{{--                                            <stop offset="0%" style="stop-color:#20108000;stop-opacity:1" />--}}
+{{--                                        </linearGradient>--}}
+{{--                                    </defs>--}}
+{{--                                </svg>--}}
+{{--                            </div>--}}
 
-                        </div>
-                    </div>
+{{--                        </div>--}}
+{{--                    </div>--}}
                     <div class="col-md-4">
                         <div class="notification_dashboard_wrapper shadow_box_wrapper">
-                            <h3>Up coming schedules</h3>
+                            <h3>Coming Soon</h3>
                             <div class="service_complete_wrapper">
                                 <ul class="notification_ul-wrapper">
                                     @forelse($prioritySchedules as $schedule)
@@ -163,7 +229,7 @@
                     <div class="col-md-8">
                         <div class="custom_div">
                             <div class="custom_justify_between">
-                                <h3>Invoices Over 45 Days</h3>
+                                <h3>Past Due Invoices</h3>
                             </div>
                             <div class="custom_table custom_table_dashboard">
                                 <div class="">
@@ -252,12 +318,8 @@
                             <div class="col-md-12">
                                 <div class="cards_dashboard_index_wrapper shadow_box_wrapper">
                                     <div>
-                                        <h3>This is Week {{ $weekNumber ?? '' }}</h3>
-                                        <img src="{{ asset('website') }}/assets/images/Arrow-up-right_dashboard.svg">
-                                    </div>
-                                    <div>
-                                        <h4>{{ $currentMonth ?? '' }}</h4>
-                                        <h4>{{ $startOfWeek ?? '' }} - {{ $endOfWeek ?? '' }} ,  {{ $currentYear ?? '' }}</h4>
+                                        <h4>This is Week {{ $weekNumber ?? '' }} :</h4>
+                                        <h4>{{ $currentMonth ?? '' }} {{ $startOfWeek ?? '' }} - {{ $endOfWeek ?? '' }} ,  {{ $currentYear ?? '' }}</h4>
                                     </div>
                                     <div class="row">
                                         @forelse($staffRoute as $route)

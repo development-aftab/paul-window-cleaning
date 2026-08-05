@@ -166,7 +166,7 @@ class WebsiteController extends Controller
                 $query->where('start_date', '<=', $currentWeekEnd->format('Y-m-d'))
                     ->where('end_date', '>=', $currentWeekStart->format('Y-m-d'))
                     ->select('id', 'client_id', 'start_date', 'end_date', 'status');
-            }])
+            }, 'assignRoute.staff'])
             ->get()->map(function ($route) {
                 $weekSchedules = $route->clientRoute->flatMap(function ($clientRoute) {
                     return $clientRoute->clientSchedule;
@@ -185,8 +185,14 @@ class WebsiteController extends Controller
                     return !empty($schedule->status) && $schedule->status === 'completed';
                 })->count();
 
+                $route->staff_name = optional($route->assignRoute->first()?->staff)->name ?? 'Unassigned';
+
                 return $route;
-            });
+            })
+            ->sortBy(function ($route) {
+                return strtolower($route->staff_name) . '_' . strtolower($route->name ?? '');
+            })
+            ->values();
 
         $weekNumber = $currentWeek['week_number'];
         $startOfWeek = $currentWeekStart->format('d');
