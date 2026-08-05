@@ -185,9 +185,12 @@ class WebsiteController extends Controller
                     return !empty($schedule->status) && $schedule->status === 'completed';
                 })->count();
 
-                $route->staff_name = optional($route->assignRoute->first()?->staff)->name ?? 'Unassigned';
+                $route->staff_name = optional($route->assignRoute->first()?->staff)->name ?? null;
 
                 return $route;
+            })
+            ->filter(function ($route) {
+                return !empty($route->staff_name);
             })
             ->sortBy(function ($route) {
                 return strtolower($route->staff_name) . '_' . strtolower($route->name ?? '');
