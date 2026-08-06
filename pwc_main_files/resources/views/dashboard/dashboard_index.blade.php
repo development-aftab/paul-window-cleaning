@@ -321,75 +321,77 @@
                                         <h4>This is Week {{ $weekNumber ?? '' }} :</h4>
                                         <h4>{{ $currentMonth ?? '' }} {{ $startOfWeek ?? '' }} - {{ $endOfWeek ?? '' }} ,  {{ $currentYear ?? '' }}</h4>
                                     </div>
-                                    <div class="row">
+                                    <div class="staff_routes_group_scroll">
                                         @forelse($staffRoute as $route)
-                                                <div class="col-md-4">
-                                                <div class="new_yorks-cards_wrapper">
-                                                    <div>
-                                                        <h2>{{ $route->name ?? '' }}</h2>
-                                                        <div class="jobs_icon_wrapper">
+                                            <div class="new_yorks-cards_wrapper new_yorks-cards_wrapper_compact">
+                                                <div>
+                                                    <h2>{{ $route->name ?? '' }}</h2>
+                                                    <div class="jobs_icon_wrapper">
+                                                        <div>
                                                             <div>
-                                                                <div>
-                                                                    <label>Jobs Scheduled:</label>
-                                                                    <span>{{ $route->jobs_total ?? 0 }}</span>
-                                                                </div>
-                                                                <div>
-                                                                    <label>Jobs Completed:</label>
-                                                                    <span>{{ $route->jobs_completed ?? 0 }}</span>
-                                                                </div>
-                                                                <div>
-                                                                    <label>Jobs Pending</label>
-                                                                    <span>{{ $route->jobs_pending ?? 0 }}</span>
-                                                                </div>
+                                                                <label>Scheduled:</label>
+                                                                <span>{{ $route->jobs_total ?? 0 }}</span>
                                                             </div>
                                                             <div>
-                                                                <a href="{{ route('staffroutes.show', [$route->id]) }}">
-                                                                    <img src="{{ asset('website') }}/assets/images/Arrow-up-right_white.svg">
-                                                                </a>
+                                                                <label>Completed:</label>
+                                                                <span>{{ $route->jobs_completed ?? 0 }}</span>
+                                                            </div>
+                                                            <div>
+                                                                <label>Pending</label>
+                                                                <span>{{ $route->jobs_pending ?? 0 }}</span>
                                                             </div>
                                                         </div>
+                                                        <a href="{{ route('staffroutes.show', [$route->id]) }}">
+                                                            <div>
+                                                                <img src="{{ asset('website') }}/assets/images/Arrow-up-right_white.svg">
+                                                            </div>
+                                                        </a>
                                                     </div>
-                                                    @php
-                                                        $totalJobs = ($route->jobs_pending ?? 0) + ($route->jobs_completed ?? 0);
-                                                        $completedPercentage = $totalJobs > 0 ? round(($route->jobs_completed / $totalJobs) * 100) : 0;
+                                                </div>
+                                                @php
+                                                    $totalJobs = ($route->jobs_pending ?? 0) + ($route->jobs_completed ?? 0);
+                                                    $completedPercentage = $totalJobs > 0 ? round(($route->jobs_completed / $totalJobs) * 100) : 0;
 
-                                                        // Determine color, icon and background based on percentage
-                                                        if ($completedPercentage <= 20) {
-                                                            $progressColor = '#ff5500';
-                                                            $progressBg = '#fbf2ec';
-                                                            $progressIcon = 'fa-hourglass-start';
-                                                            $progressText = 'Completed';
-                                                        } elseif ($completedPercentage <= 50) {
-                                                            $progressColor = '#ff9800';
-                                                            $progressBg = '#FFF3E0';
-                                                            $progressIcon = 'fa-spinner';
-                                                            $progressText = 'In Progress';
-                                                        } elseif ($completedPercentage <= 80) {
-                                                            $progressColor = '#ff9800';
-                                                            $progressBg = '#FFF3E0';
-                                                            $progressIcon = 'fa-hourglass-half';
-                                                            $progressText = 'Nearly';
-                                                        } elseif ($completedPercentage < 100) {
-                                                            $progressColor = '#ff9800';
-                                                            $progressBg = '#FFF3E0';
-                                                            $progressIcon = 'fa-check-circle';
-                                                            $progressText = 'Almost Done';
-                                                        } else {
-                                                            $progressColor = '#4caf50';
-                                                            $progressBg = '#b5fbd0';
-                                                            $progressIcon = 'fa-check-circle';
-                                                            $progressText = 'Completed';
-                                                        }
-                                                    @endphp
-                                                    <div style="background: {{ $progressBg }}; border-radius: 10px; padding: 6px 7px;">
-                                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-                                                            <i class="fa-solid {{ $progressIcon }}" style="color: {{ $progressColor }}; font-size: 14px;"></i>
-                                                            <h5 style="color: {{ $progressColor }}; margin: 0; font-size: 14px;">
-                                                                {{ $completedPercentage }}% {{ $progressText }}</h5>
-                                                        </div>
-                                                        <div style="width: 100%; background-color: #e0e0e0; border-radius: 10px; height: 8px; overflow: hidden; margin-bottom: 5px;">
-                                                            <div style="width: {{ $completedPercentage }}%; background-color: {{ $progressColor }}; height: 100%; transition: width 0.3s ease, background-color 0.3s ease;">
-                                                            </div>
+                                                    // Determine color, icon and background based on percentage
+                                                    if ($totalJobs === 0) {
+                                                        $progressColor = '#9e9e9e';
+                                                        $progressBg = '#eeeeee';
+                                                        $progressIcon = 'fa-ban';
+                                                        $progressText = 'Inactive';
+                                                    } elseif ($completedPercentage <= 20) {
+                                                        $progressColor = '#ff5500';
+                                                        $progressBg = '#fbf2ec';
+                                                        $progressIcon = 'fa-hourglass-start';
+                                                        $progressText = 'Completed';
+                                                    } elseif ($completedPercentage <= 50) {
+                                                        $progressColor = '#ff9800';
+                                                        $progressBg = '#FFF3E0';
+                                                        $progressIcon = 'fa-spinner';
+                                                        $progressText = 'In Progress';
+                                                    } elseif ($completedPercentage <= 80) {
+                                                        $progressColor = '#ff9800';
+                                                        $progressBg = '#FFF3E0';
+                                                        $progressIcon = 'fa-hourglass-half';
+                                                        $progressText = 'Nearly';
+                                                    } elseif ($completedPercentage < 100) {
+                                                        $progressColor = '#ff9800';
+                                                        $progressBg = '#FFF3E0';
+                                                        $progressIcon = 'fa-check-circle';
+                                                        $progressText = 'Almost Done';
+                                                    } else {
+                                                        $progressColor = '#4caf50';
+                                                        $progressBg = '#b5fbd0';
+                                                        $progressIcon = 'fa-check-circle';
+                                                        $progressText = 'Completed';
+                                                    }
+                                                @endphp
+                                                <div style="background: {{ $progressBg }}; border-radius: 8px; padding: 4px 5px;">
+                                                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+                                                        <i class="fa-solid {{ $progressIcon }}" style="color: {{ $progressColor }}; font-size: 11px;"></i>
+                                                        <h5 style="color: {{ $progressColor }}; margin: 0; font-size: 11px;">{{ $totalJobs === 0 ? $progressText : $completedPercentage . '% ' . $progressText }}</h5>
+                                                    </div>
+                                                    <div style="width: 100%; background-color: #e0e0e0; border-radius: 10px; height: 6px; overflow: hidden; margin-bottom: 3px;">
+                                                        <div style="width: {{ $totalJobs === 0 ? 100 : $completedPercentage }}%; background-color: {{ $progressColor }}; height: 100%; transition: width 0.3s ease, background-color 0.3s ease;">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -421,12 +423,6 @@
                                         <div class="col-md-4">
                                             <div class="payroll_cards shadow_box_wrapper">
                                                 <h3>Total Undeposited Cash</h3>
-                                                <h4>5,000</h4>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="payroll_cards shadow_box_wrapper">
-                                                <h3>My Payroll WorkSheet</h3>
                                                 <h4>5,000</h4>
                                             </div>
                                         </div>
@@ -486,7 +482,7 @@
                         <div class="row  custom_row height_100_percent">
                             <div class="col-md-12">
                                 <div class="notification_dashboard_wrapper shadow_box_wrapper">
-                                    <h3>My Tasks (Notifications)</h3>
+                                    <h3>Notifications</h3>
 
                                     <div class="service_complete_wrapper service_complete_wrapper_staff">
                                         <ul class="notification_ul-wrapper">
@@ -568,17 +564,11 @@
                                                         <input id="soap" name="items[soap][name]" type="checkbox" value="soap">
                                                         <label for="soap">Soap</label>
                                                     </div>
-                                                    <div class="i_need_input_numb">
-                                                        <input class="form-control" min="0" placeholder="00" type="number" name="items[soap][quantity]">
-                                                    </div>
                                                 </div>
                                                 <div class="i_need_wrapper_inner">
                                                     <div>
                                                         <input id="business_cards" name="items[business_card][name]" type="checkbox" value="business_card">
                                                         <label for="business_cards">Business Cards</label>
-                                                    </div>
-                                                    <div class="i_need_input_numb">
-                                                        <input class="form-control" min="0" placeholder="00" type="number" name="items[business_card][quantity]">
                                                     </div>
                                                 </div>
                                                 <div class="i_need_wrapper_inner">
@@ -586,22 +576,16 @@
                                                         <input id="blades" name="items[blade][name]" type="checkbox" value="blade">
                                                         <label for="blades">Blades</label>
                                                     </div>
-                                                    <div class="i_need_input_numb">
-                                                        <input class="form-control" min="0" placeholder="00" type="number" name="items[blade][quantity]">
-                                                    </div>
                                                 </div>
                                                 <div class="i_need_wrapper_inner">
                                                     <div>
                                                         <input id="others" name="items[other][name]" type="checkbox" value="other">
-                                                        <label for="others">Others</label>
-                                                    </div>
-                                                    <div class="i_need_input_numb">
-                                                        <input class="form-control" min="0" placeholder="00" type="number" name="items[other][quantity]">
+                                                        <label for="others">Other</label>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="others_requirments">
-                                                <input type="text" name="items[other][description]" placeholder="Other">
+                                                <input type="text" name="items[other][description]" placeholder="Other Instructions">
                                                 <label>Please Enter Any Other Requirement</label>
                                             </div>
                                             <button type="submit" class="btn_global btn_blue">Submit<i class="fa-solid fa-check"></i></button>
@@ -887,19 +871,6 @@
     {{-- //For Staff Requirements and Validations --}}
     <script>
         $(document).ready(function() {
-            $('.i_need_input_numb input[type="number"]').prop('disabled', true);
-
-            $('.i_need_wrapper_inner input[type="checkbox"]').on('change', function() {
-                const wrapper = $(this).closest('.i_need_wrapper_inner');
-                const numberInput = wrapper.find('.i_need_input_numb input[type="number"]');
-
-                if ($(this).is(':checked')) {
-                    numberInput.prop('disabled', false).attr('min', 1).val('');
-                } else {
-                    numberInput.prop('disabled', true).val('');
-                }
-            });
-
             $('#others').on('change', function() {
                 if ($(this).is(':checked')) {
                     $('input[name="items[other][description]"]').prop('disabled', false)
@@ -909,8 +880,6 @@
             }).trigger('change');
 
             $('form').on('submit', function(e) {
-                let isValid = true;
-
                 const isAnyChecked = $('.i_need_wrapper_inner input[type="checkbox"]:checked').length > 0;
                 if (!isAnyChecked) {
                     Swal.fire({
@@ -921,25 +890,6 @@
                     e.preventDefault();
                     return false;
                 }
-
-                $('.i_need_wrapper_inner input[type="checkbox"]:checked').each(function() {
-                    const wrapper = $(this).closest('.i_need_wrapper_inner');
-                    const quantityInput = wrapper.find('.i_need_input_numb input[type="number"]');
-                    const quantityValue = quantityInput.val().trim();
-
-                    if (!quantityValue || isNaN(quantityValue) || parseInt(quantityValue) < 1) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Warning!',
-                            text: 'Please enter a valid quantity (minimum 1) for each checked item.',
-                        });
-                        e.preventDefault();
-                        isValid = false;
-                        return false;
-                    }
-                });
-
-                if (!isValid) return false;
 
                 if ($('#others').is(':checked') && $('input[name="items[other][description]"]').val()
                     .trim() === '') {
