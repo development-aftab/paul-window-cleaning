@@ -370,7 +370,7 @@
             <div class="container-fluid custom_container">
                 <div class="row">
                     <div class="col-md-8">
-                        <div class="row  custom_row height_100_percent">
+                        <div class="row custom_row">
                             <div class="col-md-12">
                                 <div class="cards_dashboard_index_wrapper shadow_box_wrapper">
                                     <div>
