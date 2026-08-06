@@ -59,6 +59,62 @@
         .new_yorks-cards_wrapper_compact .jobs_icon_wrapper div:has(img) img {
             width: 12px;
         }
+
+        .notes_for_paul_wrapper {
+            background: linear-gradient(180deg, #f4f8ff 0%, #ffffff 55%);
+            border: 1px solid #e3ebfa;
+        }
+
+        .notes_for_paul_header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .notes_for_paul_header_icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: var(--dark_blue, #32346A);
+            color: #fff;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .notes_for_paul_header h3 {
+            margin: 0;
+        }
+
+        .notes_for_paul_form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .notes_for_paul_form textarea {
+            resize: none;
+            border-radius: 12px;
+            border: 1px solid #dfe6f5;
+            background: #fff;
+            padding: 12px 14px;
+            font-size: 13px;
+            box-shadow: none;
+        }
+
+        .notes_for_paul_form textarea:focus {
+            border-color: var(--dark_blue, #32346A);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(50, 52, 106, 0.1);
+        }
+
+        .notes_for_paul_form .btn_global {
+            align-self: flex-end;
+        }
     </style>
 @endpush
 @section('navbar-title')
@@ -512,6 +568,21 @@
                                 </div>
                             </div>
                             <div class="col-md-12">
+                                <div class="notes_for_paul_wrapper shadow_box_wrapper">
+                                    <div class="notes_for_paul_header">
+                                        <div class="notes_for_paul_header_icon">
+                                            <i class="fa-solid fa-note-sticky"></i>
+                                        </div>
+                                        <h3>Notes for Paul</h3>
+                                    </div>
+                                    <form id="notes_for_paul_form" method="post" action="{{ route('staff-notes.store') }}" class="notes_for_paul_form">
+                                        @csrf
+                                        <textarea name="note" class="form-control" rows="3" maxlength="2000" placeholder="Write anything you'd like Paul to know..." required></textarea>
+                                        <button type="submit" class="btn_global btn_blue">Send Note<i class="fa-solid fa-paper-plane"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
                                 <div class="notification_dashboard_wrapper shadow_box_wrapper">
                                     <div class="potientails_icon_wrap">
                                         <h3>My Potential Clients</h3>
@@ -553,7 +624,7 @@
                             <div class="col-md-12">
                                 <div class="notification_dashboard_wrapper shadow_box_wrapper">
                                     <h3>I Need</h3>
-                                    <form method="post" action="{{ route('staffrequirements.store') }}" class="form-horizontal" enctype="multipart/form-data">
+                                    <form id="i_need_form" method="post" action="{{ route('staffrequirements.store') }}" class="form-horizontal" enctype="multipart/form-data">
                                         @csrf
                                         <input type="hidden" name="timestamp" value="{{ now() }}">
                                         <div class="notification_dashboard_wrapper shadow_box_wrapper">
@@ -879,7 +950,7 @@
                 }
             }).trigger('change');
 
-            $('form').on('submit', function(e) {
+            $('#i_need_form').on('submit', function(e) {
                 const isAnyChecked = $('.i_need_wrapper_inner input[type="checkbox"]:checked').length > 0;
                 if (!isAnyChecked) {
                     Swal.fire({
@@ -912,6 +983,60 @@
                 });
 
                 return true;
+            });
+        });
+    </script>
+
+    {{-- Notes for Paul: AJAX submit --}}
+    <script>
+        $(document).ready(function() {
+            $('#notes_for_paul_form').on('submit', function(e) {
+                e.preventDefault();
+
+                const $form = $(this);
+                const $textarea = $form.find('textarea[name="note"]');
+                const $submitBtn = $form.find('button[type="submit"]');
+
+                if ($textarea.val().trim() === '') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Warning!',
+                        text: 'Please write a note before sending.',
+                    });
+                    return false;
+                }
+
+                $submitBtn.prop('disabled', true);
+
+                $.ajax({
+                    url: $form.attr('action'),
+                    method: 'POST',
+                    data: $form.serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            $textarea.val('');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sent!',
+                                text: response.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseJSON?.errors?.note?.[0] ||
+                            'Failed to send note. Please try again.';
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: message,
+                        });
+                    },
+                    complete: function() {
+                        $submitBtn.prop('disabled', false);
+                    }
+                });
             });
         });
     </script>

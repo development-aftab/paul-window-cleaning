@@ -176,6 +176,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource("assignweeks", "\App\Http\Controllers\AssignWeeksController");
     Route::resource("unavaildays", "\App\Http\Controllers\UnavailDaysController");
     Route::resource("staffrequirements", "\App\Http\Controllers\StaffRequirementsController");
+    Route::post('staff-notes', [\App\Http\Controllers\StaffNotesController::class, 'store'])->name('staff-notes.store');
     Route::resource("contacts", "\App\Http\Controllers\ContactsController");
     Route::resource("contactuses", "\App\Http\Controllers\ContactusesController");
     Route::resource("contactcleanings", "\App\Http\Controllers\ContactCleaningsController");
