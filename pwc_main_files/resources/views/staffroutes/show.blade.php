@@ -47,6 +47,136 @@
         body .details_routes_wrapper .select_radio_button button.btn.select_arrow_btn.btn_yellow {
             background: #ffc700;
         }
+
+        /* Route status color coding: light blue = not yet submitted,
+           yellow = submitted within the 24-hour editable window, dark blue = locked.
+           All three states share identical layout/border/padding — only the palette differs. */
+        .muller_honda_wrapper[class*="route_status_"] {
+            border-width: 1px;
+            border-style: solid;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .muller_honda_wrapper[class*="route_status_"] div:has(h2) {
+            border-radius: 14px;
+        }
+
+        .muller_honda_wrapper.route_status_pending {
+            background: linear-gradient(135deg, #F3FBFF 0%, #D9F1FC 100%);
+            border-color: #BEE6F7;
+            box-shadow: 0px 8px 20px 0px rgba(0, 148, 209, 0.08);
+        }
+
+        .muller_honda_wrapper.route_status_editable {
+            background: linear-gradient(135deg, #FFFBEF 0%, #FFE79E 100%);
+            border-color: #F0D273;
+            box-shadow: 0px 8px 20px 0px rgba(191, 145, 0, 0.12);
+        }
+
+        .muller_honda_wrapper.route_status_locked {
+            background: linear-gradient(135deg, #3A3C7E 0%, #1F2147 100%);
+            border-color: #1F2147;
+            box-shadow: 0px 8px 20px 0px rgba(31, 33, 71, 0.25);
+        }
+
+        .muller_honda_wrapper.route_status_pending div:has(h2),
+        .muller_honda_wrapper.route_status_editable div:has(h2) {
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        .muller_honda_wrapper.route_status_locked div:has(h2) {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .muller_honda_wrapper.route_status_pending .accordion-button,
+        .muller_honda_wrapper.route_status_pending div:has(h2) h2 {
+            color: var(--dark_blue) !important;
+        }
+
+        .muller_honda_wrapper.route_status_editable .accordion-button,
+        .muller_honda_wrapper.route_status_editable div:has(h2) h2 {
+            color: #7A5900 !important;
+        }
+
+        .muller_honda_wrapper.route_status_locked .accordion-button,
+        .muller_honda_wrapper.route_status_locked div:has(h2) h2 {
+            color: #FFFFFF !important;
+        }
+
+        .muller_honda_wrapper.route_status_pending .muller_honda_details div label,
+        .muller_honda_wrapper.route_status_pending .muller_honda_details div span,
+        .muller_honda_wrapper.route_status_pending .muller_honda_details div h5:last-child {
+            color: #2B597A;
+        }
+
+        .muller_honda_wrapper.route_status_editable .muller_honda_details div label,
+        .muller_honda_wrapper.route_status_editable .muller_honda_details div span,
+        .muller_honda_wrapper.route_status_editable .muller_honda_details div h5:last-child {
+            color: #6B4E00;
+        }
+
+        .muller_honda_wrapper.route_status_locked .muller_honda_details div label,
+        .muller_honda_wrapper.route_status_locked .muller_honda_details div span,
+        .muller_honda_wrapper.route_status_locked .muller_honda_details div h5:last-child {
+            color: #E3E4FA;
+        }
+
+        /* Breathing room between stacked cards in the same column */
+        .routes_wrapper .muller_honda_wrapper {
+            margin-bottom: 15px;
+        }
+
+        /* Status action button ("Report Status" / "Edit" / "Complete") tinted to match its card */
+        .mark_as_complete_wrapper.route_status_pending {
+            background: #D9F1FC;
+            margin-top: 10px;
+        }
+
+        .mark_as_complete_wrapper.route_status_pending h5 {
+            color: var(--dark_blue);
+            margin: 0;
+        }
+
+        .completed_wrapper.route_status_editable {
+            background: #FFDE7A;
+        }
+
+        .completed_wrapper.route_status_editable i,
+        .completed_wrapper.route_status_editable h5 {
+            color: #7A5900;
+        }
+
+        .completed_wrapper.route_status_locked {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .completed_wrapper.route_status_locked i,
+        .completed_wrapper.route_status_locked h5 {
+            color: #FFFFFF;
+        }
+
+        /* "Edit Note" keeps one standard look across all 3 card colors */
+        .edit_note_btn {
+            border-radius: 10px;
+            background: #FFFFFF;
+            padding: 10px 15px;
+            display: flex;
+            column-gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .edit_note_btn i {
+            color: #2F9400;
+            font-size: 14px;
+        }
+
+        .edit_note_btn h5 {
+            color: #2F9400;
+            margin: 0;
+        }
     </style>
 @endpush
 @section('navbar-title')
@@ -220,7 +350,12 @@
 
                                             <div class="routes_wrapper" id="week-{{ $schedule['week_number'] }}" data-week="{{ $schedule['week_number'] }}">
                                                 @foreach ($schedule['routes'] as $key => $route)
-                                                    <div class="muller_honda_wrapper muller_honda_wrapper_update" data-schedule-id="{{ $route['schedule_id'] }}" data-client-name="{{ $route['client_name'] }}" data-date="{{ $route['created_at'] ?? now() }}">
+                                                    @php
+                                                        $isLocked = !empty($route['submitted_at']) && \Carbon\Carbon::parse($route['submitted_at'])->diffInHours(now()) >= 24;
+                                                        $isEditableWindow = !empty($route['submitted_at']) && !$isLocked;
+                                                        $routeStatusClass = $isEditableWindow ? 'route_status_editable' : ($isLocked ? 'route_status_locked' : 'route_status_pending');
+                                                    @endphp
+                                                    <div class="muller_honda_wrapper muller_honda_wrapper_update {{ $routeStatusClass }}" data-schedule-id="{{ $route['schedule_id'] }}" data-client-name="{{ $route['client_name'] }}" data-date="{{ $route['created_at'] ?? now() }}">
                                                         <div class="accordion" id="accordion-{{ $schedule['week_number'] }}-{{ $key }}">
                                                             <div class="accordion-item">
                                                                 <h2 class="accordion-header" style="display: flex; align-items: center; gap: 10px;">
@@ -291,27 +426,27 @@
                                                                         </div>
                                                                         @if ($route['clientSchedule'] == 'completed')
                                                                             <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#completedModal">
-                                                                                <div class="completed_wrapper">
-                                                                                    <i class="fa-solid fa-check"></i>
+                                                                                <div class="completed_wrapper {{ $routeStatusClass }}">
+                                                                                    <i class="fa-solid {{ $isEditableWindow ? 'fa-pen' : 'fa-check' }}"></i>
                                                                                     @if (isset($route['payment_type']) && $route['payment_type'] == 'invoice')
-                                                                                        <a href="{{ url('view_client_invoice/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}">
-                                                                                            <h5>Complete</h5>
+                                                                                        <a href="{{ url(($isEditableWindow ? 'client_invoice' : 'view_client_invoice') . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}{{ $isEditableWindow ? '&month=' . urlencode($selectedMonth ?? '') : '' }}">
+                                                                                            <h5>{{ $isEditableWindow ? 'Edit' : 'Complete' }}</h5>
                                                                                         </a>
                                                                                     @elseif(isset($route['payment_type']) && $route['payment_type'] == 'cash')
-                                                                                        <a href="{{ url('view_client_cash' . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}">
-                                                                                            <h5>Complete</h5>
+                                                                                        <a href="{{ url(($isEditableWindow ? 'client_cash' : 'view_client_cash') . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}{{ $isEditableWindow ? '&month=' . urlencode($selectedMonth ?? '') : '' }}">
+                                                                                            <h5>{{ $isEditableWindow ? 'Edit' : 'Complete' }}</h5>
                                                                                         </a>
                                                                                     @endif
                                                                                     {{--                                                                        <h5>Completed</h5> --}}
                                                                                 </div>
                                                                             </a>
                                                                         @elseif($route['clientSchedule'] == 'pending')
-                                                                            <div class="mark_as_complete_wrapper mt-4">
+                                                                            <div class="mark_as_complete_wrapper mt-4 {{ $routeStatusClass }}">
                                                                                 <h5>Pending</h5>
                                                                             </div>
                                                                         @endif
                                                                         <a href="#" data-note="{{ $route['note'] }}" data-schedule-id="{{ $route['schedule_id'] }}" data-client-price-list="{{ is_array($route['client_price_list']) ? json_encode($route['client_price_list']) : json_encode($route['client_price_list']->toArray()) }}" data-bs-toggle="modal" data-bs-target="#editNoteModal">
-                                                                            <div class="completed_wrapper">
+                                                                            <div class="edit_note_btn">
                                                                                 <i class="fa-solid fa-edit"></i>
                                                                                 <h5>Edit Note</h5>
                                                                             </div>
@@ -617,7 +752,12 @@
 
                                                     <div class="routes_wrapper" id="week-{{ $schedule['week_number'] }}" data-week="{{ $schedule['week_number'] }}">
                                                         @foreach ($schedule['routes'] as $key => $route)
-                                                            <div class="muller_honda_wrapper muller_honda_wrapper_update" data-schedule-id="{{ $route['schedule_id'] }}" data-client-name="{{ $route['client_name'] }}" data-date="{{ $route['created_at'] ?? now() }}">
+                                                            @php
+                                                                $isLocked = !empty($route['submitted_at']) && \Carbon\Carbon::parse($route['submitted_at'])->diffInHours(now()) >= 24;
+                                                                $isEditableWindow = !empty($route['submitted_at']) && !$isLocked;
+                                                                $routeStatusClass = $isEditableWindow ? 'route_status_editable' : ($isLocked ? 'route_status_locked' : 'route_status_pending');
+                                                            @endphp
+                                                            <div class="muller_honda_wrapper muller_honda_wrapper_update {{ $routeStatusClass }}" data-schedule-id="{{ $route['schedule_id'] }}" data-client-name="{{ $route['client_name'] }}" data-date="{{ $route['created_at'] ?? now() }}">
                                                                 <div class="accordion" id="accordion-{{ $schedule['week_number'] }}-{{ $key }}">
                                                                     <div class="accordion-item">
                                                                         <h2 class="accordion-header" style="display: flex; align-items: center; gap: 10px;">
@@ -688,23 +828,22 @@
                                                                                 </div>
                                                                                 @if ($route['clientSchedule'] == 'completed')
                                                                                     <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#completedModal">
-                                                                                        <div class="completed_wrapper">
-                                                                                            <i class="fa-solid fa-check"></i>
+                                                                                        <div class="completed_wrapper {{ $routeStatusClass }}">
+                                                                                            <i class="fa-solid {{ $isEditableWindow ? 'fa-pen' : 'fa-check' }}"></i>
                                                                                             @if (isset($route['payment_type']) && $route['payment_type'] == 'invoice')
-                                                                                                <a href="{{ url('view_client_invoice/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}">
-                                                                                                    <h5>Complete</h5>
+                                                                                                <a href="{{ url(($isEditableWindow ? 'client_invoice' : 'view_client_invoice') . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}{{ $isEditableWindow ? '&month=' . urlencode($selectedMonth ?? '') : '' }}">
+                                                                                                    <h5>{{ $isEditableWindow ? 'Edit' : 'Complete' }}</h5>
                                                                                                 </a>
                                                                                             @elseif(isset($route['payment_type']) && $route['payment_type'] == 'cash')
-                                                                                                <a href="{{ url('view_client_cash' . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}">
-                                                                                                    <h5>Complete</h5>
+                                                                                                <a href="{{ url(($isEditableWindow ? 'client_cash' : 'view_client_cash') . '/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}{{ $isEditableWindow ? '&month=' . urlencode($selectedMonth ?? '') : '' }}">
+                                                                                                    <h5>{{ $isEditableWindow ? 'Edit' : 'Complete' }}</h5>
                                                                                                 </a>
                                                                                             @endif
                                                                                             {{--                                                                        <h5>Completed</h5> --}}
                                                                                         </div>
                                                                                     </a>
-                                                                                    <br>
                                                                                 @elseif($route['clientSchedule'] == 'pending')
-                                                                                    <div class="mark_as_complete_wrapper">
+                                                                                    <div class="mark_as_complete_wrapper {{ $routeStatusClass }}">
                                                                                         @if ($route['payment_type'] == 'invoice')
                                                                                             <a href="{{ url('client_invoice/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}&month={{ urlencode($selectedMonth ?? '') }}">
                                                                                                 <h5>Report Status</h5>
@@ -718,7 +857,7 @@
                                                                                 @endif
                                                                                 <a href="#" data-note="{{ $route['note'] }}" data-schedule-id="{{ $route['schedule_id'] }}" data-client-price-list="{{ is_array($route['client_price_list']) ? json_encode($route['client_price_list']) : json_encode($route['client_price_list']->toArray()) }}" data-bs-toggle="modal"
                                                                                     data-bs-target="#editNoteModal">
-                                                                                    <div class="completed_wrapper">
+                                                                                    <div class="edit_note_btn">
                                                                                         <i class="fa-solid fa-edit"></i>
                                                                                         <h5>Edit Note</h5>
                                                                                     </div>
@@ -886,7 +1025,7 @@
                                                                 </div>
 
                                                             </div>
-                                                            <div class="mark_as_complete_wrapper">
+                                                            <div class="mark_as_complete_wrapper route_status_pending">
                                                                 @if ($route['payment_type'] == 'invoice')
                                                                     <a href="{{ url('client_invoice/' . $route['client_id']) }}?start_date={{ $route['client_start_week'] }}&end_date={{ $route['client_end_week'] }}&month={{ urlencode($selectedMonth ?? '') }}">
                                                                         <h5>Report Status</h5>
@@ -1006,7 +1145,12 @@
                                                         </div>
                                                     </div>
                                                     @forelse ($pendingRoutes as $route)
-                                                        <div class="muller_honda_wrapper muller_honda_wrapper_update">
+                                                        @php
+                                                            $isLocked = !empty($route['submitted_at']) && \Carbon\Carbon::parse($route['submitted_at'])->diffInHours(now()) >= 24;
+                                                            $isEditableWindow = !empty($route['submitted_at']) && !$isLocked;
+                                                            $routeStatusClass = $isEditableWindow ? 'route_status_editable' : ($isLocked ? 'route_status_locked' : 'route_status_pending');
+                                                        @endphp
+                                                        <div class="muller_honda_wrapper muller_honda_wrapper_update {{ $routeStatusClass }}">
                                                             <div>
                                                                 <h2>{{ ucfirst($route['client_name']) }}
                                                                     <!-- Timer Icon -->
@@ -1071,10 +1215,10 @@
 
                                                                 </div>
                                                             </div>
-                                                            <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#completedModal">
-                                                                <div class="completed_wrapper">
-                                                                    <i class="fa-solid fa-check"></i>
-                                                                    <h5>Completed</h5>
+                                                            <a href="{{ $isEditableWindow ? url(($route['payment_type'] == 'invoice' ? 'client_invoice' : 'client_cash') . '/' . $route['client_id']) . '?start_date=' . $route['client_start_week'] . '&end_date=' . $route['client_end_week'] . '&month=' . urlencode($selectedMonth ?? '') : url(($route['payment_type'] == 'invoice' ? 'view_client_invoice' : 'view_client_cash') . '/' . $route['client_id']) . '?start_date=' . $route['client_start_week'] . '&end_date=' . $route['client_end_week'] }}">
+                                                                <div class="completed_wrapper {{ $routeStatusClass }}">
+                                                                    <i class="fa-solid {{ $isEditableWindow ? 'fa-pen' : 'fa-check' }}"></i>
+                                                                    <h5>{{ $isEditableWindow ? 'Edit' : 'Complete' }}</h5>
                                                                 </div>
                                                             </a>
                                                         </div>

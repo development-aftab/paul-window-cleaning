@@ -1095,7 +1095,7 @@ class WebsiteController extends Controller
         $start_week_date = $request->query('start_date');
         $end_week_date = $request->query('end_date');
         $selectedMonth = $request->query('month');
-        $clientSchedule = ClientSchedule::with('clientSchedulePrice.clientPaymentPrice')
+        $clientSchedule = ClientSchedule::with(['clientSchedulePayment', 'clientSchedulePrice.clientPaymentPrice'])
             ->where('client_id', $client->id)
             ->where('start_date', $start_week_date)
             ->where('end_date', $end_week_date)
@@ -1104,9 +1104,18 @@ class WebsiteController extends Controller
         if (!$clientSchedule) {
             return redirect()->back();
         }
+
+        $isLocked = $clientSchedule->submitted_at && now()->diffInHours($clientSchedule->submitted_at) >= 24;
+        if ($clientSchedule->clientSchedulePayment !== null && $isLocked) {
+            return redirect()->route('view_client_invoice', ['id' => $id, 'start_date' => $start_week_date, 'end_date' => $end_week_date]);
+        }
+
         $clientPriceSum = $this->calculateTotalSum($clientSchedule);
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
-        return view('dashboard.client_invoice', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices', 'selectedMonth'));
+        $existingPayment = $clientSchedule->clientSchedulePayment;
+        $isEditMode = $existingPayment !== null;
+
+        return view('dashboard.client_invoice', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices', 'selectedMonth', 'existingPayment', 'isEditMode'));
     }
 
     public function viewClientInvoice(Request $request, $id)
@@ -1138,7 +1147,7 @@ class WebsiteController extends Controller
         $end_week_date = $request->query('end_date');
         $selectedMonth = $request->query('month');
 
-        $clientSchedule = ClientSchedule::with('clientSchedulePrice.clientPaymentPrice')
+        $clientSchedule = ClientSchedule::with(['clientSchedulePayment', 'clientSchedulePrice.clientPaymentPrice'])
             ->where('client_id', $client->id)
             ->where('start_date', $start_week_date)
             ->where('end_date', $end_week_date)
@@ -1148,11 +1157,17 @@ class WebsiteController extends Controller
             return redirect()->back();
         }
 
+        $isLocked = $clientSchedule->submitted_at && now()->diffInHours($clientSchedule->submitted_at) >= 24;
+        if ($clientSchedule->clientSchedulePayment !== null && $isLocked) {
+            return redirect()->route('view_client_cash', ['id' => $id, 'start_date' => $start_week_date, 'end_date' => $end_week_date]);
+        }
+
         $clientPriceSum = $this->calculateTotalSum($clientSchedule);
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
+        $existingPayment = $clientSchedule->clientSchedulePayment;
+        $isEditMode = $existingPayment !== null;
 
-        // return ['clientPriceSum' => $clientPriceSum, 'multiPrices' => $multiPrices];
-        return view('dashboard.client_cash', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices', 'selectedMonth'));
+        return view('dashboard.client_cash', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices', 'selectedMonth', 'existingPayment', 'isEditMode'));
     }
 
     public function viewClientCash(Request $request, $id)
@@ -1173,6 +1188,7 @@ class WebsiteController extends Controller
 
         $clientPriceSum = $this->calculateTotalSum($clientSchedule);
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
+
         return view('dashboard.view_client_cash', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices'));
     }
 
@@ -3750,10 +3766,13 @@ class WebsiteController extends Controller
             'payment_status' => ($request->payment_type == "invoice" && $request->option != 'no_payment') ? 'paid' : 'pending',
         ]);
 
+        $schedule = ClientSchedule::find($request->schedule_id);
+
         $reorded = ClientSchedule::where('id', $request->schedule_id)->update([
             'status' => 'completed',
             'service_date' => $request->service_date ?? now()->format('Y-m-d'),
             'staff_id' => auth()->user()->id,
+            'submitted_at' => $schedule && $schedule->submitted_at ? $schedule->submitted_at : now(),
         ]);
 
         Notification::create([
@@ -3772,6 +3791,66 @@ class WebsiteController extends Controller
         } else {
             return redirect()->back()->with(['title' => 'Payment Updated', 'message' => 'Client Cash Updated Successfully.', 'type' => 'success']);
         }
+    }
+
+    public function updatePayment(Request $request)
+    {
+        $schedule = ClientSchedule::findOrFail($request->schedule_id);
+
+        if (!$schedule->submitted_at || now()->diffInHours($schedule->submitted_at) >= 24) {
+            return redirect()->back()->with(['title' => 'Locked', 'message' => 'This report is locked and can no longer be edited.', 'type' => 'error']);
+        }
+
+        $payment = ClientPayment::where('schedule_id', $request->schedule_id)->latest('created_at')->first();
+
+        if (!$payment) {
+            return redirect()->back()->with(['title' => 'Error', 'message' => 'No submitted report found to edit.', 'type' => 'error']);
+        }
+
+        $client = Client::where('id', $request->client_id)->with('clientRouteStaff')->first();
+
+        $payment->update([
+            'option' => $request->option ?? null,
+            'option_two' => $request->option_two ?? null,
+            'option_three' => $request->option_three ?? null,
+            'option_four' => $request->option_four ?? null,
+            'partial_completed_scope' => $request->partial_completed_scope ?? null,
+            'reason' => $request->reason ?? null,
+            'scope' => $request->scope ?? null,
+            'amount' => $request->amount ?? null,
+            'price_charge_one' => $request->price_charged_one ?? null,
+            'price_charge_two' => $request->price_charged_two ?? null,
+            'final_price' => $request->final_price ?? null,
+            'day_number' => $request->day_number ?? null,
+            'payment_date' => ($request->payment_type == "cash" && $request->option != 'no_payment') ? ($payment->payment_date ?? now()->format('Y-m-d')) : null,
+            'start_time' => $request->start_time ?? null,
+            'end_time' => $request->end_time ?? null,
+            'status' => ($request->payment_type == "cash" && $request->option != 'no_payment') ? 'paid' : 'pending',
+            'payment_status' => ($request->payment_type == "invoice" && $request->option != 'no_payment') ? 'paid' : 'pending',
+            'edited_after_submission' => true,
+        ]);
+
+        ClientSchedule::where('id', $request->schedule_id)->update([
+            'service_date' => $request->service_date ?? $schedule->service_date,
+        ]);
+
+        Notification::create([
+            'user_id' => 2,
+            'action_id' => $request->client_id,
+            'title' => $request->option . ' Client Payment Edited',
+            'message' => $request->option . ' Client payment was edited after submission.',
+            'type' => 'client_payment_edited',
+        ]);
+
+        if (isset($client->clientRouteStaff[0])) {
+            $routeParams = [$client->clientRouteStaff[0]->route_id];
+            if ($request->filled('month')) {
+                $routeParams['month'] = $request->month;
+            }
+            return redirect()->route('staffroutes.show', $routeParams)->with(['title' => 'Payment Updated', 'message' => 'Report Updated Successfully.', 'type' => 'success']);
+        }
+
+        return redirect()->back()->with(['title' => 'Payment Updated', 'message' => 'Report Updated Successfully.', 'type' => 'success']);
     }
 
     public function sortedSchedule(Request $request)

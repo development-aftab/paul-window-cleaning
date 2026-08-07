@@ -370,6 +370,7 @@ class StaffRoutesController extends Controller
                         'client_price_list'       => optional($firstSchedule->clientName)->clientPrice ?? [],
                         'schedule_id'             => optional($firstSchedule)->id,
                         'clientSchedule'          => optional($firstSchedule)->status,
+                        'submitted_at'            => optional($firstSchedule)->submitted_at,
                         'created_at'              => optional($firstSchedule)->created_at,
                         'client_name'             => optional($firstSchedule->clientName)->name
                             ?? optional(optional($firstSchedule->clientName)->user)->name

@@ -1,6 +1,20 @@
 @extends('theme.layout.master')
 
 @push('css')
+    <style>
+        .report_lock_badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-family: 'Hellix-SemiBold';
+            margin-left: 10px;
+            background: var(--dark_blue);
+            color: #FFFFFF;
+        }
+    </style>
 @endpush
 @section('navbar-title')
     <div class="back_btn_navbar back_btn_navbar_create_staff">
@@ -27,6 +41,7 @@
                                         <div class="custom_radio_mullerHonda">
                                             <label class="form-check-label">{{$client->user->name??''}}</label>
                                             <span>(Invoice)</span>
+                                            <span class="report_lock_badge"><i class="fa-solid fa-lock"></i> Locked</span>
                                         </div>
                                         <h3 class="pricePlus">
                                             ${{ number_format($clientPriceSum, 2, '.', ',') ?? '' }}</h3>

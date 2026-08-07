@@ -1,6 +1,20 @@
 @extends('theme.layout.master')
 
 @push('css')
+    <style>
+        .report_lock_badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-family: 'Hellix-SemiBold';
+            margin-left: 10px;
+            background: #FFF4CC;
+            color: #A67C00;
+        }
+    </style>
 @endpush
 @section('navbar-title')
     <div class="back_btn_navbar back_btn_navbar_create_staff">
@@ -11,13 +25,13 @@
     </div>
 @endsection
 @section('content')
-    @if (auth()->user()->hasRole('staff'))
+    @if (auth()->user()->hasRole('staff') || auth()->user()->hasRole('admin'))
         <section class="create_clients_sec_staff">
             <div class="container-fluid custom_container">
                 <div class="row">
                     <div class="col-md-12">
 
-                        <form method="post" action="{{ route('save_payment') }}" class="form-horizontal" enctype="multipart/form-data">
+                        <form method="post" action="{{ route($isEditMode ? 'update_payment' : 'save_payment') }}" class="form-horizontal" enctype="multipart/form-data">
                             @csrf
                             <div class="row custom_row">
                                 <div class="col-md-12">
@@ -32,6 +46,9 @@
                                                 <input type="hidden" name="final_price" value="{{ $clientPriceSum ?? '' }}">
                                                 <input type="hidden" name="month" value="{{ $selectedMonth ?? '' }}">
 {{--                                                <span>(Invoice)</span>--}}
+                                                @if ($isEditMode)
+                                                    <span class="report_lock_badge"><i class="fa-solid fa-pen"></i> Editable for 24 hours</span>
+                                                @endif
                                             </div>
                                             <h3 class="pricePlus">
                                                 ${{ number_format($clientPriceSum, 2, '.', ',') ?? '' }}</h3>
@@ -41,7 +58,7 @@
                                             <div class="col-md-6">
                                                 <div class="txt_field">
                                                     <label for="service_date">Service Date <span style="color: red;">*</span></label>
-                                                    <input class="form-control" type="date" name="service_date" id="service_date" required>
+                                                    <input class="form-control" type="date" name="service_date" id="service_date" value="{{ $isEditMode ? $clientSchedule->service_date : '' }}" required>
                                                 </div>
                                             </div>
                                         </div>
@@ -50,14 +67,14 @@
                                             <div class="row custom_row">
                                                 <div class="col-md-12 custom_no_change">
                                                     <div class="custom_radio">
-                                                        <input class="form-check-input complete_no_change" name="option" type="checkbox" value="completed" id="com_no_change">
+                                                        <input class="form-check-input complete_no_change" name="option" type="checkbox" value="completed" id="com_no_change" @if ($isEditMode && $existingPayment->option == 'completed') checked @endif>
                                                         <label class="form-check-label" for="com_no_change">Completed no
                                                             Change</label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12 partially_completed_wrapper">
                                                     <div class="custom_radio">
-                                                        <input class="form-check-input partiallly_completed check_uncheck check_show_hide" name="option" type="checkbox" value="partially" id="partiallyCompleted">
+                                                        <input class="form-check-input partiallly_completed check_uncheck check_show_hide" name="option" type="checkbox" value="partially" id="partiallyCompleted" @if ($isEditMode && $existingPayment->option == 'partially') checked @endif>
                                                         <label class="form-check-label" for="partiallyCompleted">Partially
                                                             Completed</label>
                                                     </div>
@@ -81,24 +98,24 @@
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="txt_field">
-                                                                <input class="form-control reason_disabled" type="text" name="reason" placeholder="Reason" disabled="disabled">
+                                                                <input class="form-control reason_disabled" type="text" name="reason" placeholder="Reason" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->reason ?? '') : '' }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="txt_field">
-                                                                <input class="form-control reason_disabled" type="text" name="partial_completed_scope" placeholder="Scope Of Work Completed" disabled="disabled">
+                                                                <input class="form-control reason_disabled" type="text" name="partial_completed_scope" placeholder="Scope Of Work Completed" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->partial_completed_scope ?? '') : '' }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="txt_field">
-                                                                <input class="form-control reason_disabled price_charged_one" type="text" name="price_charged_one" placeholder="Price Charged" disabled="disabled">
+                                                                <input class="form-control reason_disabled price_charged_one" type="text" name="price_charged_one" placeholder="Price Charged" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->price_charge_one ?? '') : '' }}">
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12 partially_completed_wrapper">
                                                     <div class="custom_radio">
-                                                        <input class="form-check-input  check_uncheck check_show_hide" name="option_two" type="checkbox" value="extraWork" id="workCompleted">
+                                                        <input class="form-check-input  check_uncheck check_show_hide" name="option_two" type="checkbox" value="extraWork" id="workCompleted" @if ($isEditMode && $existingPayment->option_two == 'extraWork') checked @endif>
                                                         <label class="form-check-label" for="workCompleted">Extra Work
                                                             Completed</label>
                                                     </div>
@@ -122,12 +139,12 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <div class="txt_field">
-                                                                <input class="form-control reason_disabled" type="text" name="scope" placeholder="Scope Of Additional Work Completed" disabled="disabled">
+                                                                <input class="form-control reason_disabled" type="text" name="scope" placeholder="Scope Of Additional Work Completed" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->scope ?? '') : '' }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <div class="txt_field">
-                                                                <input class="form-control reason_disabled price_charged_two" type="text" name="price_charged_two" placeholder="Price Charged" disabled="disabled">
+                                                                <input class="form-control reason_disabled price_charged_two" type="text" name="price_charged_two" placeholder="Price Charged" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->price_charge_two ?? '') : '' }}">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -135,20 +152,20 @@
 
                                                 <div class="col-md-12 partially_completed_wrapper">
                                                     <div class="custom_radio">
-                                                        <input class="form-check-input  check_uncheck check_show_hide" name="option_three" type="checkbox" value="logTime" id="logTime">
+                                                        <input class="form-check-input  check_uncheck check_show_hide" name="option_three" type="checkbox" value="logTime" id="logTime" @if ($isEditMode && $existingPayment->option_three == 'logTime') checked @endif>
                                                         <label class="form-check-label" for="logTime">Log time</label>
                                                     </div>
                                                     <div class="row reason_input_fileds_wrapper">
                                                         <div class="col-md-6">
                                                             <div class="txt_field">
                                                                 <label>Start Time</label>
-                                                                <input class="form-control reason_disabled" type="time" name="start_time" placeholder="Start Time" disabled="disabled">
+                                                                <input class="form-control reason_disabled" type="time" name="start_time" placeholder="Start Time" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->start_time ?? '') : '' }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <div class="txt_field">
                                                                 <label>End Time</label>
-                                                                <input class="form-control reason_disabled" type="time" name="end_time" placeholder="End Time" disabled="disabled">
+                                                                <input class="form-control reason_disabled" type="time" name="end_time" placeholder="End Time" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->end_time ?? '') : '' }}">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -157,13 +174,13 @@
 
                                                 <div class="col-md-12 partially_completed_wrapper">
                                                     <div class="custom_radio">
-                                                        <input class="form-check-input omit_class complete_no_change  check_uncheck check_show_hide" name="option" type="checkbox" value="omit" id="omit">
+                                                        <input class="form-check-input omit_class complete_no_change  check_uncheck check_show_hide" name="option" type="checkbox" value="omit" id="omit" @if ($isEditMode && $existingPayment->option == 'omit') checked @endif>
                                                         <label class="form-check-label" for="omit">Omit</label>
                                                     </div>
                                                     <div class="row reason_input_fileds_wrapper">
                                                         <div class="col-md-6">
                                                             <div class="txt_field">
-                                                                <input class="form-control reason_disabled" type="text" name="reason" placeholder="Reason" disabled="disabled">
+                                                                <input class="form-control reason_disabled" type="text" name="reason" placeholder="Reason" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->reason ?? '') : '' }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6"></div>
@@ -176,8 +193,8 @@
                                 </div>
                                 <div class="col-md-12">
                                     <div class="custom_justify_between">
-                                        <button type="button" class="btn_global btn_grey">Cancel<i class="fa-solid fa-close"></i></button>
-                                        <button type="submit" class="btn_global btn_blue">Submit<i class="fa-solid fa-plus"></i></button>
+                                        <button type="button" class="btn_global btn_grey" id="goBackBtnCancel">Cancel<i class="fa-solid fa-close"></i></button>
+                                        <button type="submit" class="btn_global btn_blue">{{ $isEditMode ? 'Save Changes' : 'Submit' }}<i class="fa-solid {{ $isEditMode ? 'fa-check' : 'fa-plus' }}"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -297,6 +314,9 @@
                     updatePrice();
 
                 });
+
+            // Re-sync price once initial pre-checked fields have been revealed (edit mode)
+            updatePrice();
         });
     </script>
     {{-- show hide functionality --}}{{-- and check un chack functionality --}}
@@ -361,10 +381,12 @@
                 }
             });
 
+            // Reveal/enable fields for whichever option came pre-checked (edit mode)
+            $(".check_show_hide:checked").trigger("change");
         });
 
         $(document).ready(function() {
-            $('#goBackBtn').on('click', function(e) {
+            $('#goBackBtn, #goBackBtnCancel').on('click', function(e) {
                 e.preventDefault();
                 window.history.back();
             });

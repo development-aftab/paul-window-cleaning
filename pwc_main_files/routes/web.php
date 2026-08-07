@@ -80,6 +80,7 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('quote', 'quote')->name('quote');
         Route::get('quote-details', 'quoteDetails')->name('quote-details');
         Route::post('save_payment', 'savePayment')->name('save_payment');
+        Route::post('update_payment', 'updatePayment')->name('update_payment');
         Route::post('update_client_schedule', 'updateClientSchedule')->name('update_client_schedule');
         Route::get('cms', 'cms')->name('cms');
         Route::get('invoice-template-one', 'invoiceTemplateOne')->name('invoice-template-one');
