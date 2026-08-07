@@ -167,7 +167,7 @@ class WebsiteController extends Controller
                     ->where('end_date', '>=', $currentWeekStart->format('Y-m-d'))
                     ->select('id', 'client_id', 'start_date', 'end_date', 'status');
             }, 'assignRoute.staff'])
-            ->get()->map(function ($route) {
+            ->get()->flatMap(function ($route) {
                 $weekSchedules = $route->clientRoute->flatMap(function ($clientRoute) {
                     return $clientRoute->clientSchedule;
                 });
@@ -175,19 +175,29 @@ class WebsiteController extends Controller
                     return $clientSchedule->client_id . '_' . $clientSchedule->start_date;
                 });
 
-                $route->jobs_pending = $grouped->filter(function ($schedule) {
+                $jobsPending = $grouped->filter(function ($schedule) {
                     return empty($schedule->status) || $schedule->status === 'pending';
                 })->count();
 
-                $route->jobs_total = $grouped->count();
+                $jobsTotal = $grouped->count();
 
-                $route->jobs_completed = $grouped->filter(function ($schedule) {
+                $jobsCompleted = $grouped->filter(function ($schedule) {
                     return !empty($schedule->status) && $schedule->status === 'completed';
                 })->count();
 
-                $route->staff_name = optional($route->assignRoute->first()?->staff)->name ?? null;
+                $activeAssignRoutes = $route->assignRoute->filter(function ($assignRoute) {
+                    return optional($assignRoute->staff)->status == 1;
+                });
 
-                return $route;
+                return $activeAssignRoutes->map(function ($assignRoute) use ($route, $jobsPending, $jobsTotal, $jobsCompleted) {
+                    $routeCopy = clone $route;
+                    $routeCopy->jobs_pending = $jobsPending;
+                    $routeCopy->jobs_total = $jobsTotal;
+                    $routeCopy->jobs_completed = $jobsCompleted;
+                    $routeCopy->staff_name = $assignRoute->staff->name;
+
+                    return $routeCopy;
+                });
             })
             ->filter(function ($route) {
                 return !empty($route->staff_name);
