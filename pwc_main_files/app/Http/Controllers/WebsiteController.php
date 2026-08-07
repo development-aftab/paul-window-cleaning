@@ -3842,6 +3842,25 @@ class WebsiteController extends Controller
             'type' => 'client_payment_edited',
         ]);
 
+        try {
+            $emailBody = "A staff member has edited an already-submitted report.\n\n"
+                . "Edited By: " . (auth()->user()->name ?? 'Unknown') . "\n"
+                . "Client: " . ($client->name ?? 'N/A') . "\n"
+                . "Payment Type: " . ucfirst($request->payment_type ?? '') . "\n"
+                . "Service Date: " . ($request->service_date ?? $schedule->service_date ?? 'N/A') . "\n"
+                . "Schedule Week: " . ($schedule->start_date ?? '') . " - " . ($schedule->end_date ?? '') . "\n\n"
+                . $this->describePaymentReport($request) . "\n\n"
+                . "Final Price: $" . number_format((float) ($request->final_price ?? 0), 2) . "\n"
+                . "Edited At: " . now()->format('m-d-Y h:i A');
+
+            Mail::raw($emailBody, function ($message) use ($client) {
+                $message->to('varnum4@gmail.com')
+                    ->subject('Report Edited: ' . ($client->name ?? 'Client') . ' - Please Review & Update QuickBooks');
+            });
+        } catch (\Throwable $e) {
+            Log::error('Failed to send report-edit notification email: ' . $e->getMessage());
+        }
+
         if (isset($client->clientRouteStaff[0])) {
             $routeParams = [$client->clientRouteStaff[0]->route_id];
             if ($request->filled('month')) {
@@ -3851,6 +3870,78 @@ class WebsiteController extends Controller
         }
 
         return redirect()->back()->with(['title' => 'Payment Updated', 'message' => 'Report Updated Successfully.', 'type' => 'success']);
+    }
+
+    /**
+     * Turn the raw option/reason/scope/amount fields from the cash or invoice
+     * report form into a plain-English, itemized description for the admin email.
+     */
+    private function describePaymentReport(Request $request): string
+    {
+        $isCash = $request->payment_type === 'cash';
+        $lines = [];
+
+        $statusLabels = $isCash
+            ? [
+                'completed' => 'Completed - No Change',
+                'no_payment' => 'Completed but Did Not Receive Payment',
+                'partially' => 'Partially Completed',
+                'omit' => 'Omitted',
+            ]
+            : [
+                'completed' => 'Completed - No Change',
+                'partially' => 'Partially Completed',
+                'omit' => 'Omitted',
+            ];
+
+        $option = $request->option;
+        $lines[] = 'Status: ' . ($statusLabels[$option] ?? ($option ?: 'Not specified'));
+
+        if ($option === 'no_payment') {
+            $lines[] = '  - Reason: ' . ($request->reason ?: 'N/A');
+        }
+
+        if ($option === 'partially') {
+            $lines[] = '  - Reason: ' . ($request->reason ?: 'N/A');
+            $lines[] = '  - Scope of Work Completed: ' . ($request->partial_completed_scope ?: 'N/A');
+            $lines[] = '  - Price Charged: $' . number_format((float) ($request->price_charged_one ?: 0), 2);
+        }
+
+        if ($option === 'omit') {
+            $lines[] = '  - Reason: ' . ($request->reason ?: 'N/A');
+        }
+
+        if ($isCash) {
+            if ($request->option_two === 'paid_on_prior') {
+                $lines[] = 'Paid on Prior Date of Service: Yes';
+            }
+
+            if ($request->option_three === 'extra_paid_for_date') {
+                $lines[] = 'Paid Extra for Additional Dates:';
+                $lines[] = '  - Number of Dates: ' . ($request->day_number ?: 'N/A');
+                $lines[] = '  - Amount: $' . number_format((float) ($request->amount ?: 0), 2);
+            }
+
+            if ($request->option_four === 'extra_work') {
+                $lines[] = 'Extra Work Completed:';
+                $lines[] = '  - Scope: ' . ($request->scope ?: 'N/A');
+                $lines[] = '  - Price Charged: $' . number_format((float) ($request->price_charged_two ?: 0), 2);
+            }
+        } else {
+            if ($request->option_two === 'extraWork') {
+                $lines[] = 'Extra Work Completed:';
+                $lines[] = '  - Scope: ' . ($request->scope ?: 'N/A');
+                $lines[] = '  - Price Charged: $' . number_format((float) ($request->price_charged_two ?: 0), 2);
+            }
+        }
+
+        if ($request->option_three === 'logTime') {
+            $lines[] = 'Log Time:';
+            $lines[] = '  - Start Time: ' . ($request->start_time ?: 'N/A');
+            $lines[] = '  - End Time: ' . ($request->end_time ?: 'N/A');
+        }
+
+        return implode("\n", $lines);
     }
 
     public function sortedSchedule(Request $request)
