@@ -126,6 +126,29 @@
             margin-bottom: 15px;
         }
 
+        /* Highlight the week card that contains today's date */
+        .details_routes_wrapper .week_wrapper div.current_week_highlight:has(h4) {
+            background: var(--dark_blue);
+            position: relative;
+        }
+
+        .details_routes_wrapper .week_wrapper div.current_week_highlight:has(h4) h4 {
+            color: #FFFFFF !important;
+        }
+
+        .details_routes_wrapper .week_wrapper div.current_week_highlight:has(h4)::before {
+            content: "Current Week";
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            background: #FFC700;
+            color: var(--dark_blue);
+            font-size: 10px;
+            font-family: 'Hellix-SemiBold';
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
         /* Status action button ("Report Status" / "Edit" / "Complete") tinted to match its card */
         .mark_as_complete_wrapper.route_status_pending {
             background: #D9F1FC;
@@ -270,11 +293,12 @@
                                         $grandTotal = $invoiceTotal + $cashPaidTotal;
 
                                         $routeId = $staffRoute->id ?? null;
+                                        $isCurrentWeek = now()->between(\Carbon\Carbon::parse($schedule['start_date'])->startOfDay(), \Carbon\Carbon::parse($schedule['end_date'])->endOfDay());
                                     @endphp
                                     <div class="staff_routes_week_wrapper">
                                         <div class="details_routes_wrapper">
                                             <div class="week_wrapper">
-                                                <div>
+                                                <div class="{{ $isCurrentWeek ? 'current_week_highlight' : '' }}">
                                                     <h4>Week {{ $schedule['week_number'] }}</h4>
                                                     <h4 style="font-size: 12px">
                                                         {{ \Carbon\Carbon::parse($schedule['start_date'])->format('d F') }}
@@ -707,12 +731,13 @@
                                                 $grandTotal = $invoiceTotal + $cashPaidTotal;
 
                                                 $routeId = $staffRoute->id ?? null;
+                                                $isCurrentWeek = now()->between(\Carbon\Carbon::parse($schedule['start_date'])->startOfDay(), \Carbon\Carbon::parse($schedule['end_date'])->endOfDay());
                                             @endphp
                                             <div class="staff_routes_week_wrapper">
                                                 @include('staffroutes.partials.log_hours_button', ['schedule' => $schedule, 'staffRoute' => $staffRoute])
                                                 <div class="details_routes_wrapper">
                                                     <div class="week_wrapper">
-                                                        <div>
+                                                        <div class="{{ $isCurrentWeek ? 'current_week_highlight' : '' }}">
                                                             <h4>Week {{ $schedule['week_number'] }}</h4>
                                                             <h4 style="font-size: 12px">
                                                                 {{ \Carbon\Carbon::parse($schedule['start_date'])->format('d F') }}
@@ -933,6 +958,7 @@
 
                                                 $total = $cashTotal + $invoiceTotal;
                                                 $completedTotal = $schedule['routes']->where('is_completed', 'completed')->sum('invoice_amount');
+                                                $isCurrentWeek = now()->between(\Carbon\Carbon::parse($schedule['start_date'])->startOfDay(), \Carbon\Carbon::parse($schedule['end_date'])->endOfDay());
 
                                             @endphp
 
@@ -940,7 +966,7 @@
                                                 @include('staffroutes.partials.log_hours_button', ['schedule' => $schedule, 'staffRoute' => $staffRoute])
                                                 <div class="details_routes_wrapper">
                                                     <div class="week_wrapper">
-                                                        <div>
+                                                        <div class="{{ $isCurrentWeek ? 'current_week_highlight' : '' }}">
                                                             <h4>Week {{ $schedule['week_number'] }}</h4>
                                                             <h4>{{ \Carbon\Carbon::parse($schedule['start_date'])->format('d F') }}
                                                                 -
@@ -1104,13 +1130,14 @@
 
                                                 $total = $cashTotal + $invoiceTotal;
                                                 $completedTotal = $schedule['routes']->where('is_completed', 'completed')->sum('invoice_amount');
+                                                $isCurrentWeek = now()->between(\Carbon\Carbon::parse($schedule['start_date'])->startOfDay(), \Carbon\Carbon::parse($schedule['end_date'])->endOfDay());
                                             @endphp
 
                                             <div class="staff_routes_week_wrapper completedTab">
                                                 @include('staffroutes.partials.log_hours_button', ['schedule' => $schedule, 'staffRoute' => $staffRoute])
                                                 <div class="details_routes_wrapper">
                                                     <div class="week_wrapper">
-                                                        <div>
+                                                        <div class="{{ $isCurrentWeek ? 'current_week_highlight' : '' }}">
                                                             <h4>Week {{ $schedule['week_number'] }}</h4>
                                                             <h4>{{ \Carbon\Carbon::parse($schedule['start_date'])->format('d F') }}
                                                                 -
