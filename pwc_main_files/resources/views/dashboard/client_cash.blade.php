@@ -309,14 +309,14 @@
                 }
             });
 
-            // Mutual Exclusivity: Only ONE checkbox can be checked at a time
-            // All main status checkboxes
-            var mainCheckboxes = "#com_no_change, #recievedPayment, #partiallyCompleted, #omit, #priorDate, #extraPaid, #workCompleted, #logTime";
-
-            // Log time records actual time worked, so - same as invoice schedule
-            // reporting - it can be combined with Partially Completed / Extra Work
-            // Completed instead of closing them.
-            var logTimeCompatible = "#partiallyCompleted, #workCompleted";
+            // Mutual Exclusivity: Only ONE checkbox can be checked at a time,
+            // except:
+            //  - Log time is fully independent - it is never unchecked by any
+            //    other checkbox, and checking it never unchecks anything else.
+            //  - "Completed but did not receive payment", "Partially Completed"
+            //    and "Extra Work Completed" can all be combined together.
+            var mainCheckboxes = "#com_no_change, #recievedPayment, #partiallyCompleted, #omit, #priorDate, #extraPaid, #workCompleted";
+            var compatibleGroup = "#recievedPayment, #partiallyCompleted, #workCompleted";
 
             $(mainCheckboxes).change(function() {
                 if ($(this).prop("checked")) {
@@ -324,11 +324,9 @@
                     // Uncheck all other checkboxes except this one
                     $(mainCheckboxes).not(this).each(function() {
                         var $other = $(this);
-                        var isLogTimeCombo = ($checked.is('#logTime') && $other.is(logTimeCompatible)) ||
-                            ($other.is('#logTime') && $checked.is(logTimeCompatible));
 
-                        if (isLogTimeCombo) {
-                            return; // keep this pair checked together
+                        if ($checked.is(compatibleGroup) && $other.is(compatibleGroup)) {
+                            return; // keep the compatible group checked together
                         }
 
                         $other.prop("checked", false);
@@ -408,13 +406,9 @@
                 }
             });
 
-            // Reset to original price when "Completed but did not receive payment" is selected
-            $('#recievedPayment').change(function() {
-                if ($(this).prop('checked')) {
-                    $('.pricePlus').text('$' + originalPrice.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
-                    $('input[name="final_price"]').val(originalPrice);
-                }
-            });
+            // Note: "Completed but did not receive payment" no longer force-resets the
+            // price here - it can now be combined with Partially Completed / Extra Work
+            // Completed, so updatePrice() (bound above) already computes the right total.
 
             let totalPriceOne = 0;
             let totalPriceTwo = 0;

@@ -152,7 +152,8 @@
 
                                                 <div class="col-md-12 partially_completed_wrapper">
                                                     <div class="custom_radio">
-                                                        <input class="form-check-input  check_uncheck check_show_hide" name="option_three" type="checkbox" value="logTime" id="logTime" @if ($isEditMode && $existingPayment->option_three == 'logTime') checked @endif>
+                                                        {{-- No .check_uncheck class: Log time is independent and must never be unchecked by another option, nor uncheck one --}}
+                                                        <input class="form-check-input check_show_hide" name="option_three" type="checkbox" value="logTime" id="logTime" @if ($isEditMode && $existingPayment->option_three == 'logTime') checked @endif>
                                                         <label class="form-check-label" for="logTime">Log time</label>
                                                     </div>
                                                     <div class="row reason_input_fileds_wrapper">
