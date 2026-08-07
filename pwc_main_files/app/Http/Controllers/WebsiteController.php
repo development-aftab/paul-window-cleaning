@@ -3749,6 +3749,7 @@ class WebsiteController extends Controller
             'option_two' => $request->option_two ?? null,
             'option_three' => $request->option_three ?? null,
             'option_four' => $request->option_four ?? null,
+            'option_five' => $request->option_five ?? null,
             'partial_completed_scope' => $request->partial_completed_scope ?? null,
             'reason' => $request->reason ?? null,
             'scope' => $request->scope ?? null,
@@ -3814,6 +3815,7 @@ class WebsiteController extends Controller
             'option_two' => $request->option_two ?? null,
             'option_three' => $request->option_three ?? null,
             'option_four' => $request->option_four ?? null,
+            'option_five' => $request->option_five ?? null,
             'partial_completed_scope' => $request->partial_completed_scope ?? null,
             'reason' => $request->reason ?? null,
             'scope' => $request->scope ?? null,
@@ -3885,30 +3887,34 @@ class WebsiteController extends Controller
             ? [
                 'completed' => 'Completed - No Change',
                 'no_payment' => 'Completed but Did Not Receive Payment',
-                'partially' => 'Partially Completed',
                 'omit' => 'Omitted',
             ]
             : [
                 'completed' => 'Completed - No Change',
-                'partially' => 'Partially Completed',
                 'omit' => 'Omitted',
             ];
 
         $option = $request->option;
-        $lines[] = 'Status: ' . ($statusLabels[$option] ?? ($option ?: 'Not specified'));
 
-        if ($option === 'no_payment') {
-            $lines[] = '  - Reason: ' . ($request->reason ?: 'N/A');
+        if (!empty($option)) {
+            $lines[] = 'Status: ' . ($statusLabels[$option] ?? $option);
+
+            if ($option === 'no_payment' || $option === 'omit') {
+                $lines[] = '  - Reason: ' . ($request->reason ?: 'N/A');
+            }
         }
 
-        if ($option === 'partially') {
+        // Partially Completed is tracked in its own column (option_five) so it
+        // can be combined with "Completed but Did Not Receive Payment" (option).
+        if ($request->option_five === 'partially') {
+            $lines[] = 'Status: Partially Completed';
             $lines[] = '  - Reason: ' . ($request->reason ?: 'N/A');
             $lines[] = '  - Scope of Work Completed: ' . ($request->partial_completed_scope ?: 'N/A');
             $lines[] = '  - Price Charged: $' . number_format((float) ($request->price_charged_one ?: 0), 2);
         }
 
-        if ($option === 'omit') {
-            $lines[] = '  - Reason: ' . ($request->reason ?: 'N/A');
+        if (empty($lines)) {
+            $lines[] = 'Status: Not specified';
         }
 
         if ($isCash) {

@@ -64,16 +64,16 @@
                                                 <div class="custom_radio">
                                                     <input
                                                         class="form-check-input partiallly_completed check_uncheck check_show_hide"
-                                                        name="option" type="checkbox" value="partially"
+                                                        name="option_five" type="checkbox" value="partially"
                                                         id="partiallyCompleted"
                                                         disabled
-                                                        @if($clientSchedule->clientSchedulePayment->option == 'partially')
+                                                        @if($clientSchedule->clientSchedulePayment->option_five == 'partially')
                                                             checked @endif>
                                                     <label class="form-check-label" for="partiallyCompleted">Partially
                                                         Completed</label>
                                                 </div>
                                                 <div class="row reason_input_fileds_wrapper"
-                                                     @if($clientSchedule->clientSchedulePayment->option != 'partially') hidden
+                                                     @if($clientSchedule->clientSchedulePayment->option_five != 'partially') hidden
                                                     @endif>
                                                     <div class="col-md-6">
                                                         <div class="txt_field">

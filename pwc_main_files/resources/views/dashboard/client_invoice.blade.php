@@ -74,7 +74,7 @@
                                                 </div>
                                                 <div class="col-md-12 partially_completed_wrapper">
                                                     <div class="custom_radio">
-                                                        <input class="form-check-input partiallly_completed check_uncheck check_show_hide" name="option" type="checkbox" value="partially" id="partiallyCompleted" @if ($isEditMode && $existingPayment->option == 'partially') checked @endif>
+                                                        <input class="form-check-input partiallly_completed check_uncheck check_show_hide" name="option_five" type="checkbox" value="partially" id="partiallyCompleted" @if ($isEditMode && $existingPayment->option_five == 'partially') checked @endif>
                                                         <label class="form-check-label" for="partiallyCompleted">Partially
                                                             Completed</label>
                                                     </div>
