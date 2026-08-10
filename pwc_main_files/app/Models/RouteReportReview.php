@@ -13,6 +13,7 @@ class RouteReportReview extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
+        'route_id',
         'week',
         'month',
         'year',

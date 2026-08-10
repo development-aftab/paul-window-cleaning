@@ -646,7 +646,7 @@ class WebsiteController extends Controller
             $nextMonth = $nextMonthName . ' ' . ($selectedYear + 1);
         }
 
-        $allRouteReportReviews = \App\Models\RouteReportReview::all();
+        $allRouteReportReviews = RouteReportReview::where('year', $selectedYear)->where('month', $baseMonthName)->get();
 
         $cycleData = collect();
         foreach ($weeks as $week) {
@@ -713,6 +713,7 @@ class WebsiteController extends Controller
     public function toggleRouteReportReview(Request $request)
     {
         $request->validate([
+            'route_id' => 'required',
             'week' => 'required|string',
             'month' => 'required|string',
             'year' => 'required|string',
@@ -721,6 +722,7 @@ class WebsiteController extends Controller
 
         $review = RouteReportReview::updateOrCreate(
             [
+                'route_id' => $request->route_id,
                 'week' => $request->week,
                 'month' => $request->month,
                 'year' => $request->year,
