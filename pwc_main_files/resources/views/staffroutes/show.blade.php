@@ -2011,7 +2011,7 @@
                                         payType === 'invoice' ? `$${parseFloat(route.Amount).toFixed(2)}` : "$0.00",
                                         route.Service,
                                         [
-                                            route.Note && `Note: ${route.Note}`,
+                                            route.Note && `${route.Note}`,
                                             route.Time && `Best Time: ${route.Time}`,
                                             route["Close Days"] && `Close Days: ${route["Close Days"]}`,
                                         ]
