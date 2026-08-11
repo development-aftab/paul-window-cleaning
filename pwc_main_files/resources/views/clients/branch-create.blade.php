@@ -203,6 +203,19 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h4>Notes</h4>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-floating txt_field mb-3">
+                                                    <textarea rows="4" class="form-control" name="additional_note" id="additional_note" placeholder="Additional Notes" style="height: 100px"></textarea>
+                                                    <label for="additional_note">Notes (misc info about this client or job)</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <!-- Price Section -->
                                     <div class="col-md-6 price_list_custom_row">
                                         <h4>Price</h4>
@@ -563,6 +576,19 @@
                                                             <i class="fas fa-minus"></i>
                                                         </button>
                                                     </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <h4>Notes</h4>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-floating txt_field mb-3">
+                                                    <textarea rows="4" class="form-control" name="additional_note" id="additional_note_staff" placeholder="Additional Notes" style="height: 100px"></textarea>
+                                                    <label for="additional_note_staff">Notes (misc info about this client or job)</label>
                                                 </div>
                                             </div>
                                         </div>
