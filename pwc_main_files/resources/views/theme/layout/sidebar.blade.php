@@ -233,14 +233,14 @@
                         @endforeach
                     @elseif(auth()->user()->hasRole('staff'))
                         <div class="menu-item ">
-                            <div class="menu-content">
-                                <a href="{{ url('staffroutes') }}"
-                                    class="nav_list @if (request()->is('staffroutes*') || request()->is('client_invoice*') || request()->is('client_cash*')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-location-dot"></i></div>
-                                    Assigned Routes
-                                </a>
-                            </div>
+{{--                            <div class="menu-content">--}}
+{{--                                <a href="{{ url('staffroutes') }}"--}}
+{{--                                    class="nav_list @if (request()->is('staffroutes*') || request()->is('client_invoice*') || request()->is('client_cash*')) active @endif"--}}
+{{--                                    aria-current="page">--}}
+{{--                                    <div class="sidebar_icon"><i class="fa-solid fa-location-dot"></i></div>--}}
+{{--                                    Assigned Routes--}}
+{{--                                </a>--}}
+{{--                            </div>--}}
                             <div class="menu-content">
                                 {{--                                <a href="{{url('client_management')}}" class="nav_list @if (request()->route()->getName() == 'client_management' || request()->route()->getName() == 'create_client' || request()->route()->getName() == 'client-details') active @endif" aria-current="page"> --}}
                                 <a href="{{ url('clients') }}"
@@ -294,7 +294,7 @@
                                         class="nav_list @if (request()->is('route_report*')) active @endif"
                                         aria-current="page">
                                         <div class="sidebar_icon"><i class="fa-solid fa-chart-line"></i></div>
-                                        Routes Reports
+                                        Route Reports
                                     </a>
                                 </div>
                             </div>
@@ -302,52 +302,71 @@
                     @elseif(auth()->user()->hasRole('admin'))
                         <div class="menu-item ">
                             <div class="menu-content">
-                                <a href="{{ url('staffmembers') }}"
-                                    class="nav_list @if (request()->is('staffmembers*')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div>
-                                    Staff Management
-                                </a>
+                                <button class="collapse_btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStaff" aria-expanded="false" aria-controls="collapseStaff">
+                                    <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Staff <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
+                                </button>
+                                <div class="collapse" id="collapseStaff">
+                                    <ul>
+                                        {{--                                        <li>--}}
+                                        {{--                                            <a href="{{ url('staffmembers') }}"--}}
+                                        {{--                                               class="nav_list @if (request()->is('staffmembers*')) active @endif"--}}
+                                        {{--                                               aria-current="page">--}}
+                                        {{--                                                <div class="sidebar_icon"><i class="fa-solid fa-money-bill-wave"></i></div> Bonus Tracker--}}
+                                        {{--                                            </a>--}}
+                                        {{--                                        </li>--}}
+                                        <li>
+                                            <a href="{{ url('staffmembers') }}"
+                                               class="nav_list @if (request()->is('staffmembers*')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                                                Management
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ route('payroll.index') }}"
+                                               class="nav_list @if (request()->is('payroll*')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                                                Payroll
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ url('staff-request') }}"
+                                               class="nav_list @if (request()->is('staff-request')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-user-plus"></i></div>
+                                                Requests
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                         <div class="menu-item ">
                             <div class="menu-content">
-                                <a href="{{ route('payroll.index') }}"
-                                    class="nav_list @if (request()->is('payroll*')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-money-bill-wave"></i></div>
-                                    Payroll
-                                </a>
-                            </div>
-                        </div>
-                        <div class="menu-item ">
-                            <div class="menu-content">
-                                <a href="{{ route('reports.unpaid') }}"
-                                   class="nav_list @if (request()->is('reports/unpaid*')) active @endif"
-                                   aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-                                    Unpaid Accounts
-                                </a>
-                            </div>
-                        </div>
-                        <div class="menu-item ">
-                            <div class="menu-content">
-                                <a href="{{ route('invoices') }}"
-                                    class="nav_list @if (request()->is('invoice*')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-wallet"></i></div>
-                                    Invoice
-                                </a>
-                            </div>
-                        </div>
-                        <div class="menu-item ">
-                            <div class="menu-content">
-                                <a href="{{ url('clients') }}"
-                                    class="nav_list @if (request()->is('clients*') || request()->is('client-schedule*')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-users"></i></div>
-                                    Clients
-                                </a>
+                                <button class="collapse_btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClients" aria-expanded="false" aria-controls="collapseClients">
+                                    <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Clients <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
+                                </button>
+                                <div class="collapse" id="collapseClients">
+                                    <ul>
+                                        <li>
+                                            <a href="{{ route('invoices') }}"
+                                               class="nav_list @if (request()->is('invoice*')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-wallet"></i></div>
+                                                Invoice
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ url('clients') }}"
+                                               class="nav_list @if (request()->is('clients*') || request()->is('client-schedule*')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-users"></i></div>
+                                                Manage
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
 
@@ -361,51 +380,101 @@
                                 </a>
                             </div>
                         </div>
-
-                        <div class="menu-item">
-                            <div class="menu-content">
-                                <a href="{{ url('route_report') }}"
-                                    class="nav_list @if (request()->is('route_report*')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-chart-line"></i></div>
-                                    Routes Reports
-                                </a>
-                            </div>
-                        </div>
-
-
                         <div class="menu-item ">
                             <div class="menu-content">
-                                <a href="{{ url('complete-jobs') }}"
-                                    class="nav_list @if (request()->is('complete-jobs*')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-check-circle"></i></div>
-                                    Complete Jobs
-                                </a>
+                                <button class="collapse_btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReports" aria-expanded="false" aria-controls="collapseReports">
+                                    <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Reports <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
+                                </button>
+                                <div class="collapse" id="collapseReports">
+                                    <ul>
+{{--                                        <li>--}}
+{{--                                            <a href="{{ url('clients') }}"--}}
+{{--                                               class="nav_list @if (request()->is('clients*') || request()->is('client-schedule*')) active @endif"--}}
+{{--                                               aria-current="page">--}}
+{{--                                                <div class="sidebar_icon"><i class="fa-solid fa-users"></i></div>--}}
+{{--                                                Analytics--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+                                        <li>
+                                            <a href="{{ url('complete-jobs') }}"
+                                               class="nav_list @if (request()->is('complete-jobs*')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-check-circle"></i></div>
+                                                Complete Jobs
+                                            </a>
+                                        </li>
+{{--                                        <li>--}}
+{{--                                            <a href="{{ url('clients') }}"--}}
+{{--                                               class="nav_list @if (request()->is('clients*') || request()->is('client-schedule*')) active @endif"--}}
+{{--                                               aria-current="page">--}}
+{{--                                                <div class="sidebar_icon"><i class="fa-solid fa-users"></i></div>--}}
+{{--                                                Deposit Made--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+                                        <li>
+                                            <a href="{{ url('route_report') }}"
+                                               class="nav_list @if (request()->is('route_report*')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-chart-line"></i></div>
+                                                Route Reports
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ url('deposits') }}"
+                                               class="nav_list @if (request()->is('deposits')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-wallet"></i></div>
+                                                Total Undeposited Cash
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ route('reports.unpaid') }}"
+                                               class="nav_list @if (request()->is('reports/unpaid*')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                                                Unpaid Accounts
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="menu-item ">
+                            <div class="menu-content">
+                                <button class="collapse_btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFrontPage" aria-expanded="false" aria-controls="collapseFrontPage">
+                                    <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Front Page <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
+                                </button>
+                                <div class="collapse" id="collapseFrontPage">
+                                    <ul>
+                                        <li>
+                                            <a href="{{ url('cms') }}"
+                                               class="nav_list @if (request()->is('cms')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-bars-progress"></i></div>
+                                                CMS
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ url('testimonials') }}"
+                                               class="nav_list @if (request()->is('testimonials*')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-comment"></i></div>
+                                                Testimonials
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ url('contacts') }}"
+                                               class="nav_list @if (request()->is('contacts*')) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+                                                Quotes
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="menu-item ">
-                            <div class="menu-content">
-                                <a href="{{ url('staff-request') }}"
-                                    class="nav_list @if (request()->is('staff-request')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-user-plus"></i></div>
-                                    Staff Requests
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="menu-item ">
-                            <div class="menu-content">
-                                <a href="{{ url('deposits') }}"
-                                    class="nav_list @if (request()->is('deposits')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-wallet"></i></div>
-                                    Total Undeposited Cash
-                                </a>
-                            </div>
-                        </div>
 
 {{--                        <div class="menu-item ">--}}
 {{--                            <div class="menu-content">--}}
@@ -417,36 +486,7 @@
 {{--                                </a>--}}
 {{--                            </div>--}}
 {{--                        </div>--}}
-                        <div class="menu-item ">
-                            <div class="menu-content">
-                                <a href="{{ url('contacts') }}"
-                                    class="nav_list @if (request()->is('contacts*')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-envelope-open-text"></i></div>
-                                    Quotes
-                                </a>
-                            </div>
-                        </div>
-                        <div class="menu-item ">
-                            <div class="menu-content">
-                                <a href="{{ url('testimonials') }}"
-                                    class="nav_list @if (request()->is('testimonials*')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-comment"></i></div>
-                                    Testimonials
-                                </a>
-                            </div>
-                        </div>
-                        <div class="menu-item ">
-                            <div class="menu-content">
-                                <a href="{{ url('cms') }}"
-                                    class="nav_list @if (request()->is('cms')) active @endif"
-                                    aria-current="page">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-bars-progress"></i></div>
-                                    CMS
-                                </a>
-                            </div>
-                        </div>
+
                     @endif
 
                     <div class="menu-item  logout">

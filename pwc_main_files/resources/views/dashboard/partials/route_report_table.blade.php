@@ -237,14 +237,14 @@
                 {{-- Partial Column with Conditional Hover --}}
                 <td>
                     @php
-                        $partialCount = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option ?? '') == 'partially')->count();
+                        $partialCount = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option_five ?? '') == 'partially')->count();
                     @endphp
                     @if ($partialCount > 0)
                         <div class="table_hover">
                             <h3>{{ $partialCount }}</h3>
                             <div class="tooltip_hover">
                                 <ul>
-                                    @foreach ($schedules->filter(fn($s) => ($s->clientSchedulePayment->option ?? '') == 'partially') as $s)
+                                    @foreach ($schedules->filter(fn($s) => ($s->clientSchedulePayment->option_five ?? '') == 'partially') as $s)
                                         <li style="display: flex; flex-direction: column; align-items: flex-start;">
                                             <span><strong>{{ $s->clientName->name ?? 'Client' }}</strong> <span style="float:right; font-weight:600;">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span></span>
                                             <span style="color:#dc3545; font-size:12px;">Reason:

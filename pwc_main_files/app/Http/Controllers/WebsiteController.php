@@ -4434,7 +4434,7 @@ class WebsiteController extends Controller
                     }
 
                     // Partial breakdown: Client names (bold) + amount (normal) + Partial Scope label (bold) + scope text (not bold)
-                    $partialSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option ?? '') == 'partially');
+                    $partialSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option_five ?? '') == 'partially');
                     $partialRich = new \PhpOffice\PhpSpreadsheet\RichText\RichText();
                     if ($partialSchedules->isEmpty()) {
                         $partialRich->createText('-');
