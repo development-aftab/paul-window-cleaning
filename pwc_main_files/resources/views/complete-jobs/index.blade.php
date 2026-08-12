@@ -130,12 +130,14 @@
                                                                        data-option-two="{{ $job->clientSchedulePayment->option_two ?? '' }}"
                                                                        data-option-three="{{ $job->clientSchedulePayment->option_three ?? '' }}"
                                                                        data-option-four="{{ $job->clientSchedulePayment->option_four ?? '' }}"
+                                                                       data-option-five="{{ $job->clientSchedulePayment->option_five ?? '' }}"
                                                                        data-reason="{{ $job->clientSchedulePayment->reason ?? '' }}"
                                                                        data-scope="{{ $job->clientSchedulePayment->scope ?? '' }}"
                                                                        data-partial-scope="{{ $job->clientSchedulePayment->partial_completed_scope ?? '' }}"
                                                                        data-price-one="{{ $job->clientSchedulePayment->price_charge_one ?? '' }}"
                                                                        data-price-two="{{ $job->clientSchedulePayment->price_charge_two ?? '' }}"
                                                                        data-amount="{{ $job->clientSchedulePayment->amount ?? '' }}"
+                                                                       data-day-number="{{ $job->clientSchedulePayment->day_number ?? '' }}"
                                                                        data-start-time="{{ $job->clientSchedulePayment->start_time ?? '' }}"
                                                                        data-end-time="{{ $job->clientSchedulePayment->end_time ?? '' }}"
                                                                        data-final-price="{{ $job->clientSchedulePayment->final_price ?? '' }}">
@@ -270,7 +272,16 @@
                                         <input class="form-check-input" type="checkbox" id="modal_cash_option_three"
                                                disabled>
                                         <label class="form-check-label" for="modal_cash_option_three">Paid extra for
-                                            dates</label>
+                                            <span id="modal_cash_day_number">0</span> dates</label>
+                                    </div>
+                                    <div class="row reason_input_fileds_wrapper" id="modal_cash_extra_paid_fields"
+                                         style="display: none;">
+                                        <div class="col-md-6">
+                                            <div class="txt_field">
+                                                <input class="form-control" type="text"
+                                                       id="modal_cash_amount" placeholder="Amount" disabled>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -282,6 +293,49 @@
                                         <label class="form-check-label" for="modal_cash_option_four">Extra Work
                                             Completed</label>
                                     </div>
+                                    <div class="row reason_input_fileds_wrapper" id="modal_cash_extra_work_fields"
+                                         style="display: none;">
+                                        <div class="col-md-6">
+                                            <div class="txt_field">
+                                                <input class="form-control" type="text"
+                                                       id="modal_cash_scope_extra_work"
+                                                       placeholder="Scope Of Additional Work Completed" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="txt_field">
+                                                <input class="form-control" type="text"
+                                                       id="modal_cash_price_charged_two" placeholder="Price Charged"
+                                                       disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Log time -->
+                                <div class="col-md-12 partially_completed_wrapper">
+                                    <div class="custom_radio">
+                                        <input class="form-check-input" type="checkbox" id="modal_cash_logTime"
+                                               disabled>
+                                        <label class="form-check-label" for="modal_cash_logTime">Log time</label>
+                                    </div>
+                                    <div class="row reason_input_fileds_wrapper" id="modal_cash_log_time_fields"
+                                         style="display: none;">
+                                        <div class="col-md-6">
+                                            <div class="txt_field">
+                                                <label>Start Time</label>
+                                                <input class="form-control" type="time" id="modal_cash_start_time"
+                                                       disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="txt_field">
+                                                <label>End Time</label>
+                                                <input class="form-control" type="time" id="modal_cash_end_time"
+                                                       disabled>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Omit -->
@@ -289,6 +343,15 @@
                                     <div class="custom_radio">
                                         <input class="form-check-input" type="checkbox" id="modal_cash_omit" disabled>
                                         <label class="form-check-label" for="modal_cash_omit">Omit</label>
+                                    </div>
+                                    <div class="row reason_input_fileds_wrapper" id="modal_cash_omit_reason"
+                                         style="display: none;">
+                                        <div class="col-md-12">
+                                            <div class="txt_field">
+                                                <input class="form-control" type="text"
+                                                       id="modal_cash_reason_omit" placeholder="Reason" disabled>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -435,6 +498,15 @@
                                         <input class="form-check-input" type="checkbox" id="modal_invoice_omit" disabled>
                                         <label class="form-check-label" for="modal_invoice_omit">Omit</label>
                                     </div>
+                                    <div class="row reason_input_fileds_wrapper" id="modal_invoice_omit_reason"
+                                         style="display: none;">
+                                        <div class="col-md-12">
+                                            <div class="txt_field">
+                                                <input class="form-control" type="text"
+                                                       id="modal_invoice_reason_omit" placeholder="Reason" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -555,12 +627,14 @@
                 var optionTwo = $(this).data('option-two');
                 var optionThree = $(this).data('option-three');
                 var optionFour = $(this).data('option-four');
+                var optionFive = $(this).data('option-five');
                 var reason = $(this).data('reason');
                 var scope = $(this).data('scope');
                 var partialScope = $(this).data('partial-scope');
                 var priceOne = $(this).data('price-one');
                 var priceTwo = $(this).data('price-two');
                 var amount = $(this).data('amount');
+                var dayNumber = $(this).data('day-number');
                 var startTime = $(this).data('start-time');
                 var endTime = $(this).data('end-time');
                 var finalPrice = $(this).data('final-price');
@@ -579,11 +653,13 @@
                 if (paymentType === 'cash') {
                     // CASH MODAL
                     // Reset all checkboxes and fields
-                    $('#modal_cash_completed, #modal_cash_noPayment, #modal_cash_partially, #modal_cash_option_two, #modal_cash_option_three, #modal_cash_option_four, #modal_cash_omit')
+                    $('#modal_cash_completed, #modal_cash_noPayment, #modal_cash_partially, #modal_cash_option_two, #modal_cash_option_three, #modal_cash_option_four, #modal_cash_logTime, #modal_cash_omit')
                         .prop('checked', false);
-                    $('#modal_cash_noPayment_reason, #modal_cash_partially_fields').hide();
-                    $('#modal_cash_reason_noPayment, #modal_cash_reason_partially, #modal_cash_scope_partially, #modal_cash_price_charged_one')
+                    $('#modal_cash_noPayment_reason, #modal_cash_partially_fields, #modal_cash_extra_paid_fields, #modal_cash_extra_work_fields, #modal_cash_log_time_fields, #modal_cash_omit_reason')
+                        .hide();
+                    $('#modal_cash_reason_noPayment, #modal_cash_reason_partially, #modal_cash_scope_partially, #modal_cash_price_charged_one, #modal_cash_amount, #modal_cash_scope_extra_work, #modal_cash_price_charged_two, #modal_cash_start_time, #modal_cash_end_time, #modal_cash_reason_omit')
                         .val('');
+                    $('#modal_cash_day_number').text('0');
 
                     // Set client name and final price
                     $('#modal_cash_client_name').text(clientName);
@@ -600,7 +676,16 @@
                             $('#modal_cash_noPayment_reason').show();
                             $('#modal_cash_reason_noPayment').val(reason);
                         }
-                    } else if (option === 'partially') {
+                    } else if (option === 'omit') {
+                        $('#modal_cash_omit').prop('checked', true);
+                        if (reason) {
+                            $('#modal_cash_omit_reason').show();
+                            $('#modal_cash_reason_omit').val(reason);
+                        }
+                    }
+
+                    // Partially Completed
+                    if (optionFive === 'partially') {
                         $('#modal_cash_partially').prop('checked', true);
                         $('#modal_cash_partially_fields').show();
                         if (reason) {
@@ -612,19 +697,42 @@
                         if (priceOne) {
                             $('#modal_cash_price_charged_one').val(priceOne);
                         }
-                    } else if (option === 'omit') {
-                        $('#modal_cash_omit').prop('checked', true);
                     }
 
-                    // Set additional options for CASH
+                    // Paid on prior date of service
                     if (optionTwo === 'paid_on_prior') {
                         $('#modal_cash_option_two').prop('checked', true);
                     }
+
+                    // option_three holds either 'extra_paid_for_date' or 'logTime'
                     if (optionThree === 'extra_paid_for_date') {
                         $('#modal_cash_option_three').prop('checked', true);
+                        $('#modal_cash_extra_paid_fields').show();
+                        $('#modal_cash_day_number').text(dayNumber || '0');
+                        if (amount) {
+                            $('#modal_cash_amount').val(amount);
+                        }
+                    } else if (optionThree === 'logTime') {
+                        $('#modal_cash_logTime').prop('checked', true);
+                        $('#modal_cash_log_time_fields').show();
+                        if (startTime) {
+                            $('#modal_cash_start_time').val(startTime);
+                        }
+                        if (endTime) {
+                            $('#modal_cash_end_time').val(endTime);
+                        }
                     }
+
+                    // Extra Work Completed
                     if (optionFour === 'extra_work') {
                         $('#modal_cash_option_four').prop('checked', true);
+                        $('#modal_cash_extra_work_fields').show();
+                        if (scope) {
+                            $('#modal_cash_scope_extra_work').val(scope);
+                        }
+                        if (priceTwo) {
+                            $('#modal_cash_price_charged_two').val(priceTwo);
+                        }
                     }
 
                     // Show CASH modal
@@ -635,12 +743,13 @@
                     // Reset all checkboxes and fields
                     $('#modal_invoice_completed, #modal_invoice_partially, #modal_invoice_option_two, #modal_invoice_option_three, #modal_invoice_omit')
                         .prop('checked', false);
-                    $('#modal_invoice_partially_fields, #modal_invoice_extra_work_fields, #modal_invoice_log_time_fields')
+                    $('#modal_invoice_partially_fields, #modal_invoice_extra_work_fields, #modal_invoice_log_time_fields, #modal_invoice_omit_reason')
                         .hide();
                     $('#modal_invoice_reason_partially, #modal_invoice_scope_partially, #modal_invoice_price_charged_one')
                         .val('');
                     $('#modal_invoice_scope_extra_work, #modal_invoice_price_charged_two').val('');
                     $('#modal_invoice_start_time, #modal_invoice_end_time').val('');
+                    $('#modal_invoice_reason_omit').val('');
 
                     // Set client name and final price
                     $('#modal_invoice_client_name').text(clientName);
@@ -651,7 +760,16 @@
                     // Set completion status checkboxes
                     if (option === 'completed') {
                         $('#modal_invoice_completed').prop('checked', true);
-                    } else if (option === 'partially') {
+                    } else if (option === 'omit') {
+                        $('#modal_invoice_omit').prop('checked', true);
+                        if (reason) {
+                            $('#modal_invoice_omit_reason').show();
+                            $('#modal_invoice_reason_omit').val(reason);
+                        }
+                    }
+
+                    // Partially Completed
+                    if (optionFive === 'partially') {
                         $('#modal_invoice_partially').prop('checked', true);
                         $('#modal_invoice_partially_fields').show();
                         if (reason) {
@@ -663,8 +781,6 @@
                         if (priceOne) {
                             $('#modal_invoice_price_charged_one').val(priceOne);
                         }
-                    } else if (option === 'omit') {
-                        $('#modal_invoice_omit').prop('checked', true);
                     }
 
                     // Set additional options for INVOICE
