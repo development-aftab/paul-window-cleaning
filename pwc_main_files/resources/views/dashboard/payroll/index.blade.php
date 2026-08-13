@@ -9,7 +9,7 @@
 @section('content')
 <section class="create_clients_sec">
     <div class="container-fluid custom_container">
-        
+
         <div class="row mb-5">
             <div class="col-md-12">
                 <div class="months-pagination filter_download_dropdown_wrapper" style="display: flex; align-items: center; gap: 10px;">
@@ -51,7 +51,7 @@
                                     <th class="min-w-100px">Total Gross Sales</th>
                                     <th class="min-w-100px">Commission</th>
                                     <th class="min-w-100px">Bonus</th>
-                                    <th class="min-w-100px">Additional Pay</th>
+                                    <th class="min-w-100px">Hourly Pay</th>
                                     <th class="min-w-100px text-end rounded-end">Total Gross Pay</th>
                                     <th>Actions</th>
                                 </tr>

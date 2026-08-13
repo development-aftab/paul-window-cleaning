@@ -51,10 +51,11 @@
                             <thead>
                                 <tr class="fw-bold">
                                     <th class="ps-4 min-w-150px rounded-start">Route</th>
+                                    <th class="min-w-150px">Period</th>
                                     <th class="min-w-100px text-end">Gross Sales</th>
                                     <th class="min-w-100px text-end">Commission</th>
                                     <th class="min-w-150px text-end">Bonus</th>
-                                    <th class="min-w-150px text-end">Additional Pay</th>
+                                    <th class="min-w-150px text-end">Hourly Pay</th>
                                     <th class="min-w-100px text-end rounded-end">Total Gross Pay</th>
                                 </tr>
                             </thead>
@@ -63,6 +64,11 @@
                                 <tr>
                                     <td class="ps-4">
                                         <span class="text-dark fw-bold d-block fs-6">{{ $routeData['route_name'] }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted fw-semibold d-block fs-7">
+                                            {{ $routeData['start']->format('M j') }} – {{ $routeData['end']->format('j, Y') }}
+                                        </span>
                                     </td>
                                     <td class="text-end">
                                         <span class="text-muted fw-semibold text-muted d-block fs-7">${{ number_format($routeData['gross_sales'], 2) }}</span>
@@ -115,7 +121,7 @@
                             @if($routePayrollData->isNotEmpty())
                             <tfoot>
                                 <tr>
-                                    <td colspan="5" class="ps-4 text-end fw-bold">Grand Total Payroll</td>
+                                    <td colspan="6" class="ps-4 text-end fw-bold">Grand Total Payroll</td>
                                     <td class="text-end pe-4 fw-bold">${{ number_format($grandTotalPay, 2) }}</td>
                                 </tr>
                             </tfoot>
