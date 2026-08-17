@@ -107,26 +107,26 @@
                 <td>
                     <div class="table_hover">
                         <h3>{{ number_format($totalSales, 2) }}</h3>
-                        <div class="tooltip_hover" style="min-width: 350px;">
+                        <div class="tooltip_hover sales-tooltip" style="min-width: 320px;">
+                            <p class="sales-tooltip-title">Sales Breakdown</p>
                             <ul>
                                 @foreach ($schedules as $s)
-                                    <li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
-                                        <span style="flex: 1;">
-                                            {{ $s->clientName->name ?? 'Client' }}<br>
-                                            <small style="color: {{ ($s->clientSchedulePayment->payment_type ?? '') == 'cash' ? '#28a745' : '#007bff' }}; font-weight: 600; font-size: 11px;">
+                                    <li class="customer-card">
+                                        <span class="customer-info">
+                                            <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                            <span class="payment-tag {{ ($s->clientSchedulePayment->payment_type ?? '') == 'cash' ? 'cash' : 'invoice' }}">
                                                 {{ ucfirst($s->clientSchedulePayment->payment_type ?? 'N/A') }}
-                                            </small>
+                                            </span>
                                         </span>
-                                        <span style="font-weight: 600; margin-left: 15px;">
-                                            ${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}
-                                        </span>
+                                        <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
                                     </li>
                                 @endforeach
-                                <li style="border-top: 2px solid #ddd; margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;">
-                                    <strong>Total:</strong>
-                                    <strong>${{ number_format($totalSales, 2) }}</strong>
-                                </li>
                             </ul>
+                            <hr class="sales-divider">
+                            <div class="total-summary-row">
+                                <span class="total-label">Total Sales</span>
+                                <span class="total-value">${{ number_format($totalSales, 2) }}</span>
+                            </div>
                         </div>
                     </div>
                 </td>
@@ -134,17 +134,27 @@
                 <td>
                     <div class="table_hover">
                         <h3>{{ number_format($cashRecord, 2) }}</h3>
-                        <div class="tooltip_hover">
+                        <div class="tooltip_hover sales-tooltip" style="min-width: 300px;">
+                            <p class="sales-tooltip-title">Cash Received</p>
                             <ul>
                                 @forelse ($cashSchedules as $s)
-                                    <li style="display: flex; justify-content: space-between;">
-                                        <span>{{ $s->clientName->name ?? 'Client' }}</span>
-                                        <span>${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                    <li class="customer-card">
+                                        <span class="customer-info">
+                                            <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                        </span>
+                                        <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
                                     </li>
                                 @empty
-                                    <li style="justify-content: center; color: #858585;">No Cash Records</li>
+                                    <li class="empty-state">No Cash Records</li>
                                 @endforelse
                             </ul>
+                            @if ($cashSchedules->isNotEmpty())
+                                <hr class="sales-divider">
+                                <div class="total-summary-row">
+                                    <span class="total-label">Total Cash</span>
+                                    <span class="total-value">${{ number_format($cashRecord, 2) }}</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </td>
@@ -153,19 +163,21 @@
                     <div class="table_hover">
                         <h3>{{ $totalHours }}</h3>
                         @if ($staffLogHoursForRoute->count() > 0)
-                            <div class="tooltip_hover">
-                                <ul class="m-0 p-0" style="list-style: none;">
+                            <div class="tooltip_hover sales-tooltip" style="min-width: 280px;">
+                                <p class="sales-tooltip-title">Hours Logged</p>
+                                <ul>
                                     @foreach ($staffLogHoursForRoute as $logEntry)
-                                        <li style="display: flex; justify-content: space-between; padding: 4px 0;">
-                                            <span>{{ \Carbon\Carbon::parse($logEntry->service_date)->format('d M Y') }}</span>
-                                            <span>{{ $logEntry->duration_hours }} hrs</span>
+                                        <li class="customer-card">
+                                            <span class="customer-name">{{ \Carbon\Carbon::parse($logEntry->service_date)->format('d M Y') }}</span>
+                                            <span class="customer-price">{{ $logEntry->duration_hours }} hrs</span>
                                         </li>
                                     @endforeach
-                                    <li style="border-top: 1px solid #ddd; margin-top: 5px; padding-top: 5px; display: flex; justify-content: space-between;">
-                                        <strong>Total:</strong>
-                                        <strong>{{ $totalHours }} hrs</strong>
-                                    </li>
                                 </ul>
+                                <hr class="sales-divider">
+                                <div class="total-summary-row">
+                                    <span class="total-label">Total Hours</span>
+                                    <span class="total-value">{{ $totalHours }} hrs</span>
+                                </div>
                             </div>
                         @endif
                     </div>
@@ -174,21 +186,28 @@
                 <td>
                     <div class="table_hover">
                         <h3>{{ number_format($invoiceTotal, 2) }}</h3>
-                        <div class="tooltip_hover">
+                        <div class="tooltip_hover sales-tooltip" style="min-width: 300px;">
+                            <p class="sales-tooltip-title">Invoice Payments</p>
                             <ul>
                                 @forelse ($schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'invoice') as $s)
-                                    <li>
-                                        <span style="flex: 1;">
-                                            {{ $s->clientName->name ?? 'Client' }}<br>
-                                            <small style="color: #007bff; font-size: 11px;">{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</small>
+                                    <li class="customer-card">
+                                        <span class="customer-info">
+                                            <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                            <span class="service-date"><i class="fa-regular fa-calendar"></i>{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</span>
                                         </span>
-                                        <span>${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                        <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
                                     </li>
                                 @empty
-                                    <li style="justify-content: center; color: #858585;">
-                                        No Cash Records</li>
+                                    <li class="empty-state">No Cash Records</li>
                                 @endforelse
                             </ul>
+                            @if ($invoiceSchedules->isNotEmpty())
+                                <hr class="sales-divider">
+                                <div class="total-summary-row">
+                                    <span class="total-label">Total Billed</span>
+                                    <span class="total-value">${{ number_format($invoiceTotal, 2) }}</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </td>
@@ -197,21 +216,28 @@
                 <td>
                     <div class="table_hover">
                         <h3>{{ number_format($unPaidTotal, 2) }}</h3>
-                        <div class="tooltip_hover">
+                        <div class="tooltip_hover sales-tooltip" style="min-width: 300px;">
+                            <p class="sales-tooltip-title">Unpaid Accounts</p>
                             <ul>
                                 @forelse ($cashUnpaidAcc as $s)
-                                    <li>
-                                        <span style="flex: 1;">
-                                            {{ $s->clientName->name ?? 'Client' }}<br>
-                                            <small style="color: #007bff; font-size: 11px;">{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</small>
+                                    <li class="customer-card">
+                                        <span class="customer-info">
+                                            <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                            <span class="service-date"><i class="fa-regular fa-calendar"></i>{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</span>
                                         </span>
-                                        <span>${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                        <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
                                     </li>
                                 @empty
-                                    <li style="justify-content: center; color: #858585;">
-                                        No Cash Records</li>
+                                    <li class="empty-state">No Cash Records</li>
                                 @endforelse
                             </ul>
+                            @if ($cashUnpaidAcc->isNotEmpty())
+                                <hr class="sales-divider">
+                                <div class="total-summary-row">
+                                    <span class="total-label">Total Unpaid</span>
+                                    <span class="total-value">${{ number_format($unPaidTotal, 2) }}</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </td>
@@ -220,21 +246,31 @@
                 {{-- Omit Column with Conditional Hover --}}
                 <td>
                     @php
-                        $omitCount = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option ?? '') == 'omit')->count();
+                        $omitSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option ?? '') == 'omit');
+                        $omitCount = $omitSchedules->count();
+                        $omitTotal = $omitSchedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
                     @endphp
                     @if ($omitCount > 0)
                         <div class="table_hover">
                             <h3>{{ $omitCount }}</h3>
-                            <div class="tooltip_hover">
+                            <div class="tooltip_hover sales-tooltip" style="min-width: 300px;">
+                                <p class="sales-tooltip-title">Omitted Services</p>
                                 <ul>
-                                    @foreach ($schedules->filter(fn($s) => ($s->clientSchedulePayment->option ?? '') == 'omit') as $s)
-                                        <li style="display: flex; flex-direction: column; align-items: flex-start;">
-                                            <span><strong>{{ $s->clientName->name ?? 'Client' }}</strong> <span style="float:right; font-weight:600;">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span></span>
-                                            <span style="color:#dc3545; font-size:12px;">Reason:
-                                                {{ isset($s->clientSchedulePayment->reason) && $s->clientSchedulePayment->reason !== '' ? $s->clientSchedulePayment->reason : '-' }}</span>
+                                    @foreach ($omitSchedules as $s)
+                                        <li class="customer-card stacked">
+                                            <div class="card-top-row">
+                                                <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                                <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                            </div>
+                                            <span class="reason-text"><i class="fa-solid fa-triangle-exclamation"></i><span><strong>Reason:</strong> {{ isset($s->clientSchedulePayment->reason) && $s->clientSchedulePayment->reason !== '' ? $s->clientSchedulePayment->reason : '-' }}</span></span>
                                         </li>
                                     @endforeach
                                 </ul>
+                                <hr class="sales-divider">
+                                <div class="total-summary-row danger">
+                                    <span class="total-label">Total Omitted</span>
+                                    <span class="total-value">${{ number_format($omitTotal, 2) }}</span>
+                                </div>
                             </div>
                         </div>
                     @endif
@@ -243,23 +279,32 @@
                 {{-- Partial Column with Conditional Hover --}}
                 <td>
                     @php
-                        $partialCount = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option_five ?? '') == 'partially')->count();
+                        $partialSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option_five ?? '') == 'partially');
+                        $partialCount = $partialSchedules->count();
+                        $partialTotal = $partialSchedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
                     @endphp
                     @if ($partialCount > 0)
                         <div class="table_hover">
                             <h3>{{ $partialCount }}</h3>
-                            <div class="tooltip_hover">
+                            <div class="tooltip_hover sales-tooltip" style="min-width: 300px;">
+                                <p class="sales-tooltip-title">Partially Completed</p>
                                 <ul>
-                                    @foreach ($schedules->filter(fn($s) => ($s->clientSchedulePayment->option_five ?? '') == 'partially') as $s)
-                                        <li style="display: flex; flex-direction: column; align-items: flex-start;">
-                                            <span><strong>{{ $s->clientName->name ?? 'Client' }}</strong> <span style="float:right; font-weight:600;">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span></span>
-                                            <span style="color:#dc3545; font-size:12px;">Reason:
-                                                {{ isset($s->clientSchedulePayment->reason) && $s->clientSchedulePayment->reason !== '' ? $s->clientSchedulePayment->reason : '-' }}</span>
-                                            <span style="color:#007bff; font-size:12px;">Partial Scope:
-                                                {{ isset($s->clientSchedulePayment->partial_completed_scope) && $s->clientSchedulePayment->partial_completed_scope !== '' ? $s->clientSchedulePayment->partial_completed_scope : '-' }}</span>
+                                    @foreach ($partialSchedules as $s)
+                                        <li class="customer-card stacked">
+                                            <div class="card-top-row">
+                                                <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                                <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                            </div>
+                                            <span class="reason-text"><i class="fa-solid fa-triangle-exclamation"></i><span><strong>Reason:</strong> {{ isset($s->clientSchedulePayment->reason) && $s->clientSchedulePayment->reason !== '' ? $s->clientSchedulePayment->reason : '-' }}</span></span>
+                                            <span class="scope-text"><i class="fa-solid fa-list-check"></i><span><strong>Partial Scope:</strong> {{ isset($s->clientSchedulePayment->partial_completed_scope) && $s->clientSchedulePayment->partial_completed_scope !== '' ? $s->clientSchedulePayment->partial_completed_scope : '-' }}</span></span>
                                         </li>
                                     @endforeach
                                 </ul>
+                                <hr class="sales-divider">
+                                <div class="total-summary-row purple">
+                                    <span class="total-label">Total Partial</span>
+                                    <span class="total-value">${{ number_format($partialTotal, 2) }}</span>
+                                </div>
                             </div>
                         </div>
                     @endif

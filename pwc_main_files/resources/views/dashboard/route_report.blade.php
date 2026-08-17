@@ -2,6 +2,10 @@
 @push('css')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
+        html, body {
+            color-scheme: light only;
+        }
+
         .route_report_filters_wrapper {
             display: flex;
             justify-content: space-between;
@@ -169,16 +173,19 @@
             left: 50%;
             transform: translateX(-50%);
             margin-top: 10px;
+            color-scheme: light only;
             background: #fff;
-            border: 2px solid #00ADEE;
-            border-radius: 10px;
-            padding: 15px 20px;
-            min-width: 250px;
-            max-width: 350px;
-            box-shadow: 0 8px 24px rgba(0, 173, 238, 0.25);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 16px;
+            min-width: 260px;
+            max-width: 360px;
+            max-height: 340px;
+            overflow-y: auto;
+            box-shadow: 0 12px 32px rgba(20, 30, 60, 0.22), 0 2px 8px rgba(20, 30, 60, 0.1);
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
             z-index: 1000;
         }
 
@@ -196,7 +203,7 @@
             left: 50%;
             transform: translateX(-50%);
             border: 8px solid transparent;
-            border-bottom-color: #00ADEE;
+            border-bottom-color: #32346A;
         }
 
         .tooltip_hover::after {
@@ -217,10 +224,13 @@
         }
 
         .tooltip_hover ul li {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(0, 173, 238, 0.15);
-            color: #32346A;
-            font-size: 14px;
+            padding: 10px 8px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #eef0f5;
+            border-radius: 6px;
+            color: #1f2430;
+            font-size: 13.5px;
+            font-weight: 500;
             font-family: 'Hellix-Regular', sans-serif;
             display: flex;
             justify-content: space-between;
@@ -229,17 +239,306 @@
 
         .tooltip_hover ul li:last-child {
             border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .tooltip_hover ul li:first-child {
-            padding-top: 0;
+            margin-bottom: 0;
         }
 
         .tooltip_hover ul li strong {
-            color: #5bc4ea;
+            color: #32346A;
             font-family: 'Hellix-SemiBold', sans-serif;
             margin-right: 10px;
+        }
+
+        .tooltip_hover .empty-state {
+            display: block;
+            width: 100%;
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            background: transparent !important;
+        }
+
+        /* Payment type / status badges inside tooltips */
+        .tooltip_hover .payment-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .3px;
+            color: #fff;
+            margin-top: 3px;
+        }
+
+        .tooltip_hover .payment-tag.cash {
+            background: #1e8449;
+        }
+
+        .tooltip_hover .payment-tag.invoice {
+            background: #0d6efd;
+        }
+
+        .tooltip_hover .service-date {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #32346A;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 3px;
+        }
+
+        .tooltip_hover .service-date i {
+            color: #00ADEE;
+            font-size: 11px;
+        }
+
+        .tooltip_hover .reason-text,
+        .tooltip_hover .scope-text {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            width: 100%;
+            margin-top: 8px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .tooltip_hover .reason-text {
+            background: #f8d7da;
+            color: #842029;
+            border-left: 4px solid #dc3545;
+        }
+
+        .tooltip_hover .scope-text {
+            background: #cfe2ff;
+            color: #084298;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .tooltip_hover .reason-text i,
+        .tooltip_hover .scope-text i {
+            margin-top: 2px;
+            font-size: 11px;
+        }
+
+        .tooltip_hover .reason-text strong,
+        .tooltip_hover .scope-text strong {
+            color: inherit !important;
+            margin-right: 4px;
+        }
+
+        /* ===== Sales Summary Popup (Total Sales tooltip) ===== */
+        .sales-tooltip {
+            background: rgba(255, 255, 255, 0.98);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.28), 0 4px 14px rgba(15, 23, 42, 0.1);
+        }
+
+        .sales-tooltip::before {
+            border-bottom-color: rgba(15, 23, 42, 0.9);
+        }
+
+        .sales-tooltip .sales-tooltip-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: #94a3b8;
+            padding: 0 2px 10px;
+            margin: 0;
+        }
+
+        .sales-tooltip ul {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sales-tooltip .customer-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+            border: 1px solid #eef1f6;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin: 0;
+            transition: all 0.18s ease;
+        }
+
+        .sales-tooltip .customer-card:hover {
+            background: #ffffff;
+            border-color: #cfe2ff;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .sales-tooltip .customer-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+            min-width: 0;
+        }
+
+        .sales-tooltip .customer-name {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 190px;
+        }
+
+        .sales-tooltip .customer-price {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: #0f172a;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .sales-tooltip .payment-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: .2px;
+            margin-top: 0;
+        }
+
+        .sales-tooltip .payment-tag::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .sales-tooltip .payment-tag.cash {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .sales-tooltip .payment-tag.invoice {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .sales-tooltip .payment-tag.pending {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .sales-tooltip .payment-tag.omitted {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .sales-tooltip .payment-tag.partial {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .sales-tooltip .customer-info .service-date {
+            color: #64748b;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        .sales-tooltip .customer-info .service-date i {
+            color: #94a3b8;
+        }
+
+        /* Stacked variant: for cards that carry an extra note (reason / scope) below */
+        .sales-tooltip .customer-card.stacked {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+
+        .sales-tooltip .customer-card.stacked .card-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 12px;
+        }
+
+        .sales-tooltip .customer-card .reason-text,
+        .sales-tooltip .customer-card .scope-text {
+            width: 100%;
+            margin-top: 0;
+        }
+
+        .sales-tooltip .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #f8fafc !important;
+            border: 1px dashed #dbe3ee;
+            border-radius: 10px;
+            color: #94a3b8;
+            font-style: normal;
+            font-weight: 600;
+            font-size: 12.5px;
+            padding: 14px;
+        }
+
+        .sales-tooltip .total-summary-row.danger {
+            background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+            box-shadow: 0 8px 18px rgba(185, 28, 28, 0.32);
+        }
+
+        .sales-tooltip .total-summary-row.purple {
+            background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+            box-shadow: 0 8px 18px rgba(124, 58, 237, 0.32);
+        }
+
+        .sales-tooltip .sales-divider {
+            border: none;
+            border-top: 1px solid #e7eaf1;
+            margin: 12px 0 10px;
+        }
+
+        .sales-tooltip .total-summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #32346A 0%, #1a1c3d 100%);
+            color: #fff;
+            padding: 12px 14px;
+            border-radius: 10px;
+            box-shadow: 0 8px 18px rgba(50, 52, 106, 0.35);
+        }
+
+        .sales-tooltip .total-label {
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .sales-tooltip .total-value {
+            font-size: 19px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: .2px;
         }
 
         /* Responsive tooltip positioning */
@@ -248,6 +547,10 @@
                 min-width: 200px;
                 max-width: 280px;
                 font-size: 12px;
+            }
+
+            .sales-tooltip .customer-name {
+                max-width: 130px;
             }
         }
 
@@ -479,24 +782,26 @@
                                                         <td>
                                                             <div class="table_hover">
                                                                 <h3>{{ number_format($totalSales, 2) }}</h3>
-                                                                <div class="tooltip_hover" style="min-width: 350px;">
+                                                                <div class="tooltip_hover sales-tooltip" style="min-width: 320px;">
+                                                                    <p class="sales-tooltip-title">Sales Breakdown</p>
                                                                     <ul>
                                                                         @foreach ($schedules as $s)
-                                                                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
-                                                                                <span style="flex: 1;">
-                                                                                    {{ $s->clientName->name ?? 'Client' }}<br>
-                                                                                    <small style="color: {{ ($s->clientSchedulePayment->payment_type ?? '') == 'cash' ? '#28a745' : '#007bff' }}; font-weight: 600; font-size: 11px;">
+                                                                            <li class="customer-card">
+                                                                                <span class="customer-info">
+                                                                                    <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                                                                    <span class="payment-tag {{ ($s->clientSchedulePayment->payment_type ?? '') == 'cash' ? 'cash' : 'invoice' }}">
                                                                                         {{ ucfirst($s->clientSchedulePayment->payment_type ?? 'N/A') }}
-                                                                                    </small>
+                                                                                    </span>
                                                                                 </span>
-                                                                                <span style="font-weight: 600; margin-left: 15px;">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                                <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
                                                                             </li>
                                                                         @endforeach
-                                                                        <li style="border-top: 2px solid #ddd; margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;">
-                                                                            <strong>Total Sales:</strong>
-                                                                            <strong>${{ number_format($totalSales, 2) }}</strong>
-                                                                        </li>
                                                                     </ul>
+                                                                    <hr class="sales-divider">
+                                                                    <div class="total-summary-row">
+                                                                        <span class="total-label">Total Sales</span>
+                                                                        <span class="total-value">${{ number_format($totalSales, 2) }}</span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -504,18 +809,27 @@
                                                         <td>
                                                             <div class="table_hover">
                                                                 <h3>{{ number_format($cashRecord, 2) }}</h3>
-                                                                <div class="tooltip_hover">
+                                                                <div class="tooltip_hover sales-tooltip" style="min-width: 300px;">
+                                                                    <p class="sales-tooltip-title">Cash Received</p>
                                                                     <ul>
                                                                         @forelse ($cashSchedules as $s)
-                                                                            <li>
-                                                                                <span>{{ $s->clientName->name ?? 'Client' }}</span>
-                                                                                <span>${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                            <li class="customer-card">
+                                                                                <span class="customer-info">
+                                                                                    <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                                                                </span>
+                                                                                <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
                                                                             </li>
                                                                         @empty
-                                                                            <li style="justify-content: center; color: #858585;">
-                                                                                No Cash Records</li>
+                                                                            <li class="empty-state">No Cash Records</li>
                                                                         @endforelse
                                                                     </ul>
+                                                                    @if ($cashSchedules->isNotEmpty())
+                                                                        <hr class="sales-divider">
+                                                                        <div class="total-summary-row">
+                                                                            <span class="total-label">Total Cash</span>
+                                                                            <span class="total-value">${{ number_format($cashRecord, 2) }}</span>
+                                                                        </div>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -524,19 +838,21 @@
                                                             <div class="table_hover">
                                                                 <h3>{{ $totalHours }}</h3>
                                                                 @if ($staffLogHoursForRoute->count() > 0)
-                                                                    <div class="tooltip_hover">
+                                                                    <div class="tooltip_hover sales-tooltip" style="min-width: 280px;">
+                                                                        <p class="sales-tooltip-title">Hours Logged</p>
                                                                         <ul>
                                                                             @foreach ($staffLogHoursForRoute as $logEntry)
-                                                                                <li>
-                                                                                    <span>{{ \Carbon\Carbon::parse($logEntry->service_date)->format('d M Y') }}</span>
-                                                                                    <span>{{ $logEntry->duration_hours }} hrs</span>
+                                                                                <li class="customer-card">
+                                                                                    <span class="customer-name">{{ \Carbon\Carbon::parse($logEntry->service_date)->format('d M Y') }}</span>
+                                                                                    <span class="customer-price">{{ $logEntry->duration_hours }} hrs</span>
                                                                                 </li>
                                                                             @endforeach
-                                                                            <li style="border-top: 1px solid #ddd; margin-top: 5px; padding-top: 5px;">
-                                                                                <strong>Total Hours:</strong>
-                                                                                <strong>{{ $totalHours }} hrs</strong>
-                                                                            </li>
                                                                         </ul>
+                                                                        <hr class="sales-divider">
+                                                                        <div class="total-summary-row">
+                                                                            <span class="total-label">Total Hours</span>
+                                                                            <span class="total-value">{{ $totalHours }} hrs</span>
+                                                                        </div>
                                                                     </div>
                                                                 @endif
                                                             </div>
@@ -545,21 +861,28 @@
                                                         <td>
                                                             <div class="table_hover">
                                                                 <h3>{{ number_format($invoiceTotal, 2) }}</h3>
-                                                                <div class="tooltip_hover">
+                                                                <div class="tooltip_hover sales-tooltip" style="min-width: 300px;">
+                                                                    <p class="sales-tooltip-title">Invoice Payments</p>
                                                                     <ul>
                                                                         @forelse ($schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'invoice') as $s)
-                                                                            <li>
-                                                                                <span style="flex: 1;">
-                                                                                    {{ $s->clientName->name ?? 'Client' }}<br>
-                                                                                    <small style="color: #007bff; font-size: 11px;">{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</small>
+                                                                            <li class="customer-card">
+                                                                                <span class="customer-info">
+                                                                                    <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                                                                    <span class="service-date"><i class="fa-regular fa-calendar"></i>{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</span>
                                                                                 </span>
-                                                                                <span>${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                                <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
                                                                             </li>
                                                                         @empty
-                                                                            <li style="justify-content: center; color: #858585;">
-                                                                                No Cash Records</li>
+                                                                            <li class="empty-state">No Cash Records</li>
                                                                         @endforelse
                                                                     </ul>
+                                                                    @if ($invoiceSchedules->isNotEmpty())
+                                                                        <hr class="sales-divider">
+                                                                        <div class="total-summary-row">
+                                                                            <span class="total-label">Total Billed</span>
+                                                                            <span class="total-value">${{ number_format($invoiceTotal, 2) }}</span>
+                                                                        </div>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -567,45 +890,61 @@
                                                         <td>
                                                             <div class="table_hover">
                                                                 <h3>{{ number_format($unPaidTotal, 2) }}</h3>
-                                                                <div class="tooltip_hover">
+                                                                <div class="tooltip_hover sales-tooltip" style="min-width: 300px;">
+                                                                    <p class="sales-tooltip-title">Unpaid Accounts</p>
                                                                     <ul>
                                                                         @forelse ($cashUnpaidAcc as $s)
-                                                                            <li>
-                                                                                <span style="flex: 1;">
-                                                                                    {{ $s->clientName->name ?? 'Client' }}<br>
-                                                                                    <small style="color: #007bff; font-size: 11px;">{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</small>
+                                                                            <li class="customer-card">
+                                                                                <span class="customer-info">
+                                                                                    <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                                                                    <span class="service-date"><i class="fa-regular fa-calendar"></i>{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</span>
                                                                                 </span>
-                                                                                <span>${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                                <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
                                                                             </li>
                                                                         @empty
-                                                                            <li style="justify-content: center; color: #858585;">
-                                                                                No Cash Records</li>
+                                                                            <li class="empty-state">No Cash Records</li>
                                                                         @endforelse
                                                                     </ul>
+                                                                    @if ($cashUnpaidAcc->isNotEmpty())
+                                                                        <hr class="sales-divider">
+                                                                        <div class="total-summary-row">
+                                                                            <span class="total-label">Total Unpaid</span>
+                                                                            <span class="total-value">${{ number_format($unPaidTotal, 2) }}</span>
+                                                                        </div>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </td>
                                                         {{-- Omit Column with Conditional Hover --}}
                                                         <td>
                                                             @php
-                                                                $omitCount = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option ?? '') == 'omit')->count();
+                                                                $omitSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option ?? '') == 'omit');
+                                                                $omitCount = $omitSchedules->count();
+                                                                $omitTotal = $omitSchedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
                                                             @endphp
                                                             @if ($omitCount > 0)
                                                                 <div class="table_hover">
                                                                     <h3>{{ $omitCount }}</h3>
-                                                                    <div class="tooltip_hover">
+                                                                    <div class="tooltip_hover sales-tooltip" style="min-width: 300px;">
+                                                                        <p class="sales-tooltip-title">Omitted Services</p>
                                                                         <ul>
-                                                                            @foreach ($schedules->filter(fn($s) => ($s->clientSchedulePayment->option ?? '') == 'omit') as $s)
-                                                                                <li style="display: flex; flex-direction: column; align-items: flex-start;">
-                                                                                    <span><strong>{{ $s->clientName->name ?? 'Client' }}</strong>
-                                                                                        <span style="float:right; font-weight:600;">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span></span>
+                                                                            @foreach ($omitSchedules as $s)
+                                                                                <li class="customer-card stacked">
+                                                                                    <div class="card-top-row">
+                                                                                        <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                                                                        <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                                    </div>
                                                                                     @if (!empty($s->clientSchedulePayment->reason))
-                                                                                        <span style="color:#dc3545; font-size:12px;">Reason:
-                                                                                            {{ $s->clientSchedulePayment->reason }}</span>
+                                                                                        <span class="reason-text"><i class="fa-solid fa-triangle-exclamation"></i><span><strong>Reason:</strong> {{ $s->clientSchedulePayment->reason }}</span></span>
                                                                                     @endif
                                                                                 </li>
                                                                             @endforeach
                                                                         </ul>
+                                                                        <hr class="sales-divider">
+                                                                        <div class="total-summary-row danger">
+                                                                            <span class="total-label">Total Omitted</span>
+                                                                            <span class="total-value">${{ number_format($omitTotal, 2) }}</span>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             @endif
@@ -613,29 +952,36 @@
                                                         {{-- Partial Column with Conditional Hover --}}
                                                         <td>
                                                             @php
-                                                                $partialCount = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option_five ?? '') == 'partially')->count();
+                                                                $partialSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option_five ?? '') == 'partially');
+                                                                $partialCount = $partialSchedules->count();
+                                                                $partialTotal = $partialSchedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
                                                             @endphp
                                                             @if ($partialCount > 0)
                                                                 <div class="table_hover">
                                                                     <h3>{{ $partialCount }}</h3>
-                                                                    <div class="tooltip_hover">
+                                                                    <div class="tooltip_hover sales-tooltip" style="min-width: 300px;">
+                                                                        <p class="sales-tooltip-title">Partially Completed</p>
                                                                         <ul>
-                                                                            @foreach ($schedules->filter(fn($s) => ($s->clientSchedulePayment->option_five ?? '') == 'partially') as $s)
-                                                                                <li style="display: flex; flex-direction: column; align-items: flex-start;">
-                                                                                    <span><strong>{{ $s->clientName->name ?? 'Client' }}</strong>
-                                                                                        <span style="float:right; font-weight:600;">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span></span>
+                                                                            @foreach ($partialSchedules as $s)
+                                                                                <li class="customer-card stacked">
+                                                                                    <div class="card-top-row">
+                                                                                        <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                                                                        <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                                    </div>
                                                                                     @if (!empty($s->clientSchedulePayment->reason))
-                                                                                        <span style="color:#dc3545; font-size:12px;">Reason:
-                                                                                            {{ $s->clientSchedulePayment->reason }}</span>
+                                                                                        <span class="reason-text"><i class="fa-solid fa-triangle-exclamation"></i><span><strong>Reason:</strong> {{ $s->clientSchedulePayment->reason }}</span></span>
                                                                                     @endif
                                                                                     @if (!empty($s->clientSchedulePayment->partial_completed_scope))
-                                                                                        <span style="color:#007bff; font-size:12px;">Partial
-                                                                                            Scope:
-                                                                                            {{ $s->clientSchedulePayment->partial_completed_scope }}</span>
+                                                                                        <span class="scope-text"><i class="fa-solid fa-list-check"></i><span><strong>Partial Scope:</strong> {{ $s->clientSchedulePayment->partial_completed_scope }}</span></span>
                                                                                     @endif
                                                                                 </li>
                                                                             @endforeach
                                                                         </ul>
+                                                                        <hr class="sales-divider">
+                                                                        <div class="total-summary-row purple">
+                                                                            <span class="total-label">Total Partial</span>
+                                                                            <span class="total-value">${{ number_format($partialTotal, 2) }}</span>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             @endif
