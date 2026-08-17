@@ -16,58 +16,310 @@ class DepositsController extends Controller
     {
         try {
             $user = Auth::user();
+            $isAdmin = $user && $user->hasRole('admin');
 
-            if ($user && !$user->hasRole('admin')) {
+            if ($isAdmin) {
+                $routes = StaffRoute::where('status', 1)->get();
+                $staffs = \App\Models\User::role('staff')->orderBy('name')->get();
+                // Admin can optionally narrow to one staff member via the filter; staff role
+                // always sees only their own records regardless of any staff_id passed in.
+                $onlyStaffId = $request->filled('staff_id') ? $request->staff_id : null;
+            } else {
                 $assignedRouteIds = AssignRoute::where('staff_id', $user->id)
                     ->pluck('route_id')
                     ->toArray();
                 $routes = StaffRoute::where('status', 1)
                     ->whereIn('id', $assignedRouteIds)
                     ->get();
-
-                $cashPayments = $this->getUndepositedCashPayments($user->id, $request, $assignedRouteIds);
-                $undepositedRoutes = $cashPayments->groupBy('route_id_display')->map(function ($payments, $routeId) use ($routes) {
-                    $route = $routeId ? $routes->firstWhere('id', $routeId) : null;
-                    return [
-                        'route_id' => $routeId ?: 'unassigned',
-                        'route_name' => $route ? $route->name : 'Unassigned Clients',
-                        'total_amount' => $payments->sum(fn($p) => (float) ($p->final_price ?? 0)),
-                        'record_count' => $payments->count(),
-                    ];
-                });
-
-                return view('dashboard.deposits', compact('undepositedRoutes', 'routes'));
+                $staffs = collect();
+                $onlyStaffId = $user->id;
             }
 
-            $query = Deposit::with(['route', 'staff', 'clientSchedule.clientName']);
+            $sections = $this->buildStaffSections($onlyStaffId, $request);
+            $grandTotal = $sections->sum('total');
 
-            if ($request->filled('route_id')) {
-                $query->where('route_id', $request->route_id);
-            }
-
-            if ($request->filled('month')) {
-                $query->where('month', $request->month);
-            }
-
-            if ($request->filled('year')) {
-                $query->where('year', $request->year);
-            }
-
-            if ($request->filled('is_deposit')) {
-                $query->where('is_deposit', $request->is_deposit);
-            }
-
-            $deposits = $query->orderBy('created_at', 'desc')->paginate(20);
-            $routes = StaffRoute::where('status', 1)->get();
-
-            return view('dashboard.deposits', compact('deposits', 'routes'));
+            return view('dashboard.deposits', compact('sections', 'routes', 'staffs', 'isAdmin', 'grandTotal'));
         } catch (\Exception $e) {
+            Log::error('Error loading deposits index: ' . $e->getMessage());
             return redirect()->back()->with([
                 'title' => 'Error',
                 'message' => 'Failed to load deposits: ' . $e->getMessage(),
                 'type' => 'error'
             ]);
         }
+    }
+
+    /**
+     * Build the "Total Undeposited Cash" data, grouped by staff member.
+     *
+     * Combines two sources into one unified row list:
+     *   1) Existing Deposit records that haven't been marked deposited yet (is_deposit = false).
+     *   2) Raw paid-cash ClientPayments that haven't been converted into a Deposit record yet
+     *      (e.g. a cash account that was unpaid at time of service and has since been paid).
+     *
+     * Rows from (2) are grouped by [staff, route, week, month, year] so a normal weekly batch of
+     * cash payments collapses into one aggregate row (Client column blank), while a payment that
+     * sits alone in its group (e.g. paid late, outside the normal batch) is shown individually
+     * with its own client name and exact service date.
+     */
+    private function buildStaffSections($onlyStaffId, Request $request)
+    {
+        $rows = collect();
+        $filterDate = $request->filled('date') ? Carbon::parse($request->date) : null;
+
+        // 1) Existing deposit records not yet marked as deposited
+        $depositQuery = Deposit::with(['route', 'staff', 'clientSchedule.clientName'])
+            ->where('is_deposit', false);
+
+        if ($onlyStaffId) {
+            $depositQuery->where('staff_id', $onlyStaffId);
+        }
+        if ($request->filled('route_id')) {
+            $depositQuery->where('route_id', $request->route_id);
+        }
+        if ($request->filled('week')) {
+            $depositQuery->where('week', $request->week);
+        }
+
+        foreach ($depositQuery->get() as $deposit) {
+            $referenceDate = $deposit->schedule_id
+                ? ($deposit->clientSchedule?->service_date ?? $deposit->clientSchedule?->start_date)
+                : null;
+
+            $range = $referenceDate
+                ? $this->calendarWeekRangeForDate(Carbon::parse($referenceDate))
+                : $this->computeWeekDateRange($deposit->week, $deposit->month, $deposit->year);
+
+            if ($filterDate && (!$range || !$filterDate->between($range['start'], $range['end']))) {
+                continue;
+            }
+
+            $rows->push([
+                'staff_id' => $deposit->staff_id,
+                'staff_name' => $deposit->staff->name ?? 'Unassigned',
+                'route_name' => $deposit->route->name ?? 'N/A',
+                'week_number' => $this->weekNumberFromString($deposit->week),
+                'amount' => (float) $deposit->deposit_amount,
+                'date_label' => $this->formatDateLabel($range),
+                'sort_date' => $range['start'] ?? $deposit->created_at,
+                'deposit_date' => null,
+                'deposit_id' => $deposit->id,
+                'payment_ids' => null,
+            ]);
+        }
+
+        // 2) Raw cash payments not yet converted into a deposit record
+        $rawPayments = $this->getUndepositedCashPaymentsForStaff($onlyStaffId);
+        $staffMap = \App\Models\User::whereIn('id', $rawPayments->pluck('staff_id')->filter()->unique())
+            ->get()->keyBy('id');
+
+        $groups = $rawPayments->map(function ($payment) {
+            $payment->setAttribute('_group_context', $this->resolvePaymentGroupContext($payment));
+            return $payment;
+        })->groupBy(function ($payment) {
+            $context = $payment->_group_context;
+            return implode('|', [$payment->staff_id, $context['route_id'], $context['week'], $context['month'], $context['year']]);
+        });
+
+        foreach ($groups as $groupPayments) {
+            $first = $groupPayments->first();
+            $context = $first->_group_context;
+
+            if ($request->filled('route_id') && (string) $context['route_id'] !== (string) $request->route_id) {
+                continue;
+            }
+            if ($request->filled('week') && $context['week'] !== $request->week) {
+                continue;
+            }
+
+            $routeName = $first->client?->clientRouteStaff?->first(
+                fn($cr) => (string) $cr->route_id === (string) $context['route_id']
+            )?->route?->name ?? 'N/A';
+
+            $range = $this->calendarWeekRangeForDate($context['reference_date']);
+
+            if ($filterDate && !$filterDate->between($range['start'], $range['end'])) {
+                continue;
+            }
+
+            $rows->push([
+                'staff_id' => $first->staff_id,
+                'staff_name' => $staffMap[$first->staff_id]->name ?? 'Unassigned',
+                'route_name' => $routeName,
+                'week_number' => $this->weekNumberFromString($context['week']),
+                'amount' => (float) $groupPayments->sum(fn($p) => (float) ($p->final_price ?? 0)),
+                'date_label' => $this->formatDateLabel($range),
+                'sort_date' => $range['start'] ?? $context['reference_date'],
+                'deposit_date' => null,
+                'deposit_id' => null,
+                'payment_ids' => $groupPayments->pluck('id')->values()->all(),
+            ]);
+        }
+
+        return $rows->groupBy('staff_name')
+            ->map(function ($staffRows, $staffName) {
+                return [
+                    'staff_id' => $staffRows->first()['staff_id'],
+                    'staff_name' => $staffName,
+                    'rows' => $staffRows->sortByDesc('sort_date')->values(),
+                    'total' => $staffRows->sum('amount'),
+                ];
+            })
+            ->sortBy('staff_name')
+            ->values();
+    }
+
+    /**
+     * Resolve the same route/week/month/year grouping key that createDepositFromPayment()
+     * would use if this payment were converted into a Deposit record, so a pending group's
+     * display stays consistent with the Deposit row it eventually becomes.
+     */
+    private function resolvePaymentGroupContext(ClientPayment $payment): array
+    {
+        $schedule = $payment->clientSchedule;
+        $routeId = $payment->client?->clientRouteStaff?->first()?->route_id;
+
+        $referenceDate = $schedule?->service_date
+            ?? $schedule?->start_date
+            ?? $payment->payment_date
+            ?? $payment->created_at
+            ?? now();
+        $referenceDate = Carbon::parse($referenceDate);
+
+        $week = $schedule?->week;
+        if ($week === null || $week === '') {
+            $week = 'week0';
+        } elseif (is_numeric($week)) {
+            $week = 'week' . $week;
+        } elseif (!str_starts_with((string) $week, 'week')) {
+            $week = 'week' . preg_replace('/[^0-9]/', '', (string) $week);
+        }
+
+        $month = $schedule?->month ?: $referenceDate->format('F');
+
+        return [
+            'route_id' => $routeId,
+            'week' => $week,
+            'month' => $month,
+            'year' => (int) $referenceDate->format('Y'),
+            'reference_date' => $referenceDate,
+        ];
+    }
+
+    /**
+     * Same "undeposited cash" query as getUndepositedCashPayments(), but not restricted to a
+     * single staff member's assigned routes — used by the admin, all-staff grouped view.
+     */
+    private function getUndepositedCashPaymentsForStaff($staffId = null)
+    {
+        $depositedScheduleIds = Deposit::whereNotNull('schedule_id')->pluck('schedule_id');
+        $depositedPaymentIds = Deposit::whereNotNull('client_payment_id')->pluck('client_payment_id');
+
+        return ClientPayment::with([
+                'clientSchedule.clientName.clientRouteStaff.route',
+                'client.clientRouteStaff.route',
+            ])
+            ->where('option', '!=', 'omit')
+            ->where('payment_type', 'cash')
+            ->where('status', 'paid')
+            ->where(function ($q) {
+                $q->whereNull('payment_status')->orWhere('payment_status', 'payment')->orWhere('payment_status', 'pending');
+            })
+            ->when($staffId, fn($q) => $q->where('staff_id', $staffId))
+            ->when($depositedScheduleIds->isNotEmpty(), function ($q) use ($depositedScheduleIds) {
+                $q->where(function ($sub) use ($depositedScheduleIds) {
+                    $sub->whereNull('schedule_id')->orWhereNotIn('schedule_id', $depositedScheduleIds);
+                });
+            })
+            ->when($depositedPaymentIds->isNotEmpty(), function ($q) use ($depositedPaymentIds) {
+                $q->whereNotIn('id', $depositedPaymentIds);
+            })
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    /**
+     * Calendar date range for a stored week/month/year triple (e.g. week='week2',
+     * month='August - September', year=2026), using the same 4-week cycle-offset map already
+     * used for route reports. Returns null when the month string doesn't match a known cycle
+     * name (e.g. legacy bare month names like "August" saved by createDepositFromPayment()).
+     */
+    private function computeWeekDateRange(?string $week, ?string $month, ?int $year): ?array
+    {
+        if (!$week || !$year) {
+            return null;
+        }
+
+        $cycleOffsets = [
+            'januaryfebruary' => 0,
+            'februarymarch' => 4,
+            'march' => 8,
+            'marchapril' => 12,
+            'aprilmay' => 16,
+            'mayjune' => 20,
+            'junejuly' => 24,
+            'julyaugust' => 28,
+            'augustseptember' => 32,
+            'septemberoctober' => 36,
+            'octobernovember' => 40,
+            'novemberdecember' => 44,
+            'decemberjanuary' => 48,
+        ];
+
+        $normalized = strtolower(preg_replace('/[^a-zA-Z]/', '', (string) $month));
+        if (!array_key_exists($normalized, $cycleOffsets)) {
+            return null;
+        }
+
+        $monthStart = Carbon::parse("first Monday of January {$year}")->addWeeks($cycleOffsets[$normalized]);
+        $weekStart = $monthStart->copy()->addDays(($this->weekNumberFromString($week) - 1) * 7);
+        $weekEnd = $weekStart->copy()->addDays(6);
+
+        return ['start' => $weekStart, 'end' => $weekEnd];
+    }
+
+    private function weekNumberFromString(?string $week): int
+    {
+        return ((int) preg_replace('/[^0-9]/', '', (string) $week)) + 1;
+    }
+
+    /**
+     * Find the portal's 7-day calendar week that a given date falls into, purely from the date
+     * itself — the same "first Monday of January + 7-day blocks" tiling the rest of the app uses
+     * to lay out weeks, without depending on a (possibly inconsistent) stored week/month string.
+     */
+    private function calendarWeekRangeForDate(Carbon $date): array
+    {
+        $firstMonday = Carbon::parse('first Monday of January ' . $date->year);
+        if ($date->lt($firstMonday)) {
+            $firstMonday = Carbon::parse('first Monday of January ' . ($date->year - 1));
+        }
+
+        $weekIndex = intdiv($firstMonday->diffInDays($date), 7);
+        $weekStart = $firstMonday->copy()->addWeeks($weekIndex);
+        $weekEnd = $weekStart->copy()->addDays(6);
+
+        return ['start' => $weekStart, 'end' => $weekEnd];
+    }
+
+    /**
+     * Format a week date range as e.g. "Aug 03 - 09, 2026" (same month) or
+     * "Aug 31 - Sep 06, 2026" (crossing a month boundary).
+     */
+    private function formatDateLabel(?array $range): string
+    {
+        if (!$range) {
+            return 'N/A';
+        }
+
+        $start = $range['start'];
+        $end = $range['end'];
+
+        if ($start->format('M') === $end->format('M')) {
+            return $start->format('M d') . ' - ' . $end->format('d') . ', ' . $end->format('Y');
+        }
+
+        return $start->format('M d') . ' - ' . $end->format('M d') . ', ' . $end->format('Y');
     }
 
     public function create(Request $request)
@@ -919,6 +1171,7 @@ class DepositsController extends Controller
         $request->validate([
             'payment_ids' => 'required|array|min:1',
             'payment_ids.*' => 'required|exists:client_payments,id',
+            'deposit_date' => 'nullable|date',
         ]);
 
         $user = Auth::user();
@@ -971,11 +1224,18 @@ class DepositsController extends Controller
             }
         }
 
+        // A caller can pass an explicit deposit_date (e.g. the "Date Deposited" inline picker on
+        // the Total Undeposited Cash page) to record the deposit as already made on that date.
+        // Without one (e.g. the plain "Mark Deposited" action elsewhere), it's staged for review
+        // with is_deposit left false, same as before.
+        $depositDate = $request->filled('deposit_date') ? Carbon::parse($request->deposit_date) : null;
+        $isDeposit = (bool) $depositDate;
+
         try {
-            DB::transaction(function () use ($payments, $user) {
+            DB::transaction(function () use ($payments, $user, $depositDate, $isDeposit) {
                 foreach ($payments as $payment) {
                     $payment->update(['payment_status' => 'paid']);
-                    $this->createDepositFromPayment($payment, $user);
+                    $this->createDepositFromPayment($payment, $user, $depositDate, $isDeposit);
                 }
             });
         } catch (\Exception $e) {
@@ -1000,10 +1260,11 @@ class DepositsController extends Controller
             'message' => count($request->payment_ids) === 1
                 ? 'Payment marked as deposited successfully.'
                 : count($request->payment_ids) . ' payments marked as deposited successfully.',
+            'deposit_date' => $depositDate?->format('m-d-Y'),
         ]);
     }
 
-    private function createDepositFromPayment(ClientPayment $payment, $user): Deposit
+    private function createDepositFromPayment(ClientPayment $payment, $user, $depositDate = null, bool $isDeposit = false): Deposit
     {
         $schedule = $payment->clientSchedule;
         $routeId = $payment->client?->clientRouteStaff?->first()?->route_id;
@@ -1045,8 +1306,8 @@ class DepositsController extends Controller
             'year' => (int) $referenceDate->format('Y'),
             'total_amount' => $amount,
             'deposit_amount' => $amount,
-            'is_deposit' => false,
-            'deposit_date' => now(),
+            'is_deposit' => $isDeposit,
+            'deposit_date' => $depositDate ? Carbon::parse($depositDate) : now(),
         ]);
     }
 
@@ -1059,8 +1320,8 @@ class DepositsController extends Controller
             $deposit = Deposit::findOrFail($id);
             $user = Auth::user();
 
-            // Only admin can update deposit status
-            if (!$user || !$user->hasRole('admin')) {
+            // Admin can update any deposit; staff can only update their own.
+            if (!$user || (!$user->hasRole('admin') && $deposit->staff_id != $user->id)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'You do not have permission to update deposit status'
@@ -1068,7 +1329,10 @@ class DepositsController extends Controller
             }
 
             $deposit->is_deposit = $request->input('is_deposit', 0);
-            if ($deposit->is_deposit && !$deposit->deposit_date) {
+            if ($request->filled('deposit_date')) {
+                // An explicit date (e.g. from the "Date Deposited" inline picker) always wins.
+                $deposit->deposit_date = Carbon::parse($request->input('deposit_date'));
+            } elseif ($deposit->is_deposit && !$deposit->deposit_date) {
                 $deposit->deposit_date = now();
             }
             $deposit->save();
@@ -1092,4 +1356,5 @@ class DepositsController extends Controller
             ], 500);
         }
     }
+
 }
