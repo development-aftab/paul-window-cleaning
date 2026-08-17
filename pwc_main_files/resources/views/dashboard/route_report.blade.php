@@ -549,7 +549,10 @@
                                                                     <ul>
                                                                         @forelse ($schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'invoice') as $s)
                                                                             <li>
-                                                                                <span>{{ $s->clientName->name ?? 'Client' }}</span>
+                                                                                <span style="flex: 1;">
+                                                                                    {{ $s->clientName->name ?? 'Client' }}<br>
+                                                                                    <small style="color: #007bff; font-size: 11px;">{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</small>
+                                                                                </span>
                                                                                 <span>${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
                                                                             </li>
                                                                         @empty
@@ -568,7 +571,10 @@
                                                                     <ul>
                                                                         @forelse ($cashUnpaidAcc as $s)
                                                                             <li>
-                                                                                <span>{{ $s->clientName->name ?? 'Client' }}</span>
+                                                                                <span style="flex: 1;">
+                                                                                    {{ $s->clientName->name ?? 'Client' }}<br>
+                                                                                    <small style="color: #007bff; font-size: 11px;">{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</small>
+                                                                                </span>
                                                                                 <span>${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
                                                                             </li>
                                                                         @empty

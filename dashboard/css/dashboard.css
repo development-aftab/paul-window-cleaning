@@ -4031,3 +4031,13 @@ body .error {
 .priority_checkbox {display: flex;align-items: center;gap: 10px;}
 .customer_payroll_sheets .payroll_cards {background: #CCEFFC;}
 .customer_payroll_sheets .payroll_cards h3 {margin-bottom: 15px;}
+
+.app-sidebar.custom_sidebar .menu-item .menu-content button.collapse_btn {width: 100%;display: flex;align-items: center;gap: 10px;padding: 10px;border: 0;background: #CCEFFC;font-weight: 600;color: var(--dark_blue);}
+.app-sidebar.custom_sidebar .menu-item .menu-content button.collapse_btn .sidebar_icon i {color: var(--dark_blue);}
+.app-sidebar.custom_sidebar .menu-item .menu-content .collapse,.app-sidebar.custom_sidebar .menu-item .menu-content .collapsing {background: #ffffff;padding: 10px;box-shadow: 0px 0px 4px 0px var(--dark_blue);border-radius: 4px;}
+.app-sidebar.custom_sidebar .menu-item .menu-content .collapse ul, .app-sidebar.custom_sidebar .menu-item .menu-content .collapsing ul {list-style: none;padding: 0;margin: 0;}
+.app-sidebar.custom_sidebar .menu-item .menu-content .collapse ul li:not(:last-child), .app-sidebar.custom_sidebar .menu-item .menu-content .collapsing ul li:not(:last-child) {margin-bottom:10px}
+.app-sidebar.custom_sidebar .menu-item .menu-content:has(a.active) button.collapse_btn {border-radius: 0px 114px 114px 0px;background: #00ADEE;box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.10);padding: 20px 20px;color: white;}
+.app-sidebar.custom_sidebar .menu-item .menu-content:has(a.active) button.collapse_btn .sidebar_icon i {color: white;}
+.app-sidebar.custom_sidebar .menu-item .menu-content .collapse a.active,.app-sidebar.custom_sidebar .menu-item .menu-content .collapsing a.active {padding: 10px;border-radius: 0;background: #CCEFFC;color: var(--dark_blue);}
+.app-sidebar.custom_sidebar .menu-item .menu-content .collapse a.active i,.app-sidebar.custom_sidebar .menu-item .menu-content .collapsing a.active i {color: var(--dark_blue);}
