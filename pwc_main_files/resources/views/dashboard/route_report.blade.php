@@ -739,19 +739,19 @@
                                                 @foreach ($sortedWeekRoutes as $routeId => $schedules)
                                                     @php
                                                         $routeName = $schedules->first()->clientName?->clientRouteStaff->first()->route->name ?? 'N/A';
-                                                        $totalSales = $schedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
+                                                        $totalSales = $schedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
                                                         $cashSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'cash' && ($s->clientSchedulePayment->status ?? '') == 'paid');
-                                                        $cashRecord = $cashSchedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
+                                                        $cashRecord = $cashSchedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
                                                         $weekString = 'week' . $dbWeekNum;
                                                         $matchingDeposits = $allDeposits->where('route_id', $routeId)->where('week', $weekString)->where('month', $selectedMonthName)->where('year', $selectedYear);
                                                         $totalDeposited = $matchingDeposits->sum('deposit_amount');
                                                         $invoiceSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'invoice');
-                                                        $invoiceTotal = $invoiceSchedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
-                                                        $invoicePaid = $invoiceSchedules->filter(fn($s) => ($s->clientSchedulePayment->payment_status ?? null) == 'paid')->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
-                                                        $invoiceUnpaid = $invoiceSchedules->filter(fn($s) => ($s->clientSchedulePayment->payment_status ?? null) === null)->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
+                                                        $invoiceTotal = $invoiceSchedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
+                                                        $invoicePaid = $invoiceSchedules->filter(fn($s) => ($s->clientSchedulePayment->payment_status ?? null) == 'paid')->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
+                                                        $invoiceUnpaid = $invoiceSchedules->filter(fn($s) => ($s->clientSchedulePayment->payment_status ?? null) === null)->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
                                                         $billed = $totalDeposited + $invoicePaid;
                                                         $cashUnpaidAcc = $schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'cash' && ($s->clientSchedulePayment->status ?? '') == 'pending');
-                                                        $unPaidTotal = $cashUnpaidAcc->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
+                                                        $unPaidTotal = $cashUnpaidAcc->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
 
                                                         // Calculate HRs from Staff Log Hours (matched by route_id and week_start_date)
                                                         $currentWeekStartDate = null;
@@ -793,7 +793,7 @@
                                                                                         {{ ucfirst($s->clientSchedulePayment->payment_type ?? 'N/A') }}
                                                                                     </span>
                                                                                 </span>
-                                                                                <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                                <span class="customer-price">${{ number_format($s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0), 2) }}</span>
                                                                             </li>
                                                                         @endforeach
                                                                     </ul>
@@ -817,7 +817,7 @@
                                                                                 <span class="customer-info">
                                                                                     <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
                                                                                 </span>
-                                                                                <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                                <span class="customer-price">${{ number_format($s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0), 2) }}</span>
                                                                             </li>
                                                                         @empty
                                                                             <li class="empty-state">No Cash Records</li>
@@ -870,7 +870,7 @@
                                                                                     <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
                                                                                     <span class="service-date"><i class="fa-regular fa-calendar"></i>{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</span>
                                                                                 </span>
-                                                                                <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                                <span class="customer-price">${{ number_format($s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0), 2) }}</span>
                                                                             </li>
                                                                         @empty
                                                                             <li class="empty-state">No Cash Records</li>
@@ -899,7 +899,7 @@
                                                                                     <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
                                                                                     <span class="service-date"><i class="fa-regular fa-calendar"></i>{{ $s->service_date ? \Carbon\Carbon::parse($s->service_date)->format('d M Y') : 'N/A' }}</span>
                                                                                 </span>
-                                                                                <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                                <span class="customer-price">${{ number_format($s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0), 2) }}</span>
                                                                             </li>
                                                                         @empty
                                                                             <li class="empty-state">No Cash Records</li>
@@ -920,7 +920,7 @@
                                                             @php
                                                                 $omitSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option ?? '') == 'omit');
                                                                 $omitCount = $omitSchedules->count();
-                                                                $omitTotal = $omitSchedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
+                                                                $omitTotal = $omitSchedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
                                                             @endphp
                                                             @if ($omitCount > 0)
                                                                 <div class="table_hover">
@@ -932,7 +932,7 @@
                                                                                 <li class="customer-card stacked">
                                                                                     <div class="card-top-row">
                                                                                         <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
-                                                                                        <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                                        <span class="customer-price">${{ number_format($s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0), 2) }}</span>
                                                                                     </div>
                                                                                     @if (!empty($s->clientSchedulePayment->reason))
                                                                                         <span class="reason-text"><i class="fa-solid fa-triangle-exclamation"></i><span><strong>Reason:</strong> {{ $s->clientSchedulePayment->reason }}</span></span>
@@ -954,7 +954,7 @@
                                                             @php
                                                                 $partialSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option_five ?? '') == 'partially');
                                                                 $partialCount = $partialSchedules->count();
-                                                                $partialTotal = $partialSchedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
+                                                                $partialTotal = $partialSchedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
                                                             @endphp
                                                             @if ($partialCount > 0)
                                                                 <div class="table_hover">
@@ -966,7 +966,7 @@
                                                                                 <li class="customer-card stacked">
                                                                                     <div class="card-top-row">
                                                                                         <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
-                                                                                        <span class="customer-price">${{ number_format($s->clientSchedulePayment->final_price ?? 0, 2) }}</span>
+                                                                                        <span class="customer-price">${{ number_format($s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0), 2) }}</span>
                                                                                     </div>
                                                                                     @if (!empty($s->clientSchedulePayment->reason))
                                                                                         <span class="reason-text"><i class="fa-solid fa-triangle-exclamation"></i><span><strong>Reason:</strong> {{ $s->clientSchedulePayment->reason }}</span></span>

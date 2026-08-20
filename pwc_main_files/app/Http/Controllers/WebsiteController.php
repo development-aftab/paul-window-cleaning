@@ -494,7 +494,7 @@ class WebsiteController extends Controller
             if ($weekItems->count() > 0) {
                 return $weekItems->groupBy(function ($item) {
                     return $item->clientName?->clientRouteStaff->first()->route->id ?? 0;
-                });
+                })->map(fn($schedules) => $this->mergeRouteReportScheduleNotes($schedules));
             } else {
                 return collect();
             }
@@ -648,7 +648,7 @@ class WebsiteController extends Controller
             if ($weekItems->count() > 0) {
                 return $weekItems->groupBy(function ($item) {
                     return $item->clientName?->clientRouteStaff->first()->route->id ?? 0;
-                });
+                })->map(fn($schedules) => $this->mergeRouteReportScheduleNotes($schedules));
             } else {
                 return collect();
             }
@@ -696,7 +696,7 @@ class WebsiteController extends Controller
             if ($weekItems->count() > 0) {
                 return $weekItems->groupBy(function ($item) {
                     return $item->clientName?->clientRouteStaff->first()->route->id ?? 0;
-                });
+                })->map(fn($schedules) => $this->mergeRouteReportScheduleNotes($schedules));
             } else {
                 return collect();
             }
@@ -916,7 +916,7 @@ class WebsiteController extends Controller
                     $data = collect([
                         $targetWeekLabel => $weekItems->groupBy(function ($item) {
                             return $item->clientName?->clientRouteStaff->first()->route->id ?? 0;
-                        })
+                        })->map(fn($schedules) => $this->mergeRouteReportScheduleNotes($schedules))
                     ]);
                 } else {
                     $data = collect([$targetWeekLabel => collect()]);
@@ -931,7 +931,7 @@ class WebsiteController extends Controller
                 if ($weekItems->count() > 0) {
                     return $weekItems->groupBy(function ($item) {
                         return $item->clientName?->clientRouteStaff->first()->route->id ?? 0;
-                    });
+                    })->map(fn($schedules) => $this->mergeRouteReportScheduleNotes($schedules));
                 } else {
                     return collect();
                 }
@@ -1142,7 +1142,7 @@ class WebsiteController extends Controller
             return redirect()->route('view_client_invoice', ['id' => $id, 'start_date' => $start_week_date, 'end_date' => $end_week_date]);
         }
 
-        $clientPriceSum = $this->calculateTotalSum($clientSchedule);
+        $clientPriceSum = $clientSchedule->calculateMergedInvoiceAmount();
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
         $existingPayment = $clientSchedule->clientSchedulePayment;
         $isEditMode = $existingPayment !== null;
@@ -1166,7 +1166,7 @@ class WebsiteController extends Controller
             return redirect()->back();
         }
 
-        $clientPriceSum = $this->calculateMergedInvoiceAmount($clientSchedule);
+        $clientPriceSum = $clientSchedule->calculateMergedInvoiceAmount();
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
 
         return view('dashboard.view_client_invoice', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices'));
@@ -1194,7 +1194,7 @@ class WebsiteController extends Controller
             return redirect()->route('view_client_cash', ['id' => $id, 'start_date' => $start_week_date, 'end_date' => $end_week_date]);
         }
 
-        $clientPriceSum = $this->calculateTotalSum($clientSchedule);
+        $clientPriceSum = $clientSchedule->calculateMergedInvoiceAmount();
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
         $existingPayment = $clientSchedule->clientSchedulePayment;
         $isEditMode = $existingPayment !== null;
@@ -1218,79 +1218,19 @@ class WebsiteController extends Controller
             return redirect()->back();
         }
 
-        $clientPriceSum = $this->calculateMergedInvoiceAmount($clientSchedule);
+        $clientPriceSum = $clientSchedule->calculateMergedInvoiceAmount();
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
 
         return view('dashboard.view_client_cash', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices'));
     }
 
-    private function calculateMergedInvoiceAmount($clientSchedule)
+    private function mergeRouteReportScheduleNotes($schedules)
     {
-        $groupSchedules = \App\Models\ClientSchedule::with('clientSchedulePrice.clientPaymentPrice')
-            ->where('client_id', $clientSchedule->client_id)
-            ->where('start_date', $clientSchedule->start_date)
-            ->get();
-
-        $mergedInvoiceAmount = 0;
-
-        foreach ($groupSchedules as $sch) {
-            if ($sch->clientSchedulePrice && $sch->clientSchedulePrice->count() > 0) {
-                foreach ($sch->clientSchedulePrice as $sp) {
-                    $mergedInvoiceAmount += (float) (optional($sp->clientPaymentPrice)->value ?? 0);
-                }
-            }
-
-            if ($sch->extra_work && $sch->extra_work_price) {
-                $names = json_decode($sch->extra_work, true);
-                $values = json_decode($sch->extra_work_price, true);
-
-                if (is_array($names) && is_array($values)) {
-                    foreach ($names as $idx => $name) {
-                        $mergedInvoiceAmount += (float) ($values[$idx] ?? 0);
-                    }
-                }
-            }
-        }
-
-        return $mergedInvoiceAmount;
-    }
-
-    private function calculateTotalSum($clientSchedule)
-    {
-        $clientSchedulePriceIds = \App\Models\ClientSchedulePrice::where('schedule_id', $clientSchedule->id)
-            ->pluck('price_id')
-            ->toArray();
-
-        $basePriceSum = 0;
-
-        if (count($clientSchedulePriceIds) > 0) {
-            $basePriceSum = (float) \App\Models\ClientPriceList::whereIn('id', $clientSchedulePriceIds)->sum('value');
-        } else {
-            $note1Schedule = \App\Models\ClientSchedule::where('client_id', $clientSchedule->client_id)
-                ->where('week', $clientSchedule->week)
-                ->where('week_month', $clientSchedule->week_month)
-                ->whereHas('clientSchedulePrice') // Jis mein pivot table entries hon
-                ->first();
-
-            if ($note1Schedule) {
-                $note1PriceIds = \App\Models\ClientSchedulePrice::where('schedule_id', $note1Schedule->id)
-                    ->pluck('price_id')
-                    ->toArray();
-                $basePriceSum = (float) \App\Models\ClientPriceList::whereIn('id', $note1PriceIds)->sum('value');
-            }
-        }
-
-        $extraWorkSum = 0;
-        if (!empty($clientSchedule->extra_work_price)) {
-            $decodedPrices = json_decode($clientSchedule->extra_work_price, true);
-            if (is_array($decodedPrices)) {
-                $extraWorkSum = array_sum(array_map('floatval', $decodedPrices));
-            } else {
-                $extraWorkSum = (float) $clientSchedule->extra_work_price;
-            }
-        }
-
-        return $basePriceSum + $extraWorkSum;
+        return $schedules->groupBy(function ($schedule) {
+            return $schedule->client_id . '_' . $schedule->start_date;
+        })->map(function ($group) {
+            return $group->first(fn($s) => $s->clientSchedulePayment !== null) ?? $group->first();
+        })->values();
     }
 
     private function getMultiPriceWithExtra($clientSchedule)
@@ -4349,9 +4289,9 @@ class WebsiteController extends Controller
                         $staffName = $staffName === 'N/A' ? 'N/A' : preg_replace('/^(\S+)\s+(\S).*/', '$1 $2', $staffName);
 
                     // Calculate summary values
-                    $totalSales = $schedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
+                    $totalSales = $schedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
                     $cashSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'cash' && ($s->clientSchedulePayment->status ?? '') == 'paid');
-                    $cashRecord = $cashSchedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0);
+                    $cashRecord = $cashSchedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
 
                     // Calculate HRs from Staff Log Hours (matched by route_id and week_start_date)
                     $weekStartDate = null;
@@ -4378,7 +4318,7 @@ class WebsiteController extends Controller
 //                    $totalSalesRich->createText(number_format($cashRecord, 2) . "\n");
 //                    $invoiceLabel = $totalSalesRich->createTextRun("Invoice: ");
 //                    $invoiceLabel->getFont()->setBold(true);
-//                    $totalSalesRich->createText(number_format($invoiceSchedules->sum(fn($s) => $s->clientSchedulePayment->final_price ?? 0), 2) . "\n");
+//                    $totalSalesRich->createText(number_format($invoiceSchedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0)), 2) . "\n");
                     $totalLabel = $totalSalesRich->createTextRun("$ ");
                     $totalLabel->getFont()->setBold(true)->setSize(9);
                     $totalSalesRich->createText(number_format($totalSales, 2));
@@ -4433,7 +4373,7 @@ class WebsiteController extends Controller
                             }
 
                             $billedRich->createText(": ");
-                            $amount = $schedule->clientSchedulePayment->final_price ?? 0;
+                            $amount = $schedule->calculateMergedInvoiceAmount() ?: ($schedule->clientSchedulePayment->final_price ?? 0);
                             $billedRich->createText(number_format($amount, 2));
                         }
                     }
@@ -4453,7 +4393,7 @@ class WebsiteController extends Controller
                             if (!$firstUnpaid) $unpaidRich->createText("\n\n");
                             $firstUnpaid = false;
                             $clientName = $schedule->clientName->name ?? 'Unknown';
-                            $amount = $schedule->clientSchedulePayment->final_price ?? 0;
+                            $amount = $schedule->calculateMergedInvoiceAmount() ?: ($schedule->clientSchedulePayment->final_price ?? 0);
                             $serviceDate = $schedule->service_date
                                 ? \Carbon\Carbon::parse($schedule->service_date)->format('m/d/Y')
                                 : '';
@@ -4506,13 +4446,13 @@ class WebsiteController extends Controller
                             $firstPartial = false;
                             $clientName = $schedule->clientName->name ?? 'Unknown';
                             $scope = $schedule->clientSchedulePayment->partial_completed_scope ?? '';
-                            $amount = $schedule->clientSchedulePayment->final_price ?? 0;
+                            $amount = $schedule->calculateMergedInvoiceAmount() ?: ($schedule->clientSchedulePayment->final_price ?? 0);
 
                             $nameRun = $partialRich->createTextRun(
                                 $scope ? "$clientName ($scope): " : "$clientName: "
                             );
                             $nameRun->getFont()->setSize(9);
-                            $amount = $schedule->clientSchedulePayment->final_price ?? 0;
+                            $amount = $schedule->calculateMergedInvoiceAmount() ?: ($schedule->clientSchedulePayment->final_price ?? 0);
                             $partialRich->createText(number_format($amount, 2));
                         }
                     }

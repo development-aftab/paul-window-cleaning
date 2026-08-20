@@ -59,5 +59,35 @@ class ClientSchedule extends Model
         return $this->belongsTo(User::class, 'staff_id', 'id');
     }
 
+    public function calculateMergedInvoiceAmount(): float
+    {
+        $groupSchedules = self::with('clientSchedulePrice.clientPaymentPrice')
+            ->where('client_id', $this->client_id)
+            ->where('start_date', $this->start_date)
+            ->get();
+
+        $mergedInvoiceAmount = 0;
+
+        foreach ($groupSchedules as $sch) {
+            if ($sch->clientSchedulePrice && $sch->clientSchedulePrice->count() > 0) {
+                foreach ($sch->clientSchedulePrice as $sp) {
+                    $mergedInvoiceAmount += (float) (optional($sp->clientPaymentPrice)->value ?? 0);
+                }
+            }
+
+            if ($sch->extra_work && $sch->extra_work_price) {
+                $names = json_decode($sch->extra_work, true);
+                $values = json_decode($sch->extra_work_price, true);
+
+                if (is_array($names) && is_array($values)) {
+                    foreach ($names as $idx => $name) {
+                        $mergedInvoiceAmount += (float) ($values[$idx] ?? 0);
+                    }
+                }
+            }
+        }
+
+        return $mergedInvoiceAmount;
+    }
 
 }
