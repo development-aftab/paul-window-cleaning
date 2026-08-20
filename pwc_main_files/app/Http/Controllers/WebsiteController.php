@@ -1166,7 +1166,7 @@ class WebsiteController extends Controller
             return redirect()->back();
         }
 
-        $clientPriceSum = $this->calculateTotalSum($clientSchedule);
+        $clientPriceSum = $this->calculateMergedInvoiceAmount($clientSchedule);
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
 
         return view('dashboard.view_client_invoice', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices'));
@@ -1218,10 +1218,41 @@ class WebsiteController extends Controller
             return redirect()->back();
         }
 
-        $clientPriceSum = $this->calculateTotalSum($clientSchedule);
+        $clientPriceSum = $this->calculateMergedInvoiceAmount($clientSchedule);
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
 
         return view('dashboard.view_client_cash', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices'));
+    }
+
+    private function calculateMergedInvoiceAmount($clientSchedule)
+    {
+        $groupSchedules = \App\Models\ClientSchedule::with('clientSchedulePrice.clientPaymentPrice')
+            ->where('client_id', $clientSchedule->client_id)
+            ->where('start_date', $clientSchedule->start_date)
+            ->get();
+
+        $mergedInvoiceAmount = 0;
+
+        foreach ($groupSchedules as $sch) {
+            if ($sch->clientSchedulePrice && $sch->clientSchedulePrice->count() > 0) {
+                foreach ($sch->clientSchedulePrice as $sp) {
+                    $mergedInvoiceAmount += (float) (optional($sp->clientPaymentPrice)->value ?? 0);
+                }
+            }
+
+            if ($sch->extra_work && $sch->extra_work_price) {
+                $names = json_decode($sch->extra_work, true);
+                $values = json_decode($sch->extra_work_price, true);
+
+                if (is_array($names) && is_array($values)) {
+                    foreach ($names as $idx => $name) {
+                        $mergedInvoiceAmount += (float) ($values[$idx] ?? 0);
+                    }
+                }
+            }
+        }
+
+        return $mergedInvoiceAmount;
     }
 
     private function calculateTotalSum($clientSchedule)
