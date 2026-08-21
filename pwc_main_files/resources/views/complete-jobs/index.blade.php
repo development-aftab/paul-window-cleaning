@@ -537,6 +537,8 @@
             flatpickr("#filter_date_range", {
                 mode: "range",
                 dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "m-d-Y",
                 onChange: function(selectedDates) {
                     if (selectedDates.length === 2) {
                         var toStr = function(d) {
