@@ -1152,7 +1152,9 @@ class WebsiteController extends Controller
 
     public function viewClientInvoice(Request $request, $id)
     {
-        $client = Client::with('clientSchedule.clientSchedulePrice.clientPaymentPrice')->findOrFail($id);
+        $client = Client::with(['clientSchedule.clientSchedulePrice.clientPaymentPrice', 'clientPrice' => function ($query) {
+            $query->orderBy('position', 'asc');
+        }])->findOrFail($id);
         $start_week_date = $request->query('start_date');
         $end_week_date = $request->query('end_date');
 
@@ -1174,7 +1176,9 @@ class WebsiteController extends Controller
 
     public function clientCash(Request $request, $id)
     {
-        $client = Client::with('clientSchedule.clientSchedulePrice.clientPaymentPrice')->findOrFail($id);
+        $client = Client::with(['clientSchedule.clientSchedulePrice.clientPaymentPrice', 'clientPrice' => function ($query) {
+            $query->orderBy('position', 'asc');
+        }])->findOrFail($id);
         $start_week_date = $request->query('start_date');
         $end_week_date = $request->query('end_date');
         $selectedMonth = $request->query('month');
@@ -1204,7 +1208,9 @@ class WebsiteController extends Controller
 
     public function viewClientCash(Request $request, $id)
     {
-        $client = Client::with('clientSchedule.clientSchedulePrice.clientPaymentPrice')->findOrFail($id);
+        $client = Client::with(['clientSchedule.clientSchedulePrice.clientPaymentPrice', 'clientPrice' => function ($query) {
+            $query->orderBy('position', 'asc');
+        }])->findOrFail($id);
         $start_week_date = $request->query('start_date');
         $end_week_date = $request->query('end_date');
 

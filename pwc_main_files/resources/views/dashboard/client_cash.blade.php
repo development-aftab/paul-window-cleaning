@@ -14,6 +14,64 @@
             background: #FFF4CC;
             color: #A67C00;
         }
+
+        .create_clients_sec_staff .price_list_wrapper .price_list_flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .create_clients_sec_staff .price_list_wrapper .price_list_item {
+            flex: 0 0 auto;
+            max-width: 100%;
+        }
+
+        .create_clients_sec_staff .price_list_wrapper .price_list_flex .price_list {
+            background: #F5F6FA;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 0;
+        }
+
+        .create_clients_sec_staff .price_list_wrapper .price_list_flex .price_list_box {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+        .create_clients_sec_staff .price_list_wrapper .price_list_flex .table_checkbox {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .create_clients_sec_staff .price_list_wrapper .price_list_flex .table_checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 1.5px solid #C9CDD3;
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .create_clients_sec_staff .price_list_wrapper .price_list_flex .table_checkbox label {
+            font-size: 14px;
+            color: #1D1F2C;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .create_clients_sec_staff .price_list_wrapper .price_list_flex .price_list span {
+            font-size: 14px;
+            color: #667085;
+            font-weight: 500;
+            white-space: nowrap;
+        }
     </style>
 @endpush
 @section('navbar-title')
@@ -84,11 +142,31 @@
                                         </div>
                                         <div class="custom_partially_changed">
                                             <div class="row custom_row">
-                                                <div class="col-md-12 custom_no_change">
+                                                <div class="col-md-12 custom_no_change partially_completed_wrapper">
                                                     <div class="custom_radio">
-                                                        <input class="form-check-input complete_no_change" name="option" type="checkbox" value="completed" id="com_no_change" @if ($isEditMode && $existingPayment->option == 'completed') checked @endif>
+                                                        <input class="form-check-input complete_no_change check_show_hide" name="option" type="checkbox" value="completed" id="com_no_change" @if ($isEditMode && $existingPayment->option == 'completed') checked @endif>
                                                         <label class="form-check-label" for="com_no_change">Completed no
                                                             Change</label>
+                                                    </div>
+                                                    <div class="row reason_input_fileds_wrapper">
+                                                        <div class="price_list_wrapper appended_price_list">
+                                                            <div class="price_list_flex">
+                                                                @foreach($client->clientPrice as $price)
+                                                                    <div class="price_list_item">
+                                                                        <div class="price_list">
+                                                                            <div class="price_list_box">
+                                                                                <div class="table_checkbox">
+                                                                                    <input class="form-check-input" type="checkbox" disabled
+                                                                                        @if($clientSchedule->clientSchedulePrice->pluck('price_id')->contains($price->id)) checked @endif>
+                                                                                    <label>{{ $price->name ?? '' }}</label>
+                                                                                </div>
+                                                                                <span>${{ $price->value ?? '' }}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -100,6 +178,24 @@
                                                             but did not receive payment</label>
                                                     </div>
                                                     <div class="row reason_input_fileds_wrapper">
+                                                        <div class="price_list_wrapper appended_price_list">
+                                                            <div class="price_list_flex">
+                                                                @foreach($client->clientPrice as $price)
+                                                                    <div class="price_list_item">
+                                                                        <div class="price_list">
+                                                                            <div class="price_list_box">
+                                                                                <div class="table_checkbox">
+                                                                                    <input class="form-check-input" type="checkbox" disabled
+                                                                                        @if($clientSchedule->clientSchedulePrice->pluck('price_id')->contains($price->id)) checked @endif>
+                                                                                    <label>{{ $price->name ?? '' }}</label>
+                                                                                </div>
+                                                                                <span>${{ $price->value ?? '' }}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
                                                         <div class="col-md-12">
                                                             <div class="txt_field">
                                                                 <input class="form-control reason_disabled" type="text" name="reason" placeholder="Reason" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->reason ?? '') : '' }}">
