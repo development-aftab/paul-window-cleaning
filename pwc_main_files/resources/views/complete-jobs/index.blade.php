@@ -3,6 +3,73 @@
 @push('css')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+    <style>
+        #viewReportModalCash .price_list_wrapper .price_list_flex,
+        #viewReportModalInvoice .price_list_wrapper .price_list_flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #viewReportModalCash .price_list_wrapper .price_list_item,
+        #viewReportModalInvoice .price_list_wrapper .price_list_item {
+            flex: 0 0 auto;
+            max-width: 100%;
+        }
+
+        #viewReportModalCash .price_list_wrapper .price_list,
+        #viewReportModalInvoice .price_list_wrapper .price_list {
+            background: #F5F6FA;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 0;
+        }
+
+        #viewReportModalCash .price_list_wrapper .price_list_box,
+        #viewReportModalInvoice .price_list_wrapper .price_list_box {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+        #viewReportModalCash .price_list_wrapper .table_checkbox,
+        #viewReportModalInvoice .price_list_wrapper .table_checkbox {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        #viewReportModalCash .price_list_wrapper .table_checkbox input[type="checkbox"],
+        #viewReportModalInvoice .price_list_wrapper .table_checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 1.5px solid #C9CDD3;
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        #viewReportModalCash .price_list_wrapper .table_checkbox label,
+        #viewReportModalInvoice .price_list_wrapper .table_checkbox label {
+            font-size: 14px;
+            color: #1D1F2C;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        #viewReportModalCash .price_list_wrapper .price_list span,
+        #viewReportModalInvoice .price_list_wrapper .price_list span {
+            font-size: 14px;
+            color: #667085;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+    </style>
 @endpush
 
 @section('navbar-title')
@@ -140,7 +207,9 @@
                                                                        data-day-number="{{ $job->clientSchedulePayment->day_number ?? '' }}"
                                                                        data-start-time="{{ $job->clientSchedulePayment->start_time ?? '' }}"
                                                                        data-end-time="{{ $job->clientSchedulePayment->end_time ?? '' }}"
-                                                                       data-final-price="{{ $job->clientSchedulePayment->final_price ?? '' }}">
+                                                                       data-final-price="{{ $job->clientSchedulePayment->final_price ?? '' }}"
+                                                                       data-client-price-list="{{ optional($job->clientName?->clientPrice)->toJson() ?? '[]' }}"
+                                                                       data-schedule-price-ids="{{ $job->clientSchedulePrice->pluck('price_id')->toJson() }}">
                                                                         <i class="fa-solid fa-file-lines me-2"></i>View
                                                                         Report
                                                                     </a>
@@ -202,6 +271,11 @@
                                         <label class="form-check-label" for="modal_cash_completed">Completed no
                                             Change</label>
                                     </div>
+                                    <div class="row reason_input_fileds_wrapper" id="modal_cash_completed_price_list_wrapper"
+                                         style="display: none;">
+                                        <div class="price_list_wrapper appended_price_list" id="modal_cash_completed_price_list">
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Completed but did not receive payment -->
@@ -214,6 +288,8 @@
                                     </div>
                                     <div class="row reason_input_fileds_wrapper" id="modal_cash_noPayment_reason"
                                          style="display: none;">
+                                        <div class="price_list_wrapper appended_price_list" id="modal_cash_noPayment_price_list">
+                                        </div>
                                         <div class="col-md-12">
                                             <div class="txt_field">
                                                 <input class="form-control" type="text"
@@ -403,6 +479,11 @@
                                                disabled>
                                         <label class="form-check-label" for="modal_invoice_completed">Completed no
                                             Change</label>
+                                    </div>
+                                    <div class="row reason_input_fileds_wrapper" id="modal_invoice_completed_price_list_wrapper"
+                                         style="display: none;">
+                                        <div class="price_list_wrapper appended_price_list" id="modal_invoice_completed_price_list">
+                                        </div>
                                     </div>
                                 </div>
 
@@ -622,6 +703,35 @@
 
             $('#filter_route, #filter_week').on('change', applyFilters);
 
+            // Build the read-only price list markup for a client, marking only the
+            // specific services that were attached to this job's schedule as checked.
+            function buildPriceListHtml(priceList, selectedIds) {
+                if (!priceList || !priceList.length) {
+                    return '';
+                }
+                selectedIds = (selectedIds || []).map(function(id) {
+                    return String(id);
+                });
+                var html = '<div class="price_list_flex">';
+                priceList.forEach(function(price) {
+                    var isChecked = selectedIds.indexOf(String(price.id)) !== -1;
+                    html += '<div class="price_list_item">' +
+                        '<div class="price_list">' +
+                        '<div class="price_list_box">' +
+                        '<div class="table_checkbox">' +
+                        '<input class="form-check-input" type="checkbox"' + (isChecked ? ' checked' : '') +
+                        ' disabled>' +
+                        '<label>' + (price.name || '') + '</label>' +
+                        '</div>' +
+                        '<span>$' + (price.value || '0.00') + '</span>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                });
+                html += '</div>';
+                return html;
+            }
+
             // Handle View Report button click
             $(document).on('click', '.view-report-btn', function() {
                 var serviceDate = $(this).data('service-date');
@@ -642,6 +752,8 @@
                 var finalPrice = $(this).data('final-price');
                 var clientName = $(this).data('client-name');
                 var paymentType = $(this).data('payment-type'); // 'cash' or 'invoice'
+                var clientPriceList = $(this).data('client-price-list');
+                var schedulePriceIds = $(this).data('schedule-price-ids');
 
                 // Format service date
                 var formattedDate = 'N/A';
@@ -657,11 +769,12 @@
                     // Reset all checkboxes and fields
                     $('#modal_cash_completed, #modal_cash_noPayment, #modal_cash_partially, #modal_cash_option_two, #modal_cash_option_three, #modal_cash_option_four, #modal_cash_logTime, #modal_cash_omit')
                         .prop('checked', false);
-                    $('#modal_cash_noPayment_reason, #modal_cash_partially_fields, #modal_cash_extra_paid_fields, #modal_cash_extra_work_fields, #modal_cash_log_time_fields, #modal_cash_omit_reason')
+                    $('#modal_cash_noPayment_reason, #modal_cash_partially_fields, #modal_cash_extra_paid_fields, #modal_cash_extra_work_fields, #modal_cash_log_time_fields, #modal_cash_omit_reason, #modal_cash_completed_price_list_wrapper')
                         .hide();
                     $('#modal_cash_reason_noPayment, #modal_cash_reason_partially, #modal_cash_scope_partially, #modal_cash_price_charged_one, #modal_cash_amount, #modal_cash_scope_extra_work, #modal_cash_price_charged_two, #modal_cash_start_time, #modal_cash_end_time, #modal_cash_reason_omit')
                         .val('');
                     $('#modal_cash_day_number').text('0');
+                    $('#modal_cash_completed_price_list, #modal_cash_noPayment_price_list').empty();
 
                     // Set client name and final price
                     $('#modal_cash_client_name').text(clientName);
@@ -672,11 +785,20 @@
                     // Set completion status checkboxes
                     if (option === 'completed') {
                         $('#modal_cash_completed').prop('checked', true);
+                        var completedPriceListHtml = buildPriceListHtml(clientPriceList, schedulePriceIds);
+                        if (completedPriceListHtml) {
+                            $('#modal_cash_completed_price_list').html(completedPriceListHtml);
+                            $('#modal_cash_completed_price_list_wrapper').show();
+                        }
                     } else if (option === 'no_payment') {
                         $('#modal_cash_noPayment').prop('checked', true);
+                        $('#modal_cash_noPayment_reason').show();
                         if (reason) {
-                            $('#modal_cash_noPayment_reason').show();
                             $('#modal_cash_reason_noPayment').val(reason);
+                        }
+                        var noPaymentPriceListHtml = buildPriceListHtml(clientPriceList, schedulePriceIds);
+                        if (noPaymentPriceListHtml) {
+                            $('#modal_cash_noPayment_price_list').html(noPaymentPriceListHtml);
                         }
                     } else if (option === 'omit') {
                         $('#modal_cash_omit').prop('checked', true);
@@ -745,13 +867,14 @@
                     // Reset all checkboxes and fields
                     $('#modal_invoice_completed, #modal_invoice_partially, #modal_invoice_option_two, #modal_invoice_option_three, #modal_invoice_omit')
                         .prop('checked', false);
-                    $('#modal_invoice_partially_fields, #modal_invoice_extra_work_fields, #modal_invoice_log_time_fields, #modal_invoice_omit_reason')
+                    $('#modal_invoice_partially_fields, #modal_invoice_extra_work_fields, #modal_invoice_log_time_fields, #modal_invoice_omit_reason, #modal_invoice_completed_price_list_wrapper')
                         .hide();
                     $('#modal_invoice_reason_partially, #modal_invoice_scope_partially, #modal_invoice_price_charged_one')
                         .val('');
                     $('#modal_invoice_scope_extra_work, #modal_invoice_price_charged_two').val('');
                     $('#modal_invoice_start_time, #modal_invoice_end_time').val('');
                     $('#modal_invoice_reason_omit').val('');
+                    $('#modal_invoice_completed_price_list').empty();
 
                     // Set client name and final price
                     $('#modal_invoice_client_name').text(clientName);
@@ -762,6 +885,11 @@
                     // Set completion status checkboxes
                     if (option === 'completed') {
                         $('#modal_invoice_completed').prop('checked', true);
+                        var invoiceCompletedPriceListHtml = buildPriceListHtml(clientPriceList, schedulePriceIds);
+                        if (invoiceCompletedPriceListHtml) {
+                            $('#modal_invoice_completed_price_list').html(invoiceCompletedPriceListHtml);
+                            $('#modal_invoice_completed_price_list_wrapper').show();
+                        }
                     } else if (option === 'omit') {
                         $('#modal_invoice_omit').prop('checked', true);
                         if (reason) {

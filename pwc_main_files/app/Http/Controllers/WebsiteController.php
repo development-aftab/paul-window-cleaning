@@ -4160,6 +4160,8 @@ class WebsiteController extends Controller
         // Fetch completed schedules with relationships
         $completeJobs = ClientSchedule::with([
             'clientName',  // Client relationship
+            'clientName.clientPrice',  // Client price list
+            'clientSchedulePrice',  // Specific services attached to this schedule/job
             'clientSchedulePayment',  // Payment relationship
         ])->where('status', 'completed')->orderBy('created_at', 'desc')->get();
         $routes = StaffRoute::where('status', 1)->get();
