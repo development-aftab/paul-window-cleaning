@@ -65,7 +65,8 @@ class DepositsController extends Controller
     private function buildStaffSections($onlyStaffId, Request $request)
     {
         $rows = collect();
-        $filterDate = $request->filled('date') ? Carbon::parse($request->date) : null;
+        $filterDateFrom = $request->filled('date_from') ? Carbon::parse($request->date_from)->startOfDay() : null;
+        $filterDateTo = $request->filled('date_to') ? Carbon::parse($request->date_to)->endOfDay() : null;
 
         // 1) Existing deposit records not yet marked as deposited
         $depositQuery = Deposit::with(['route', 'staff', 'clientSchedule.clientName'])
@@ -90,7 +91,7 @@ class DepositsController extends Controller
                 ? $this->calendarWeekRangeForDate(Carbon::parse($referenceDate))
                 : $this->computeWeekDateRange($deposit->week, $deposit->month, $deposit->year);
 
-            if ($filterDate && (!$range || !$filterDate->between($range['start'], $range['end']))) {
+            if (($filterDateFrom || $filterDateTo) && (!$range || !$this->rangeOverlaps($range, $filterDateFrom, $filterDateTo))) {
                 continue;
             }
 
@@ -138,7 +139,7 @@ class DepositsController extends Controller
 
             $range = $this->calendarWeekRangeForDate($context['reference_date']);
 
-            if ($filterDate && !$filterDate->between($range['start'], $range['end'])) {
+            if (($filterDateFrom || $filterDateTo) && !$this->rangeOverlaps($range, $filterDateFrom, $filterDateTo)) {
                 continue;
             }
 
@@ -276,6 +277,22 @@ class DepositsController extends Controller
         $weekEnd = $weekStart->copy()->addDays(6);
 
         return ['start' => $weekStart, 'end' => $weekEnd];
+    }
+
+    /**
+     * Whether a row's week date range overlaps the requested date_from/date_to filter range.
+     * Either bound may be null (open-ended).
+     */
+    private function rangeOverlaps(array $range, ?Carbon $filterDateFrom, ?Carbon $filterDateTo): bool
+    {
+        if ($filterDateFrom && $range['end']->lt($filterDateFrom)) {
+            return false;
+        }
+        if ($filterDateTo && $range['start']->gt($filterDateTo)) {
+            return false;
+        }
+
+        return true;
     }
 
     private function weekNumberFromString(?string $week): int

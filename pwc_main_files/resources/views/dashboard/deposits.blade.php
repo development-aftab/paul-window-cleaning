@@ -2,6 +2,7 @@
 
 @push('css')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
     <style>
         html, body {
             color-scheme: light only;
@@ -158,11 +159,13 @@
                                 </select>
                             </div>
                             <div class="txt_field">
-                                <label for="filter_date">Date</label>
-                                <input class="form-control" type="date" name="date" id="filter_date" value="{{ request('date') }}">
+                                <label for="filter_date_range">Date Range</label>
+                                <input class="form-control" type="text" id="filter_date_range" placeholder="Select date range" autocomplete="off">
+                                <input type="hidden" name="date_from" id="filter_date_from" value="{{ request('date_from') }}">
+                                <input type="hidden" name="date_to" id="filter_date_to" value="{{ request('date_to') }}">
                             </div>
                             <button type="submit" class="btn_global btn_dark_blue">Filter</button>
-                            @if (request()->hasAny(['staff_id', 'route_id', 'week', 'date']))
+                            @if (request()->hasAny(['staff_id', 'route_id', 'week', 'date_from', 'date_to']))
                                 <a href="{{ route('deposits.index') }}" class="btn_global btn_dark_blue" style="background:#fff;color:#32346A;border:1px solid #ddd;">Clear</a>
                             @endif
                         </form>
@@ -237,11 +240,38 @@
 
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         $(document).ready(function() {
             $(".selectRoute").select2({
                 allowClear: true,
                 placeholder: 'All Routes'
+            });
+
+            var initialDateFrom = @json(request('date_from'));
+            var initialDateTo = @json(request('date_to'));
+
+            flatpickr("#filter_date_range", {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "m-d-Y",
+                defaultDate: (initialDateFrom && initialDateTo) ? [initialDateFrom, initialDateTo] : null,
+                onChange: function(selectedDates) {
+                    var toStr = function(d) {
+                        return d.getFullYear() + '-' +
+                            ('0' + (d.getMonth() + 1)).slice(-2) + '-' +
+                            ('0' + d.getDate()).slice(-2);
+                    };
+
+                    if (selectedDates.length === 2) {
+                        $('#filter_date_from').val(toStr(selectedDates[0]));
+                        $('#filter_date_to').val(toStr(selectedDates[1]));
+                    } else {
+                        $('#filter_date_from').val('');
+                        $('#filter_date_to').val('');
+                    }
+                }
             });
 
             // Inline-editable "Date Deposited" — confirm, then save on select, reusing the same
