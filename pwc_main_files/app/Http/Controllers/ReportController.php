@@ -133,7 +133,7 @@ class ReportController extends Controller
                 })->orWhereDoesntHave('clientSchedulePayment');
             })
             ->join('clients', 'client_schedules.client_id', '=', 'clients.id')
-            ->orderBy('clients.name', 'asc')
+            ->orderBy('client_schedules.created_at', 'asc')
             ->select('client_schedules.*')
             ->get();
 
