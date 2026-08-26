@@ -269,11 +269,23 @@ class WebsiteController extends Controller
 
         $startDate = Carbon::now();
         $endDate = Carbon::now()->addWeeks(2);
-        $prioritySchedules = ClientSchedule::with(['clientName.clientRoute'])
-            ->where('priority', 1)
+        $upcomingSchedules = ClientSchedule::with(['clientName.clientRoute', 'clientSchedulePrice.clientPaymentPrice'])
+            ->where(function ($q) {
+                $q->whereNull('status')->orWhere('status', '!=', 'completed');
+            })
             ->whereBetween('start_date', [$startDate, $endDate])
             ->orderBy('start_date', 'asc')
-            ->get();
+            ->get()
+            ->map(function ($schedule) use ($customStartDates) {
+                $calendarWeek = $this->resolveCustomCalendarWeek(Carbon::parse($schedule->start_date), $customStartDates);
+
+                $schedule->calendar_week_number = $calendarWeek['week_number'];
+                $schedule->calendar_month = $calendarWeek['month'];
+                $schedule->calendar_range_start = $calendarWeek['start_date'];
+                $schedule->calendar_range_end = $calendarWeek['end_date'];
+
+                return $schedule;
+            });
 
         $totalUnPaids = 0;
         if (auth()->user()->hasRole('staff')) {
@@ -299,8 +311,37 @@ class WebsiteController extends Controller
             'MyPotentialClients' => $MyPotentialClients,
             'deposits' => $deposits,
             'last45DaysInvoices' => $last45DaysInvoices,
-            'prioritySchedules' => $prioritySchedules,
+            'upcomingSchedules' => $upcomingSchedules,
         ]);
+    }
+
+    private function resolveCustomCalendarWeek(Carbon $date, $customStartDates)
+    {
+        $matchedRange = null;
+        $matchedStart = null;
+
+        foreach ($customStartDates as $range => $rangeStart) {
+            if ($date->gte($rangeStart) && $date->lt($rangeStart->copy()->addWeeks(4))) {
+                $matchedRange = $range;
+                $matchedStart = $rangeStart;
+                break;
+            }
+        }
+
+        if (!$matchedStart) {
+            $matchedStart = collect($customStartDates)->first();
+        }
+
+        $weekIndex = intdiv($matchedStart->diffInDays($date), 7);
+        $weekStart = $matchedStart->copy()->addWeeks($weekIndex);
+        $weekEnd = $weekStart->copy()->addDays(6);
+
+        return [
+            'week_number' => $weekIndex + 1,
+            'month' => $weekStart->format('F'),
+            'start_date' => $weekStart,
+            'end_date' => $weekEnd,
+        ];
     }
 
     public function notification()

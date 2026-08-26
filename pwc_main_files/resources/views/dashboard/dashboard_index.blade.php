@@ -258,18 +258,39 @@
                             <h3>Coming Soon</h3>
                             <div class="service_complete_wrapper">
                                 <ul class="notification_ul-wrapper">
-                                    @forelse($prioritySchedules as $schedule)
+                                    @forelse($upcomingSchedules as $schedule)
+                                        @php
+                                            $routeName = optional(optional($schedule->clientName)->clientRoute->first())->name ?? '';
+                                            $scopeOfWork = $schedule->clientSchedulePrice
+                                                ->map(fn ($price) => $price->clientPaymentPrice?->name)
+                                                ->filter()
+                                                ->implode(', ');
+                                            $dateRange = $schedule->calendar_range_start
+                                                ? $schedule->calendar_range_start->format('M d') . ' - ' . $schedule->calendar_range_end->format('M d')
+                                                : '';
+                                        @endphp
                                         <li>
                                             <div>
                                                 <h5>
-                                                    {{ optional($schedule->clientName)->clientRoute->first()->name ?? '' }}
-                                                    -
                                                     {{ optional($schedule->clientName)->name ?? '' }}
+                                                    @if ($routeName)
+                                                        - {{ $routeName }}
+                                                    @endif
                                                 </h5>
                                             </div>
                                             <div>
-                                                <p>{{ $schedule->note ?? '' }}</p>
-                                                <span>{{ $schedule->start_date ?? '' }}</span>
+                                                <p>
+                                                    @if ($schedule->calendar_week_number)
+                                                        Week {{ $schedule->calendar_week_number }}
+                                                    @endif
+                                                    @if ($schedule->calendar_month)
+                                                        , {{ $schedule->calendar_month }}
+                                                    @endif
+                                                    @if ($scopeOfWork)
+                                                        &mdash; {{ $scopeOfWork }}
+                                                    @endif
+                                                </p>
+                                                <span>{{ $dateRange }}</span>
                                             </div>
                                         </li>
                                     @empty
