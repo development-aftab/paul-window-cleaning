@@ -116,6 +116,55 @@
             line-height: 24px;
             width: 180px;
         }
+
+        /* Note Reset Button Styles */
+        .note-reset-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(238, 90, 36, 0.3);
+            margin-left: auto;
+            margin-right: 12px;
+            z-index: 2;
+            position: relative;
+            letter-spacing: 0.3px;
+        }
+
+        .note-reset-btn:hover {
+            background: linear-gradient(135deg, #fc5c65, #d63031);
+            box-shadow: 0 4px 14px rgba(238, 90, 36, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .note-reset-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 4px rgba(238, 90, 36, 0.25);
+        }
+
+        .note-reset-btn i {
+            font-size: 11px;
+        }
+
+        .note_accordion .accordion-header {
+            position: relative;
+        }
+
+        .note_accordion .accordion-header .note-reset-btn {
+            position: absolute;
+            right: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+        }
     </style>
 @endpush
 @section('navbar-title')
@@ -716,6 +765,9 @@
                                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-${id}" aria-expanded="true" aria-controls="collapseOne-${id}">
                                             Note 1
                                         </button>
+                                        <span class="note-reset-btn" onclick="resetNoteFields(this)" title="Reset Note 1 fields">
+                                            <i class="fa-solid fa-rotate-left"></i> Reset
+                                        </span>
                                     </h2>
                                     <div id="collapseOne-${id}" class="accordion-collapse collapse show">
                                         <div class="accordion-body">
@@ -780,6 +832,9 @@
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo-${id}" aria-expanded="false" aria-controls="collapseTwo-${id}">
                                                 Note 2
                                             </button>
+                                            <span class="note-reset-btn" onclick="resetNoteFields(this)" title="Reset Note 2 fields">
+                                                <i class="fa-solid fa-rotate-left"></i> Reset
+                                            </span>
                                         </h2>
                                         <div id="collapseTwo-${id}" class="accordion-collapse collapse">
                                             <div class="accordion-body">
@@ -834,6 +889,9 @@
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree-${id}" aria-expanded="false" aria-controls="collapseThree-${id}">
                                                 Note 3
                                             </button>
+                                            <span class="note-reset-btn" onclick="resetNoteFields(this)" title="Reset Note 3 fields">
+                                                <i class="fa-solid fa-rotate-left"></i> Reset
+                                            </span>
                                         </h2>
                                         <div id="collapseThree-${id}" class="accordion-collapse collapse">
                                             <div class="accordion-body">
@@ -887,6 +945,9 @@
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour-${id}" aria-expanded="false" aria-controls="collapseFour-${id}">
                                                 Note 4
                                             </button>
+                                            <span class="note-reset-btn" onclick="resetNoteFields(this)" title="Reset Note 4 fields">
+                                                <i class="fa-solid fa-rotate-left"></i> Reset
+                                            </span>
                                         </h2>
                                         <div id="collapseFour-${id}" class="accordion-collapse collapse">
                                             <div class="accordion-body">
@@ -940,6 +1001,9 @@
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive-${id}" aria-expanded="false" aria-controls="collapseFive-${id}">
                                                 Note 5
                                             </button>
+                                            <span class="note-reset-btn" onclick="resetNoteFields(this)" title="Reset Note 5 fields">
+                                                <i class="fa-solid fa-rotate-left"></i> Reset
+                                            </span>
                                         </h2>
                                         <div id="collapseFive-${id}" class="accordion-collapse collapse">
                                             <div class="accordion-body">
@@ -992,6 +1056,9 @@
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix-${id}" aria-expanded="false" aria-controls="collapseSix-${id}">
                                                 Note 6
                                             </button>
+                                            <span class="note-reset-btn" onclick="resetNoteFields(this)" title="Reset Note 6 fields">
+                                                <i class="fa-solid fa-rotate-left"></i> Reset
+                                            </span>
                                         </h2>
                                         <div id="collapseSix-${id}" class="accordion-collapse collapse">
                                             <div class="accordion-body">
@@ -1776,5 +1843,42 @@
             // Trigger the submitButton handler
             $('.submitButton').first().click();
         });
+    </script>
+
+    <script>
+        // Reset all fields within a specific Note accordion section
+        function resetNoteFields(btn) {
+            var $accordionItem = $(btn).closest('.accordion-item');
+            var $body = $accordionItem.find('.accordion-body');
+
+            // Clear all textareas
+            $body.find('textarea').val('');
+
+            // Clear date inputs
+            $body.find('input[type="date"]').val('');
+
+            // Reset select dropdowns to default placeholder
+            $body.find('select').each(function() {
+                $(this).val('');
+                // Re-select the disabled placeholder option
+                $(this).find('option[disabled]').prop('selected', true);
+            });
+
+            // Uncheck priority checkbox and reset its value
+            $body.find('.priority_checkbox input[type="checkbox"]').prop('checked', false).val('0');
+
+            // Uncheck all price list checkboxes
+            $body.find('.price_list_wrapper input[type="checkbox"]').prop('checked', false);
+
+            // Brief visual feedback on the button
+            var $btn = $(btn);
+            var originalHtml = $btn.html();
+            $btn.html('<i class="fa-solid fa-check"></i> Done!');
+            $btn.css('background', 'linear-gradient(135deg, #2ed573, #1abc9c)');
+            setTimeout(function() {
+                $btn.html(originalHtml);
+                $btn.css('background', '');
+            }, 1200);
+        }
     </script>
 @endpush
