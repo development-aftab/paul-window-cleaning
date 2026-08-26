@@ -90,13 +90,24 @@
                     <div class="custom_div">
                         <!-- Filters -->
                         <div class="row row_gap">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <div class="txt_field custom_select_route">
+                                    <label for="filter_client">Filter by Client</label>
+                                    <select class="form-select selectClient" id="filter_client">
+                                        <option value="">All Clients</option>
+                                        @foreach ($clients ?? [] as $client)
+                                            <option value="{{ $client->id }}">{{ $client->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
                                 <div class="txt_field">
                                     <label for="filter_date_range">Filter by Date</label>
                                     <input class="form-control" type="text" id="filter_date_range" placeholder="Select date range" autocomplete="off">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="txt_field custom_select_route">
                                     <label for="filter_route">Filter by Route</label>
                                     <select class="form-select selectRoute" id="filter_route">
@@ -107,7 +118,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="txt_field">
                                     <label for="filter_week">Filter by Week</label>
                                     <select class="form-select" id="filter_week">
@@ -140,7 +151,8 @@
                                             <tbody>
                                             @forelse ($completeJobs->filter(function($job) { return $job->clientSchedulePayment; }) as $job)
                                                 @php $paymentType = $job->clientSchedulePayment->payment_type; @endphp
-                                                <tr data-route-id="{{ $job->clientName->clientRouteStaff->first()->route_id ?? '' }}"
+                                                <tr data-client-id="{{ $job->client_id }}"
+                                                    data-route-id="{{ $job->clientName->clientRouteStaff->first()->route_id ?? '' }}"
                                                     data-week="{{ $job->week }}"
                                                     data-date="{{ $job->service_date }}">
                                                     <td>{{ $job->clientName->name ?? 'N/A' }}</td>
@@ -612,6 +624,11 @@
                 allowClear: true
             });
 
+            $(".selectClient").select2({
+                placeholder: "Search client name",
+                allowClear: true
+            });
+
             var filterStartDate = '';
             var filterEndDate = '';
 
@@ -662,6 +679,7 @@
 
             // Filters
             function applyFilters() {
+                var filterClient = $('#filter_client').val();
                 var filterRoute = $('#filter_route').val();
                 var filterWeek = $('#filter_week').val();
 
@@ -673,9 +691,14 @@
                         }
 
                         var row = jobsTable.row(dataIndex).node();
+                        var clientId = $(row).data('client-id') || '';
                         var routeId = $(row).data('route-id') || '';
                         var week = $(row).data('week') || '';
                         var date = $(row).data('date') || '';
+
+                        if (filterClient && String(clientId) !== String(filterClient)) {
+                            return false;
+                        }
 
                         if (filterRoute && routeId != filterRoute) {
                             return false;
@@ -701,7 +724,7 @@
                 $.fn.dataTable.ext.search.pop();
             }
 
-            $('#filter_route, #filter_week').on('change', applyFilters);
+            $('#filter_client, #filter_route, #filter_week').on('change', applyFilters);
 
             // Build the read-only price list markup for a client, marking only the
             // specific services that were attached to this job's schedule as checked.

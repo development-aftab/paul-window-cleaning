@@ -4171,7 +4171,13 @@ class WebsiteController extends Controller
             'clientSchedulePayment',  // Payment relationship
         ])->where('status', 'completed')->orderBy('created_at', 'desc')->get();
         $routes = StaffRoute::where('status', 1)->get();
-        return view('complete-jobs.index', compact('completeJobs', 'routes'));
+        $clients = $completeJobs
+            ->pluck('clientName')
+            ->filter()
+            ->unique('id')
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+        return view('complete-jobs.index', compact('completeJobs', 'routes', 'clients'));
     }
 
     public function updatePricePositions(Request $request)
