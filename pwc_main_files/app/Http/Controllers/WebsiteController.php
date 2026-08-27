@@ -3473,7 +3473,7 @@ class WebsiteController extends Controller
                     'site_url' => env('APP_URL'),
                 ];
                 Mail::send('website.email_templates.contact_quote_template', ['data' => $emailData], function ($message) use ($emailData) {
-                    $message->to('varnum4@gmail.com', 'Admin')
+                    $message->to('paul@paulswindowcleaning.org', 'Admin')
                         ->subject('New Quote Request: ' . $emailData['subject']);
                 });
             } catch (\Exception $e) {
@@ -3906,7 +3906,7 @@ class WebsiteController extends Controller
                 . "Edited At: " . now()->format('m-d-Y h:i A');
 
             Mail::raw($emailBody, function ($message) use ($client) {
-                $message->to('varnum4@gmail.com')
+                $message->to('paul@paulswindowcleaning.org')
                     ->subject('Report Edited: ' . ($client->name ?? 'Client') . ' - Please Review & Update QuickBooks');
             });
         } catch (\Throwable $e) {

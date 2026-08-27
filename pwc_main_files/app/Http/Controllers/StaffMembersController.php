@@ -109,7 +109,7 @@ class StaffMembersController extends Controller
         ];
 
         Mail::send('website.email_templates.creating_staff_template', ['data' => $data], function ($message) use ($data) {
-            $message->to($data['email'], $data['name'])->cc('cleaning@yopmail.com', 'Admin')->subject($data['subject']);
+            $message->to($data['email'], $data['name'])->cc('paul@paulswindowcleaning.org', 'Admin')->subject($data['subject']);
         });
 
         return redirect()->route('staffmembers.index')->with(['title' => 'Done', 'message' => 'Staff Created Successfully', 'type' => 'success',]);
@@ -231,7 +231,7 @@ class StaffMembersController extends Controller
             ];
 
             Mail::send('website.email_templates.creating_staff_template', ['data' => $data], function ($message) use ($data) {
-                $message->to($data['email'], $data['name'])->cc('cleaning@yopmail.com', 'Admin')->subject($data['subject']);
+                $message->to($data['email'], $data['name'])->cc('paul@paulswindowcleaning.org', 'Admin')->subject($data['subject']);
             });
         }
 
