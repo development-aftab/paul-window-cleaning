@@ -110,6 +110,29 @@
             border-radius: 5px;
             text-align: end;
         }
+
+        .sortable-header {
+            cursor: pointer;
+            position: relative;
+            padding-right: 20px !important;
+        }
+
+        .sortable-header::after {
+            content: '\2195'; /* Up/down arrow */
+            position: absolute;
+            right: 5px;
+            opacity: 0.3;
+        }
+
+        .sortable-header.asc::after {
+            content: '\2191'; /* Up arrow */
+            opacity: 1;
+        }
+
+        .sortable-header.desc::after {
+            content: '\2193'; /* Down arrow */
+            opacity: 1;
+        }
     </style>
 @endpush
 
@@ -170,11 +193,19 @@
                             @endif
                         </form>
 
+                        @if ($sections->isNotEmpty())
+                            <div class="d-flex justify-content-end mb-3 align-items-center gap-2">
+                                <span style="font-weight: 600; color: #32346A; font-size: 14px;">Sort Staff Groups:</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary btn-sort-staff" data-sort="name">Name ↕</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary btn-sort-staff" data-sort="total">Total Amount ↕</button>
+                            </div>
+                        @endif
+
                         <div class="custom_table">
                             <div class="table-responsive">
-                                <table class="table">
-                                    <tbody>
+                                <table class="table staff-groups-table">
                                         @forelse ($sections as $section)
+                                            <tbody class="staff-group-tbody" data-staff-name="{{ $section['staff_name'] }}" data-staff-total="{{ $section['total'] }}">
                                             @if (!$loop->first)
                                                 <tr class="staff-spacer-row">
                                                     <td colspan="5"></td>
@@ -191,15 +222,15 @@
                                             </tr>
 
                                             <tr class="staff-columns-row">
-                                                <th>Date</th>
-                                                <th>Route</th>
-                                                <th>Week</th>
-                                                <th>Amount</th>
+                                                <th class="sortable-header" data-sort="date" data-col-index="0">Date</th>
+                                                <th class="sortable-header" data-sort="string" data-col-index="1">Route</th>
+                                                <th class="sortable-header" data-sort="number" data-col-index="2">Week</th>
+                                                <th class="sortable-header" data-sort="number" data-col-index="3">Amount</th>
                                                 <th>Date Deposited</th>
                                             </tr>
 
                                             @foreach ($section['rows'] as $row)
-                                                <tr>
+                                                <tr class="staff-data-row" data-sort-date="{{ $row['sort_date'] ? \Carbon\Carbon::parse($row['sort_date'])->format('Y-m-d') : '' }}">
                                                     <td>{{ $row['date_label'] }}</td>
                                                     <td>{{ $row['route_name'] }}</td>
                                                     <td>{{ $row['week_number'] }}</td>
@@ -215,12 +246,14 @@
                                                     </td>
                                                 </tr>
                                             @endforeach
+                                            </tbody>
                                         @empty
-                                            <tr>
-                                                <td colspan="5" class="text-center text-muted">All caught up! No undeposited cash to show right now.</td>
-                                            </tr>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted">All caught up! No undeposited cash to show right now.</td>
+                                                </tr>
+                                            </tbody>
                                         @endforelse
-                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -361,6 +394,122 @@
                             });
                         }
                     });
+                });
+            });
+
+            // Frontend sorting within each staff section
+            $(document).on('click', '.sortable-header', function() {
+                const $th = $(this);
+                const colIndex = $th.data('col-index');
+                const sortType = $th.data('sort');
+                const isAsc = $th.hasClass('asc');
+
+                // Toggle sort direction
+                $th.closest('tr').find('th').removeClass('asc desc');
+                $th.addClass(isAsc ? 'desc' : 'asc');
+                const sortDir = isAsc ? -1 : 1;
+
+                // Find the data rows belonging to this section
+                const $headerRow = $th.closest('tr');
+                let $currentTr = $headerRow.next();
+                const rows = [];
+
+                while ($currentTr.length && $currentTr.hasClass('staff-data-row')) {
+                    rows.push($currentTr);
+                    $currentTr = $currentTr.next();
+                }
+
+                // Sort the rows
+                rows.sort((a, b) => {
+                    let valA, valB;
+
+                    if (sortType === 'date') {
+                        valA = a.data('sort-date') || '';
+                        valB = b.data('sort-date') || '';
+                    } else {
+                        valA = a.find('td').eq(colIndex).text().trim();
+                        valB = b.find('td').eq(colIndex).text().trim();
+                    }
+
+                    if (sortType === 'number') {
+                        // Extract numbers (remove $ and commas, handle week numbers)
+                        valA = parseFloat(valA.replace(/[^0-9.-]+/g, "")) || 0;
+                        valB = parseFloat(valB.replace(/[^0-9.-]+/g, "")) || 0;
+                        return (valA - valB) * sortDir;
+                    }
+
+                    // String or date sort
+                    return valA.localeCompare(valB) * sortDir;
+                });
+
+                // Proper insertion in place:
+                // We need to re-insert them after the header row in the new order
+                let $insertAfter = $headerRow;
+                $.each(rows, function(index, $row) {
+                    $row.insertAfter($insertAfter);
+                    $insertAfter = $row;
+                });
+            });
+
+            // Global Staff Group Sorting
+            $('.btn-sort-staff').on('click', function() {
+                const $btn = $(this);
+                const sortType = $btn.data('sort');
+                const isAsc = $btn.hasClass('asc');
+                
+                // Reset both buttons
+                $('.btn-sort-staff').removeClass('asc desc btn-primary').addClass('btn-outline-secondary')
+                    .each(function() {
+                        $(this).text($(this).text().replace(/↑|↓/, '↕'));
+                    });
+                
+                // Toggle current button
+                $btn.removeClass('btn-outline-secondary').addClass('btn-primary');
+                $btn.addClass(isAsc ? 'desc' : 'asc');
+                const sortDir = isAsc ? -1 : 1;
+                
+                // Update button text icon
+                const baseText = sortType === 'name' ? 'Name ' : 'Total Amount ';
+                $btn.text(baseText + (isAsc ? '↓' : '↑'));
+
+                const tbodies = $('.staff-groups-table .staff-group-tbody').get();
+                
+                tbodies.sort(function(a, b) {
+                    const $a = $(a);
+                    const $b = $(b);
+                    
+                    if (sortType === 'name') {
+                        const nameA = $a.data('staff-name').toLowerCase();
+                        const nameB = $b.data('staff-name').toLowerCase();
+                        return nameA.localeCompare(nameB) * sortDir;
+                    } else {
+                        const totalA = parseFloat($a.data('staff-total')) || 0;
+                        const totalB = parseFloat($b.data('staff-total')) || 0;
+                        return (totalA - totalB) * sortDir;
+                    }
+                });
+                
+                // Re-append sorted tbodies and fix spacer rows
+                const $table = $('.staff-groups-table');
+                $.each(tbodies, function(index, tbody) {
+                    const $tbody = $(tbody);
+                    
+                    // The spacer row logic: only non-first groups should have the spacer visible.
+                    // We can just find the .staff-spacer-row inside this tbody.
+                    let $spacer = $tbody.find('.staff-spacer-row');
+                    
+                    if (index === 0) {
+                        $spacer.hide(); // Hide spacer for first group
+                    } else {
+                        if ($spacer.length === 0) {
+                            // If it doesn't have a spacer (was originally first), add it
+                            $tbody.prepend('<tr class="staff-spacer-row"><td colspan="5"></td></tr>');
+                        } else {
+                            $spacer.show();
+                        }
+                    }
+                    
+                    $table.append($tbody);
                 });
             });
         });

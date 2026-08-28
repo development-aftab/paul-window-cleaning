@@ -162,7 +162,11 @@ class DepositsController extends Controller
                 return [
                     'staff_id' => $staffRows->first()['staff_id'],
                     'staff_name' => $staffName,
-                    'rows' => $staffRows->sortBy('sort_date')->values(),
+                    'rows' => $staffRows->sortBy([
+                        ['route_name', 'asc'],
+                        ['week_number', 'asc'],
+                        ['sort_date', 'asc']
+                    ])->values(),
                     'total' => $staffRows->sum('amount'),
                 ];
             })
