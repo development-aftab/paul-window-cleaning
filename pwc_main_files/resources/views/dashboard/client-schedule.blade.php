@@ -1848,37 +1848,49 @@
     <script>
         // Reset all fields within a specific Note accordion section
         function resetNoteFields(btn) {
-            var $accordionItem = $(btn).closest('.accordion-item');
-            var $body = $accordionItem.find('.accordion-body');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will clear all notes and selections in this section.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#00ADEE',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, reset it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var $accordionItem = $(btn).closest('.accordion-item');
+                    var $body = $accordionItem.find('.accordion-body');
 
-            // Clear all textareas
-            $body.find('textarea').val('');
+                    // Clear all textareas
+                    $body.find('textarea').val('');
 
-            // Clear date inputs
-            $body.find('input[type="date"]').val('');
+                    // Clear date inputs
+                    $body.find('input[type="date"]').val('');
 
-            // Reset select dropdowns to default placeholder
-            $body.find('select').each(function() {
-                $(this).val('');
-                // Re-select the disabled placeholder option
-                $(this).find('option[disabled]').prop('selected', true);
+                    // Reset select dropdowns to default placeholder
+                    $body.find('select').each(function() {
+                        $(this).val('');
+                        // Re-select the disabled placeholder option
+                        $(this).find('option[disabled]').prop('selected', true);
+                    });
+
+                    // Uncheck priority checkbox and reset its value
+                    $body.find('.priority_checkbox input[type="checkbox"]').prop('checked', false).val('0');
+
+                    // Uncheck all price list checkboxes
+                    $body.find('.price_list_wrapper input[type="checkbox"]').prop('checked', false);
+
+                    // Brief visual feedback on the button
+                    var $btnNode = $(btn);
+                    var originalHtml = $btnNode.html();
+                    $btnNode.html('<i class="fa-solid fa-check"></i> Done!');
+                    $btnNode.css('background', 'linear-gradient(135deg, #2ed573, #1abc9c)');
+                    setTimeout(function() {
+                        $btnNode.html(originalHtml);
+                        $btnNode.css('background', '');
+                    }, 1200);
+                }
             });
-
-            // Uncheck priority checkbox and reset its value
-            $body.find('.priority_checkbox input[type="checkbox"]').prop('checked', false).val('0');
-
-            // Uncheck all price list checkboxes
-            $body.find('.price_list_wrapper input[type="checkbox"]').prop('checked', false);
-
-            // Brief visual feedback on the button
-            var $btn = $(btn);
-            var originalHtml = $btn.html();
-            $btn.html('<i class="fa-solid fa-check"></i> Done!');
-            $btn.css('background', 'linear-gradient(135deg, #2ed573, #1abc9c)');
-            setTimeout(function() {
-                $btn.html(originalHtml);
-                $btn.css('background', '');
-            }, 1200);
         }
     </script>
 @endpush

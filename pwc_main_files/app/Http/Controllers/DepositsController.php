@@ -69,8 +69,7 @@ class DepositsController extends Controller
         $filterDateTo = $request->filled('date_to') ? Carbon::parse($request->date_to)->endOfDay() : null;
 
         // 1) Existing deposit records not yet marked as deposited
-        $depositQuery = Deposit::with(['route', 'staff', 'clientSchedule.clientName'])
-            ->where('is_deposit', false);
+        $depositQuery = Deposit::with(['route', 'staff', 'clientSchedule.clientName']);
 
         if ($onlyStaffId) {
             $depositQuery->where('staff_id', $onlyStaffId);
@@ -103,9 +102,10 @@ class DepositsController extends Controller
                 'amount' => (float) $deposit->deposit_amount,
                 'date_label' => $this->formatDateLabel($range),
                 'sort_date' => $range['start'] ?? $deposit->created_at,
-                'deposit_date' => null,
+                'deposit_date' => $deposit->deposit_date,
                 'deposit_id' => $deposit->id,
                 'payment_ids' => null,
+                'is_deposit' => (bool) $deposit->is_deposit,
             ]);
         }
 
@@ -154,6 +154,7 @@ class DepositsController extends Controller
                 'deposit_date' => null,
                 'deposit_id' => null,
                 'payment_ids' => $groupPayments->pluck('id')->values()->all(),
+                'is_deposit' => false,
             ]);
         }
 

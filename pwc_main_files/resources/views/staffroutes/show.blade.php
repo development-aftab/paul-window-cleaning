@@ -388,6 +388,9 @@
                                                                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ $schedule['week_number'] }}-{{ $key }}" aria-expanded="false" aria-controls="collapseOne-{{ $schedule['week_number'] }}-{{ $key }}" style="flex: 1;">
                                                                         {{ ucfirst($route['client_name']) }}
                                                                         @if ($route['service_frequency'] == 'monthly' || $route['service_frequency'] == 'biMonthly')
+                                                                            <span class="badge rounded-pill" style="margin-left: 8px; background: #fff5f5; color: #d32f2f; border: 1.5px solid #ef5350; box-shadow: 0 1px 3px rgba(211,47,47,0.1); font-weight: 600; padding: 4px 10px; font-size: 11px;">
+                                                                                {{ $route['service_frequency'] == 'monthly' ? 'Monthly' : 'Bi-Monthly' }}
+                                                                            </span>
                                                                             <i class="fas fa-edit edit-monthly-schedule-btn" data-schedule-id="{{ $route['schedule_id'] }}" data-client-name="{{ $route['client_name'] }}" data-start-date="{{ $route['client_start_week'] }}" data-end-date="{{ $route['client_end_week'] }}" data-service-frequency="{{ $route['service_frequency'] }}"
                                                                                 style="margin-left: 10px; color: #007bff; cursor: pointer; font-size: 14px;" title="Edit Schedule Date"></i>
                                                                         @endif
@@ -790,10 +793,11 @@
                                                                         style="width: 18px; height: 18px; cursor: pointer; margin-left: 10px;"> --}}
                                                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ $schedule['week_number'] }}-{{ $key }}" aria-expanded="false" aria-controls="collapseOne-{{ $schedule['week_number'] }}-{{ $key }}" style="flex: 1;">
                                                                                 {{ ucfirst($route['client_name']) }}
-                                                                                {{-- @if ($route['service_frequency'] == 'monthly' || $route['service_frequency'] == 'biMonthly')
-                                                                                    <i class="fas fa-edit edit-monthly-schedule-btn" data-schedule-id="{{ $route['schedule_id'] }}" data-client-name="{{ $route['client_name'] }}" data-start-date="{{ $route['client_start_week'] }}" data-end-date="{{ $route['client_end_week'] }}" data-service-frequency="{{ $route['service_frequency'] }}"
-                                                                                        style="margin-left: 10px; color: #007bff; cursor: pointer; font-size: 14px;" title="Edit Schedule Date"></i>
-                                                                                @endif --}}
+                                                                                @if ($route['service_frequency'] == 'monthly' || $route['service_frequency'] == 'biMonthly')
+                                                                                    <span class="badge rounded-pill" style="margin-left: 8px; background: #fff5f5; color: #d32f2f; border: 1.5px solid #ef5350; box-shadow: 0 1px 3px rgba(211,47,47,0.1); font-weight: 600; padding: 4px 10px; font-size: 11px;">
+                                                                                        {{ $route['service_frequency'] == 'monthly' ? 'Monthly' : 'Bi-Monthly' }}
+                                                                                    </span>
+                                                                                @endif
                                                                             </button>
                                                                             <span class="schedule-error-message" data-schedule-id="{{ $route['schedule_id'] }}" style="color: red; font-weight: bold; font-size: 9px; display: none; margin-left: 10px;">
                                                                             </span>

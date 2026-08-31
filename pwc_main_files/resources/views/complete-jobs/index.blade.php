@@ -160,7 +160,7 @@
                                                         <span class="badge bg-secondary">{{ ucfirst($paymentType) }}</span>
                                                     </td>
                                                     <td>${{ $job->clientSchedulePayment->final_price ?? 'N/A' }}</td>
-                                                    <td>
+                                                    <td data-sort="{{ $job->service_date ? \Carbon\Carbon::parse($job->service_date)->format('Y-m-d') : '' }}">
                                                         {{ $job->service_date ? \Carbon\Carbon::parse($job->service_date)->format('m-d-Y') : 'N/A' }}
                                                     </td>
                                                     <td>

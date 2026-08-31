@@ -133,6 +133,25 @@
             content: '\2193'; /* Down arrow */
             opacity: 1;
         }
+
+        .staff-data-row.deposited-row td {
+            background: linear-gradient(90deg, rgba(232, 245, 233, 0.7) 0%, rgba(241, 248, 233, 0.7) 100%) !important;
+            border-bottom: 1px solid #C8E6C9 !important;
+            color: #2E7D32 !important;
+        }
+        
+        .staff-data-row.deposited-row td:first-child {
+            border-left: 3px solid #4CAF50 !important;
+        }
+        
+        .staff-data-row.deposited-row input.deposit-date-input,
+        .staff-data-row.deposited-row input.deposit-date-input:disabled {
+            background-color: rgba(255, 255, 255, 0.6);
+            border-color: #A5D6A7;
+            color: #1B5E20;
+            cursor: not-allowed;
+            opacity: 1;
+        }
     </style>
 @endpush
 
@@ -230,19 +249,29 @@
                                             </tr>
 
                                             @foreach ($section['rows'] as $row)
-                                                <tr class="staff-data-row" data-sort-date="{{ $row['sort_date'] ? \Carbon\Carbon::parse($row['sort_date'])->format('Y-m-d') : '' }}">
+                                                <tr class="staff-data-row {{ !empty($row['is_deposit']) ? 'deposited-row' : '' }}" data-sort-date="{{ $row['sort_date'] ? \Carbon\Carbon::parse($row['sort_date'])->format('Y-m-d') : '' }}">
                                                     <td>{{ $row['date_label'] }}</td>
                                                     <td>{{ $row['route_name'] }}</td>
                                                     <td>{{ $row['week_number'] }}</td>
                                                     <td>${{ number_format($row['amount'], 2) }}</td>
                                                     <td style="display: flex; justify-content: center">
-                                                        <input
-                                                            type="date"
-                                                            class="form-control deposit-date-input"
-                                                            value="{{ $row['deposit_date'] }}"
-                                                            data-deposit-id="{{ $row['deposit_id'] }}"
-                                                            data-payment-ids="{{ $row['payment_ids'] ? implode(',', $row['payment_ids']) : '' }}"
-                                                        >
+                                                        @if($isAdmin)
+                                                            <span style="font-weight: 500; color: #2E7D32; margin-top: 6px;">{{ $row['deposit_date'] ? \Carbon\Carbon::parse($row['deposit_date'])->format('m/d/Y') : '-' }}</span>
+                                                        @else
+                                                            @php
+                                                                $depositDateValue = $row['deposit_date']
+                                                                    ? \Carbon\Carbon::parse($row['deposit_date'])->format('Y-m-d')
+                                                                    : '';
+                                                            @endphp
+                                                            <input
+                                                                type="date"
+                                                                class="form-control deposit-date-input"
+                                                                value="{{ $depositDateValue }}"
+                                                                data-deposit-id="{{ $row['deposit_id'] }}"
+                                                                data-payment-ids="{{ $row['payment_ids'] ? implode(',', $row['payment_ids']) : '' }}"
+                                                                @if(!empty($row['is_deposit'])) disabled @endif
+                                                            >
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach
