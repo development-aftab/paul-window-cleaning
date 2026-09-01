@@ -268,11 +268,12 @@ class WebsiteController extends Controller
             ->get();
 
         $startDate = Carbon::now();
-        $endDate = Carbon::now()->addWeeks(2);
+        $endDate = Carbon::now()->addWeeks(8);
         $upcomingSchedules = ClientSchedule::with(['clientName.clientRoute', 'clientSchedulePrice.clientPaymentPrice'])
             ->where(function ($q) {
                 $q->whereNull('status')->orWhere('status', '!=', 'completed');
             })
+            ->where('priority', 1)
             ->whereBetween('start_date', [$startDate, $endDate])
             ->orderBy('start_date', 'asc')
             ->get()
