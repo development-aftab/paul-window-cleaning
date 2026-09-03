@@ -222,23 +222,23 @@
                                             </div>
                                         </div>
 
-                                        @if ($client->service_frequency != 'normalWeek')
-                                            <div class="col-md-2">
-                                                <div class="starting_date_box">
-                                                    <div class="form-floating txt_field custom_dates">
-                                                        <input type="date" class="form-control startDate" value="{{ $client->start_date ?? '' }}" name="start_date" id="startDate" placeholder="">
-                                                        <label for="startDate">Starting Date</label>
-                                                        <p id="startDateError" style="color: red; display: none;">
-                                                            Starting date cannot be today or in the past.
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <br>
-                                                <button type="button" style="width: 182px;" class="btn_global btn_blue submitbtn">
-                                                    Update Schedule<i class="fa-solid"></i>
-                                                </button>
-                                            </div>
-                                        @endif
+{{--                                        @if ($client->service_frequency != 'normalWeek')--}}
+{{--                                            <div class="col-md-2">--}}
+{{--                                                <div class="starting_date_box">--}}
+{{--                                                    <div class="form-floating txt_field custom_dates">--}}
+{{--                                                        <input type="date" class="form-control startDate" value="{{ $client->start_date ?? '' }}" name="start_date" id="startDate" placeholder="">--}}
+{{--                                                        <label for="startDate">Starting Date</label>--}}
+{{--                                                        <p id="startDateError" style="color: red; display: none;">--}}
+{{--                                                            Starting date cannot be today or in the past.--}}
+{{--                                                        </p>--}}
+{{--                                                    </div>--}}
+{{--                                                </div>--}}
+{{--                                                <br>--}}
+{{--                                                <button type="button" style="width: 182px;" class="btn_global btn_blue submitbtn">--}}
+{{--                                                    Update Schedule<i class="fa-solid"></i>--}}
+{{--                                                </button>--}}
+{{--                                            </div>--}}
+{{--                                        @endif--}}
                                         <div class="col-md-12" style="display:none;">
                                             <h4>Frequency of Service</h4>
                                             <div class="cycle_frequency_wrapper">
@@ -352,6 +352,22 @@
                                         <div class="monthly_schedule_box">
                                             <div class="custom_checkbox_wrapper assign_week mb-5 input_shadow_wrapper" style="display: flex; flex-wrap: nowrap; overflow-x: auto;">
                                                 @foreach ($months as $monthIndex => $month)
+                                                    @php
+                                                        $skipMonthlyWeek = false;
+                                                        if (($client->service_frequency ?? '') === 'monthly' && !empty($client->start_date)) {
+                                                            try {
+                                                                $clientStartDate = \Carbon\Carbon::createFromFormat('d/m/Y', $client->start_date)->startOfDay();
+                                                            } catch (\Exception $e) {
+                                                                $clientStartDate = \Carbon\Carbon::parse($client->start_date)->startOfDay();
+                                                            }
+                                                            $weekStartDate = \Carbon\Carbon::parse($month['start_date'])->startOfDay();
+                                                            $weekEndDate = \Carbon\Carbon::parse($month['end_date'])->endOfDay();
+                                                            $skipMonthlyWeek = !$clientStartDate->between($weekStartDate, $weekEndDate);
+                                                        }
+                                                    @endphp
+                                                    @if ($skipMonthlyWeek)
+                                                        @continue
+                                                    @endif
                                                     <div class="monthly_schedule">
                                                         <h4 style="display: none">{{ $month['month'] }}
                                                             {{ $month['year'] }}</h4>
@@ -514,6 +530,22 @@
                                         <div class="monthly_schedule_box">
                                             <div class="custom_checkbox_wrapper assign_week mb-5 input_shadow_wrapper" style="display: flex; flex-wrap: nowrap; overflow-x: auto;">
                                                 @foreach ($months as $monthIndex => $month)
+                                                    @php
+                                                        $skipMonthlyWeek = false;
+                                                        if (($client->service_frequency ?? '') === 'monthly' && !empty($client->start_date)) {
+                                                            try {
+                                                                $clientStartDate = \Carbon\Carbon::createFromFormat('d/m/Y', $client->start_date)->startOfDay();
+                                                            } catch (\Exception $e) {
+                                                                $clientStartDate = \Carbon\Carbon::parse($client->start_date)->startOfDay();
+                                                            }
+                                                            $weekStartDate = \Carbon\Carbon::parse($month['start_date'])->startOfDay();
+                                                            $weekEndDate = \Carbon\Carbon::parse($month['end_date'])->endOfDay();
+                                                            $skipMonthlyWeek = !$clientStartDate->between($weekStartDate, $weekEndDate);
+                                                        }
+                                                    @endphp
+                                                    @if ($skipMonthlyWeek)
+                                                        @continue
+                                                    @endif
                                                     <div class="monthly_schedule">
                                                         <h4 style="display: none">{{ $month['month'] }}
                                                             {{ $month['year'] }}</h4>

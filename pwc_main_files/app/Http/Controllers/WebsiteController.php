@@ -1748,494 +1748,10 @@ class WebsiteController extends Controller
         $status = auth()->user()->hasRole('admin') ? '1' : '0';
         $monthsToGenerate = 2;
         $startDateClient = $client->start_date ? Carbon::createFromFormat('d/m/Y', $client->start_date) : Carbon::now();
+        $secondStartDateClient = $client->second_start_date ? Carbon::createFromFormat('d/m/Y', $client->second_start_date) : null;
         $selectedYear = Carbon::now()->year;
         $firstMondayOfYear = Carbon::create($selectedYear, 1, 1)->modify('first monday');
 
-        // if ($client->service_frequency == 'normalWeek') {
-        //     $currentYear = $client->start_date ? Carbon::createFromFormat('d/m/Y', $client->start_date)->year : Carbon::now()->year;
-        //     $nextYear = $currentYear + 1;
-        //     $nextYear2 = $currentYear + 2;
-        //     $nextYear3 = $currentYear + 3;
-
-        //     $customStartDates = [
-        //         "January - February-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday'),
-        //         "January - February-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday'),
-        //         "February - March-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(4),
-        //         "February - March-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(4),
-        //         "March-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(8),
-        //         "March-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(8),
-        //         "March - April-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(12),
-        //         "March - April-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(12),
-        //         "April - May-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(16),
-        //         "April - May-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(16),
-        //         "May - June-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(20),
-        //         "May - June-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(20),
-        //         "June - July-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(24),
-        //         "June - July-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(24),
-        //         "July - August-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(28),
-        //         "July - August-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(28),
-        //         "August - September-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(32),
-        //         "August - September-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(32),
-        //         "September - October-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(36),
-        //         "September - October-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(36),
-        //         "October - November-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(40),
-        //         "October - November-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(40),
-        //         "November - December-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(44),
-        //         "November - December-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(44),
-        //         "December - January-{$currentYear}" => Carbon::create($currentYear, 1, 1)->modify('first monday')->addWeeks(48),
-        //         "December - January-{$nextYear}" => Carbon::create($nextYear, 1, 1)->modify('first monday')->addWeeks(48),
-        //         // Next year 2
-        //         "January - February-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday'),
-        //         "February - March-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(4),
-        //         "March-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(8),
-        //         "March - April-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(12),
-        //         "April - May-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(16),
-        //         "May - June-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(20),
-        //         "June - July-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(24),
-        //         "July - August-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(28),
-        //         "August - September-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(32),
-        //         "September - October-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(36),
-        //         "October - November-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(40),
-        //         "November - December-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(44),
-        //         "December - January-{$nextYear2}" => Carbon::create($nextYear2, 1, 1)->modify('first monday')->addWeeks(48),
-        //         // Next year 3
-        //         "January - February-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday'),
-        //         "February - March-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(4),
-        //         "March-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(8),
-        //         "March - April-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(12),
-        //         "April - May-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(16),
-        //         "May - June-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(20),
-        //         "June - July-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(24),
-        //         "July - August-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(28),
-        //         "August - September-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(32),
-        //         "September - October-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(36),
-        //         "October - November-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(40),
-        //         "November - December-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(44),
-        //         "December - January-{$nextYear3}" => Carbon::create($nextYear3, 1, 1)->modify('first monday')->addWeeks(48),
-        //     ];
-
-        //     function findMatchingMonth($month, $customStartDates)
-        //     {
-        //         foreach ($customStartDates as $key => $value) {
-        //             if (str_contains($key, $month)) {
-        //                 return $key;
-        //             }
-        //         }
-        //         return null;
-        //     }
-
-        //     $inputSchedules = [];
-        //     $isNonRecurring = $request->recurring_type === 'non_recurring';
-
-        //     foreach ($request->input('month') as $monthName => $weeks) {
-        //         $matchedMonthKey = findMatchingMonth($monthName, $customStartDates);
-        //         if ($matchedMonthKey === null) {
-        //             continue;
-        //         }
-
-        //         foreach ($weeks as $weekIndex => $week) {
-
-        //             if (!isset($week['start_date'], $week['end_date'], $week['prices']) || empty($week['prices'])) {
-        //                 continue;
-        //             }
-
-        //             if (!isset($week['note_start_date']) || empty($week['note_start_date'])) {
-        //                 return back()->withErrors(['error' => "Please select a start date for {$monthName} - {$weekIndex}"])->withInput();
-        //             }
-
-        //             $startDateClient = Carbon::createFromFormat('Y-m-d', $week['note_start_date']);
-
-        //             $matchedRange = null;
-        //             foreach ($customStartDates as $range => $startDate) {
-        //                 if ($startDateClient->gte($startDate) && $startDateClient->lt($startDate->copy()->addWeeks(4))) {
-        //                     $matchedRange = $range;
-        //                     break;
-        //                 }
-        //             }
-
-        //             if ($matchedRange === null) {
-        //                 return back()->withErrors(['error' => "Invalid date range for {$monthName} - {$weekIndex}"])->withInput();
-        //             }
-
-        //             preg_match('/\d+/', $weekIndex, $matches);
-        //             $rangeStart = $customStartDates[$matchedRange];
-        //             $originalStartDate = $rangeStart->copy()->addWeeks($matches[0]);
-        //             $originalEndDate = $originalStartDate->copy()->addDays(6);
-
-        //             if (!$isNonRecurring) {
-        //                 $inputSchedules[] = [
-        //                     'month' => $monthName,
-        //                     'week' => $weekIndex,
-        //                     'week_month' => $monthName,
-        //                     'start_date' => $originalStartDate->toDateString(),
-        //                     'end_date' => $originalEndDate->toDateString(),
-        //                     'note' => $week['note'] ?? null,
-        //                     'note_two' => $week['note_two'] ?? null,
-        //                     'note_type' => $week['note_type'] ?? null,
-        //                     'note_date' => $week['note_start_date'] ?? $week['start_date'] ?? null,
-        //                     'prices' => $week['prices'],
-        //                     'extra_work' =>  null,
-        //                     'extra_work_price' => $week['note_extra_price'] ?? null,
-        //                     'note_week_no' => 0,
-        //                     'extra_work_price_id' => null,
-        //                 ];
-        //             }
-
-        //             $additionalNotes = $week['additional_note'] ?? [];
-        //             $additionalPricesNested = $week['extra_prices'] ?? [];
-        //             $additionalNoteTypes = $week['extra_note_type'] ?? [];
-        //             $additionalNoteDates = $week['extra_note_start_date'] ?? [];
-
-        //             $allNoteDates = array_merge(
-        //                 [$week['note_start_date'] ?? $week['start_date'] ?? null],
-        //                 $additionalNoteDates
-        //             );
-        //             $allNoteTypes = array_merge(
-        //                 [$week['note_type'] ?? null],
-        //                 $additionalNoteTypes
-        //             );
-        //             $allNotes = array_merge(
-        //                 [$week['note'] ?? null, $week['note_two'] ?? null],
-        //                 $additionalNotes
-        //             );
-
-        //             if ($isNonRecurring) {
-        //                 $allOccurrences = [];
-        //                 $totalNotes = count($allNoteDates);
-
-        //                 $noteOccurrences = [];
-
-        //                 foreach ($allNoteDates as $dateIndex => $noteDate) {
-        //                     if (!isset($noteDate) || empty($noteDate)) {
-        //                         continue;
-        //                     }
-
-        //                     $noteType = $allNoteTypes[$dateIndex] ?? null;
-        //                     $intervalWeeks = match ($noteType) {
-        //                         '8_weeks'  => 2,
-        //                         '12_weeks' => 3,
-        //                         '24_weeks' => 6,
-        //                         '52_weeks' => 13,
-        //                         default    => 1,
-        //                     };
-
-        //                     for ($i = 0; $i < 39; $i += $intervalWeeks) {
-        //                         $startDateClient = Carbon::createFromFormat('Y-m-d', $noteDate)->addWeeks($i * 4);
-
-        //                         $matchedRange = null;
-        //                         foreach ($customStartDates as $range => $startDate) {
-        //                             if ($startDateClient->gte($startDate) && $startDateClient->lt($startDate->copy()->addWeeks(4))) {
-        //                                 $matchedRange = $range;
-        //                                 break;
-        //                             }
-        //                         }
-
-        //                         if ($matchedRange === null) continue;
-
-        //                         $rangeStart = $customStartDates[$matchedRange];
-        //                         preg_match('/\d+/', $weekIndex, $matches);
-        //                         $originalStartDate = $rangeStart->copy()->addWeeks($matches[0]);
-        //                         $originalEndDate   = $originalStartDate->copy()->addDays(6);
-        //                         $weekKey = $originalStartDate->toDateString();
-
-        //                         $noteOccurrences[$dateIndex][] = $weekKey;
-        //                     }
-        //                 }
-
-        //                 // Ab cycle banao: Note1, Note2, Note3, Note1, Note2 ...
-        //                 // Sab unique dates collect karo sorted
-        //                 $allDates = [];
-        //                 foreach ($noteOccurrences as $dates) {
-        //                     $allDates = array_merge($allDates, $dates);
-        //                 }
-        //                 $allDates = array_unique($allDates);
-        //                 sort($allDates);
-
-        //                 // Har date ko cycle ke hisaab se note assign karo
-        //                 $noteIndexKeys = array_keys(array_filter($allNoteDates, fn($d) => !empty($d)));
-        //                 $cycleLength   = count($noteIndexKeys);
-
-        //                 foreach ($allDates as $cycleIndex => $weekKey) {
-        //                     $assignedNoteIndex = $noteIndexKeys[$cycleIndex % $cycleLength]; // cycling!
-        //                     $noteDate  = $allNoteDates[$assignedNoteIndex];
-        //                     $noteType  = $allNoteTypes[$assignedNoteIndex] ?? null;
-
-        //                     // Prices
-        //                     $currentPrices     = [];
-        //                     $extraWorkPriceIds = null;
-        //                     $extraWorkNamesJson = null;
-        //                     $extraWorkValuesJson = null;
-
-        //                     if ($assignedNoteIndex === 0) {
-        //                         $currentPrices = $week['prices'];
-        //                     } else {
-        //                         $notePrices  = $additionalPricesNested[$assignedNoteIndex - 1] ?? [];
-        //                         $validPrices = array_filter($notePrices, fn($p) => $p && $p !== "0");
-
-        //                         if (!empty($validPrices)) {
-        //                             $priceDetails = \App\Models\ClientPriceList::whereIn('id', $validPrices)->get();
-        //                             $extraWorkNames  = [];
-        //                             $extraWorkValues = [];
-        //                             foreach ($priceDetails as $pd) {
-        //                                 $extraWorkNames[]  = $pd->name;
-        //                                 $extraWorkValues[] = $pd->value;
-        //                             }
-        //                             $extraWorkPriceIds   = json_encode(array_values($validPrices));
-        //                             $extraWorkNamesJson  = json_encode($extraWorkNames);
-        //                             $extraWorkValuesJson = json_encode($extraWorkValues);
-        //                         }
-        //                     }
-
-        //                     // Date objects reconstruct
-        //                     $startDateObj = Carbon::createFromFormat('Y-m-d', $weekKey);
-        //                     $endDateObj   = $startDateObj->copy()->addDays(6);
-
-        //                     $inputSchedules[] = [
-        //                         'month'               => $startDateObj->format('F'),
-        //                         'week_month'          => $monthName,
-        //                         'week'                => $weekIndex,
-        //                         'start_date'          => $weekKey,
-        //                         'end_date'            => $endDateObj->toDateString(),
-        //                         'note'                => $allNotes[$assignedNoteIndex] ?? str_repeat('.', $assignedNoteIndex + 1),
-        //                         'note_two'            => $allNotes[$assignedNoteIndex + 1] ?? null,
-        //                         'note_type'           => $noteType,
-        //                         'note_date'           => $noteDate,
-        //                         'prices'              => $currentPrices,
-        //                         'extra_work'          => $extraWorkNamesJson,
-        //                         'extra_work_price'    => $extraWorkValuesJson,
-        //                         'note_week_no'        => $assignedNoteIndex,
-        //                         'extra_work_price_id' => $extraWorkPriceIds,
-        //                     ];
-        //                 }
-
-        //                 continue; // foreach weeks loop continue
-        //             }
-
-        //             $firstNoteEndDate = null;
-
-        //             foreach ($allNoteDates as $dateIndex => $noteDate) {
-        //                 if (!isset($noteDate) || empty($noteDate)) {
-        //                     continue;
-        //                 }
-
-        //                 $noteType = $allNoteTypes[$dateIndex] ?? null;
-        //                 $lastNote = $allNotes[$dateIndex - 1] ?? null;
-
-        //                 for ($i = 1; $i < 40; $i++) {
-        //                     if ($i === 1) {
-        //                         $startDateClient = Carbon::createFromFormat('Y-m-d', $noteDate);
-        //                     } else {
-        //                         $startDateClient = Carbon::createFromFormat('Y-m-d', $noteDate)->addWeeks(($i - 1) * 4);
-        //                     }
-
-        //                     $matchedRange = null;
-        //                     foreach ($customStartDates as $range => $startDate) {
-        //                         if ($startDateClient->gte($startDate) && $startDateClient->lt($startDate->copy()->addWeeks(4))) {
-        //                             $matchedRange = $range;
-        //                             break;
-        //                         }
-        //                     }
-
-        //                     if ($matchedRange === null) {
-        //                         \Log::warning("No matching range found for date: " . $startDateClient->toDateString());
-        //                         continue;
-        //                     }
-
-        //                     $rangeStart = $customStartDates[$matchedRange];
-        //                     preg_match('/\d+/', $weekIndex, $matches);
-        //                     $originalStartDate = $rangeStart->copy()->addWeeks($matches[0]);
-        //                     $originalEndDate = $originalStartDate->copy()->addDays(6);
-
-        //                     if ($firstNoteEndDate != null && $originalStartDate->gte($firstNoteEndDate)) {
-        //                         break;
-        //                     }
-        //                     if ($i === 39 && $firstNoteEndDate === null) {
-        //                         $firstNoteEndDate = $originalStartDate;
-        //                     }
-
-        //                     $note = null;
-        //                     $noteTwo = null;
-        //                     $weekNoteType = null;
-        //                     $noteWeekCounter = 0;
-        //                     $currentPrices = $dateIndex === 0 ? $week['prices'] : [];
-        //                     $extraWorkPriceIds = null;
-        //                     $extraWorkNamesJson = null;
-        //                     $extraWorkValuesJson = null;
-
-        //                     if ($dateIndex > 0) {
-        //                         $notePrices = $additionalPricesNested[$dateIndex - 1] ?? [];
-        //                         if (!is_array($notePrices)) {
-        //                             $notePrices = [];
-        //                         }
-        //                         $validPrices = array_filter($notePrices, function ($price) {
-        //                             return $price && $price !== "0";
-        //                         });
-
-        //                         if (!empty($validPrices)) {
-        //                             $priceDetails = \App\Models\ClientPriceList::whereIn('id', $validPrices)->get();
-        //                             $extraWorkNames = [];
-        //                             $extraWorkValues = [];
-        //                             foreach ($priceDetails as $priceDetail) {
-        //                                 $extraWorkNames[] = $priceDetail->name;
-        //                                 $extraWorkValues[] = $priceDetail->value;
-        //                             }
-        //                             $extraWorkPriceIds = json_encode(array_values($validPrices));
-        //                             $extraWorkNamesJson = json_encode($extraWorkNames);
-        //                             $extraWorkValuesJson = json_encode($extraWorkValues);
-        //                         }
-        //                     }
-
-        //                     if ($i === 1) {
-        //                         $note = $allNotes[$dateIndex] ?? str_repeat('.', $dateIndex + 1);
-        //                         $noteTwo = $allNotes[$dateIndex + 1] ?? null;
-        //                         $noteWeekCounter = $dateIndex;
-        //                         $weekNoteType = $noteType;
-        //                     } elseif ($noteType === 'weekly') {
-        //                         $note = $allNotes[$dateIndex] ?? str_repeat('.', $dateIndex + 1);
-        //                         $noteTwo = $allNotes[$dateIndex + 1] ?? null;
-        //                         $weekNoteType = $noteType;
-        //                     } elseif ($noteType === '4_weeks' && (($i - 1) % 1) === 0) {
-        //                         $note = $allNotes[$dateIndex] ?? str_repeat('.', $dateIndex + 1);
-        //                         $noteTwo = $allNotes[$dateIndex + 1] ?? null;
-        //                         $noteWeekCounter = $dateIndex;
-        //                         $weekNoteType = $noteType;
-        //                     } elseif ($noteType === '8_weeks' && (($i - 1) % 2) === 0) {
-        //                         $note = $allNotes[$dateIndex] ?? str_repeat('.', $dateIndex + 1);
-        //                         $noteTwo = $allNotes[$dateIndex + 1] ?? null;
-        //                         $noteWeekCounter = $dateIndex;
-        //                         $weekNoteType = $noteType;
-        //                     } elseif ($noteType === '12_weeks' && (($i - 1) % 3) === 0) {
-        //                         $note = $allNotes[$dateIndex] ?? str_repeat('.', $dateIndex + 1);
-        //                         $noteTwo = $allNotes[$dateIndex + 1] ?? null;
-        //                         $weekNoteType = '12_weeks';
-        //                         $noteWeekCounter = $dateIndex;
-        //                     } elseif ($noteType === '24_weeks' && (($i - 1) % 6) === 0) {
-        //                         $note = $allNotes[$dateIndex] ?? str_repeat('.', $dateIndex + 1);
-        //                         $noteTwo = $allNotes[$dateIndex + 1] ?? null;
-        //                         $weekNoteType = '24_weeks';
-        //                         $noteWeekCounter = $dateIndex;
-        //                     } elseif ($noteType === '52_weeks' && (($i - 1) % 12) === 0) {
-        //                         $note = $allNotes[$dateIndex] ?? str_repeat('.', $dateIndex + 1);
-        //                         $noteTwo = $allNotes[$dateIndex + 1] ?? null;
-        //                         $weekNoteType = '52_weeks';
-        //                         $noteWeekCounter = $dateIndex;
-        //                     }
-
-        //                     $existingScheduleIndex = null;
-        //                     foreach ($inputSchedules as $index => $schedule) {
-        //                         if ($schedule['start_date'] === $originalStartDate->toDateString() && $schedule['week'] === $weekIndex) {
-        //                             $existingScheduleIndex = $index;
-        //                             break;
-        //                         }
-        //                     }
-
-        //                     if ($existingScheduleIndex !== null) {
-        //                         if (!isset($note)) {
-        //                             continue;
-        //                         }
-        //                         $inputSchedules[$existingScheduleIndex] = [
-        //                             'month' => $originalStartDate->format('F'),
-        //                             'week_month' => $monthName,
-        //                             'week' => $weekIndex,
-        //                             'start_date' => $originalStartDate->toDateString(),
-        //                             'end_date' => $originalEndDate->toDateString(),
-        //                             'note' => $note,
-        //                             'note_two' => $noteTwo,
-        //                             'note_type' => $weekNoteType ?? null,
-        //                             'note_date' => $noteDate ?? null,
-        //                             'prices' => $currentPrices,
-        //                             'extra_work' => $extraWorkNamesJson,
-        //                             'extra_work_price' => $extraWorkValuesJson,
-        //                             'note_week_no' => $noteWeekCounter ?? null,
-        //                             'extra_work_price_id' => $extraWorkPriceIds,
-        //                         ];
-        //                     } else {
-        //                         $inputSchedules[] = [
-        //                             'month' => $originalStartDate->format('F'),
-        //                             'week_month' => $monthName,
-        //                             'week' => $weekIndex,
-        //                             'start_date' => $originalStartDate->toDateString(),
-        //                             'end_date' => $originalEndDate->toDateString(),
-        //                             'note' => isset($note) ? $note : $lastNote,
-        //                             'note_two' => $noteTwo,
-        //                             'note_type' => $weekNoteType ?? null,
-        //                             'note_date' => $noteDate ?? null,
-        //                             'prices' => $currentPrices,
-        //                             'extra_work' => $extraWorkNamesJson,
-        //                             'extra_work_price' => $extraWorkValuesJson,
-        //                             'note_week_no' => $noteWeekCounter ?? null,
-        //                             'extra_work_price_id' => $extraWorkPriceIds,
-        //                         ];
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-
-        //     // Database operations (same as before)
-        //     $existingSchedules = ClientSchedule::where('client_id', $id)->get();
-
-        //     $existingSchedulesToDelete = $existingSchedules->filter(function ($schedule) use ($inputSchedules) {
-        //         foreach ($inputSchedules as $inputSchedule) {
-        //             if (
-        //                 $schedule->month === $inputSchedule['month'] &&
-        //                 $schedule->week == $inputSchedule['week'] &&
-        //                 $schedule->start_date === $inputSchedule['start_date'] &&
-        //                 $schedule->end_date === $inputSchedule['end_date']
-        //             ) {
-        //                 return false;
-        //             }
-        //         }
-        //         return true;
-        //     });
-
-        //     foreach ($existingSchedulesToDelete as $scheduleToDelete) {
-        //         ClientSchedulePrice::where('schedule_id', $scheduleToDelete->id)->delete();
-        //         $scheduleToDelete->delete();
-        //     }
-
-        //     foreach ($inputSchedules as $scheduleData) {
-        //         $prices = $scheduleData['prices'];
-        //         unset($scheduleData['prices']);
-        //         $existingSchedule = ClientSchedule::where('client_id', $id)
-        //             ->where('month', $scheduleData['month'])
-        //             ->where('week', $scheduleData['week'])
-        //             ->where('start_date', $scheduleData['start_date'])
-        //             ->where('end_date', $scheduleData['end_date'])
-        //             ->first();
-
-        //         if ($existingSchedule) {
-        //             $existingSchedule->update($scheduleData);
-        //         } else {
-        //             $existingSchedule = ClientSchedule::create(array_merge($scheduleData, ['client_id' => $id]));
-        //         }
-
-        //         if (!empty($prices)) {
-        //             $existingPrices = ClientSchedulePrice::where('client_id', $id)
-        //                 ->where('schedule_id', $existingSchedule->id)
-        //                 ->pluck('price_id')
-        //                 ->toArray();
-
-        //             $pricesToDelete = array_diff($existingPrices, $prices);
-
-        //             ClientSchedulePrice::where('client_id', $id)
-        //                 ->where('schedule_id', $existingSchedule->id)
-        //                 ->whereIn('price_id', $pricesToDelete)
-        //                 ->delete();
-
-        //             $pricesToAdd = array_diff($prices, $existingPrices);
-
-        //             foreach ($pricesToAdd as $priceId) {
-        //                 ClientSchedulePrice::create([
-        //                     'client_id' => $id,
-        //                     'schedule_id' => $existingSchedule->id,
-        //                     'price_id' => $priceId,
-        //                 ]);
-        //             }
-        //         }
-        //     }
-        //     $client->update(['recurring_type' => $request->recurring_type]);
-        // }
         if ($client->service_frequency == 'normalWeek') {
             $currentYear = $client->start_date ? Carbon::createFromFormat('d/m/Y', $client->start_date)->year : Carbon::now()->year;
             $nextYear  = $currentYear + 1;
@@ -2503,7 +2019,10 @@ class WebsiteController extends Controller
                         continue;
                     }
 
-                    $originalStartDate = Carbon::parse($week['start_date']);
+                    // Anchor on the client's actual start_date (e.g. the 23rd), not the
+                    // Monday-of-week value submitted for the selected week, so recurring
+                    // months land on the same day-of-month as the client's start_date.
+                    $originalStartDate = $startDateClient->copy();
 
                     for ($i = 0; $i < 39; $i++) {
                         $newStartDate = $originalStartDate->copy()->addMonthsNoOverflow($i);
@@ -2585,61 +2104,30 @@ class WebsiteController extends Controller
             }
         } elseif ($client->service_frequency == 'biMonthly') {
 
-            $customStartDates = [
-                "January - February" => $firstMondayOfYear->copy(),
-                "February - March" => $firstMondayOfYear->copy()->addWeeks(4),
-                "March" => $firstMondayOfYear->copy()->addWeeks(8),
-                "March - April" => $firstMondayOfYear->copy()->addWeeks(12),
-                "April - May" => $firstMondayOfYear->copy()->addWeeks(16),
-                "May - June" => $firstMondayOfYear->copy()->addWeeks(20),
-                "June - July" => $firstMondayOfYear->copy()->addWeeks(24),
-                "July - August" => $firstMondayOfYear->copy()->addWeeks(28),
-                "August - September" => $firstMondayOfYear->copy()->addWeeks(32),
-                "September - October" => $firstMondayOfYear->copy()->addWeeks(36),
-                "October - November" => $firstMondayOfYear->copy()->addWeeks(40),
-                "November - December" => $firstMondayOfYear->copy()->addWeeks(44),
-                "December - January" => $firstMondayOfYear->copy()->addWeeks(48),
-            ];
-
-            function findMatchingMonth($month, $customStartDates)
-            {
-                foreach ($customStartDates as $key => $value) {
-                    if (str_contains($key, $month)) {
-                        return $key;
-                    }
-                }
-                return null;
-            }
-
+            // biMonthly = two visits every month: one anchored on the client's
+            // start_date day-of-month, one anchored on second_start_date's
+            // day-of-month. Same recurrence logic as 'monthly', run once per anchor.
             $inputSchedules = [];
-            $isNoteTwoNext = true;
-            foreach ($request->input('month') as $monthName => $weeks) {
-                $matchedMonthKey = findMatchingMonth($monthName, $customStartDates);
-                if ($matchedMonthKey === null) {
-                    continue;
-                }
 
+            foreach ($request->input('month') as $monthName => $weeks) {
                 foreach ($weeks as $weekIndex => $week) {
                     if (!isset($week['start_date'], $week['end_date'], $week['prices']) || empty($week['prices'])) {
                         continue;
                     }
 
-                    $originalStartDate = Carbon::parse($week['start_date']);
-                    $originalEndDate = Carbon::parse($week['end_date']);
-                    $weekOffset = $originalStartDate->diffInDays($customStartDates[$matchedMonthKey]);
+                    $submittedWeekStart = Carbon::parse($week['start_date'])->startOfDay();
+                    $submittedWeekEnd = Carbon::parse($week['end_date'])->endOfDay();
 
-                    $inputSchedules[] = [
-                        'month' => $monthName,
-                        'week_month' => $monthName,
-                        'week' => $weekIndex,
-                        'start_date' => $originalStartDate->toDateString(),
-                        'end_date' => $originalEndDate->toDateString(),
-                        'note' => $week['note'] ?? 'a',
-                        'note_two' => $week['note_two'] ?? null,
-                        'prices' => $week['prices'],
-                        'extra_work_price' => $week['note_extra_price'] ?? null,
-                        'priority' => $week['priority'][0] ?? 0,
-                    ];
+                    // Match this submitted week to whichever client anchor date falls
+                    // inside it (not by month name, since both anchors can share a month).
+                    if ($startDateClient->between($submittedWeekStart, $submittedWeekEnd)) {
+                        $originalStartDate = $startDateClient->copy();
+                    } elseif ($secondStartDateClient && $secondStartDateClient->between($submittedWeekStart, $submittedWeekEnd)) {
+                        $originalStartDate = $secondStartDateClient->copy();
+                    } else {
+                        continue;
+                    }
+
                     for ($i = 0; $i < 39; $i++) {
                         $newStartDate = $originalStartDate->copy()->addMonthsNoOverflow($i);
                         $newEndDate = $newStartDate->copy()->addDays(6);
@@ -2650,7 +2138,7 @@ class WebsiteController extends Controller
                             'week' => $weekIndex,
                             'start_date' => $newStartDate->toDateString(),
                             'end_date' => $newEndDate->toDateString(),
-                            'note' => $week['note'] ?? '.',
+                            'note' => $week['note'] ?? 'a',
                             'note_two' => $week['note_two'] ?? null,
                             'prices' => $week['prices'],
                             'extra_work_price' => $week['note_extra_price'] ?? null,
