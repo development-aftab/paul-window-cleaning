@@ -661,6 +661,11 @@
                     let dateParts = clientStartDate.split('/');
                     clientStartDate = dateParts[2] + '-' + dateParts[1].padStart(2, '0') + '-' + dateParts[0].padStart(2, '0');
                 }
+                let clientSecondStartDate = "{{ $client->second_start_date ?? '' }}";
+                if (clientSecondStartDate !== '') {
+                    let secondDateParts = clientSecondStartDate.split('/');
+                    clientSecondStartDate = secondDateParts[2] + '-' + secondDateParts[1].padStart(2, '0') + '-' + secondDateParts[0].padStart(2, '0');
+                }
                 // If this is the first week/month, override startDate with schedule's first start_date
                 if (weekNumber === 1 && clientScheduleData.length > 0) {
                     // Find the schedule entry with the earliest start_date
@@ -829,10 +834,11 @@
                                                                     </div>` : `
                                                                         <div class="d-flex align-items-center">
                                                                         <label>
-                                                                            ${ !clientFrequencyNote ? `
-                                                                            Start Note :
-                                                                            ${formatDateRange(startDate, endDate)}
-                                                                        ` : ''}
+                                                                            ${ !clientFrequencyNote ? (
+                                                                                client === 'monthly' ? `Start Date : ${formatSingleDate(clientStartDate)}` :
+                                                                                client === 'biMonthly' ? `Start Date : ${formatSingleDate(weekNumber === 1 ? clientStartDate : clientSecondStartDate)}` :
+                                                                                `Start Note : ${formatDateRange(startDate, endDate)}`
+                                                                            ) : ''}
                                                                         </label>
                                                                         </div>
                                                                     `}
@@ -1298,6 +1304,18 @@
                 });
 
                 return `${startMonth} ${startFormatted.slice(4)} thru ${endMonth} ${endFormatted.slice(4)}`;
+            }
+
+            function formatSingleDate(dateStr) {
+                if (!dateStr) return '';
+                const date = new Date(dateStr);
+                if (isNaN(date)) return '';
+
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: '2-digit'
+                }).replace(',', '');
             }
 
 
