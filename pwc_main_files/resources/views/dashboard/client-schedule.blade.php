@@ -1308,7 +1308,11 @@
 
             function formatSingleDate(dateStr) {
                 if (!dateStr) return '';
-                const date = new Date(dateStr);
+
+                const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
+                if (!year || !month || !day) return '';
+
+                const date = new Date(year, month - 1, day);
                 if (isNaN(date)) return '';
 
                 return date.toLocaleDateString('en-US', {
