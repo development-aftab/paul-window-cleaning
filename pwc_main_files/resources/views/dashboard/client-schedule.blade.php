@@ -667,26 +667,26 @@
                     clientSecondStartDate = secondDateParts[2] + '-' + secondDateParts[1].padStart(2, '0') + '-' + secondDateParts[0].padStart(2, '0');
                 }
                 // If this is the first week/month, override startDate with schedule's first start_date
-                if (weekNumber === 1 && clientScheduleData.length > 0) {
-                    // Find the schedule entry with the earliest start_date
-                    let minSchedule = clientScheduleData.reduce((min, curr) => {
-                        if (!min || new Date(curr.start_date) < new Date(min.start_date)) {
-                            return curr;
-                        }
-                        return min;
-                    }, null);
-                    if (minSchedule && minSchedule.start_date) {
-                        startDate = minSchedule.start_date;
-                        let start = new Date(startDate);
-                        let end = new Date(start);
-                        end.setDate(start.getDate() + 6); // 7 days range
-                        let yyyy = end.getFullYear();
-                        let mm = String(end.getMonth() + 1).padStart(2, '0');
-                        let dd = String(end.getDate()).padStart(2, '0');
-                        endDate = `${yyyy}-${mm}-${dd}`;
-                    }
-                }
-
+                // if (weekNumber === 1 && clientScheduleData.length > 0) {
+                //     // Find the schedule entry with the earliest start_date
+                //     let minSchedule = clientScheduleData.reduce((min, curr) => {
+                //         if (!min || new Date(curr.start_date) < new Date(min.start_date)) {
+                //             return curr;
+                //         }
+                //         return min;
+                //     }, null);
+                //     if (minSchedule && minSchedule.start_date) {
+                //         startDate = minSchedule.start_date;
+                //         let start = new Date(startDate);
+                //         let end = new Date(start);
+                //         end.setDate(start.getDate() + 6); // 7 days range
+                //         let yyyy = end.getFullYear();
+                //         let mm = String(end.getMonth() + 1).padStart(2, '0');
+                //         let dd = String(end.getDate()).padStart(2, '0');
+                //         endDate = `${yyyy}-${mm}-${dd}`;
+                //     }
+                // }
+                console.log("startDate" , startDate)
                 var scheduleData = clientScheduleData.find(schedule => schedule.week === openWeek && schedule
                     .note_week_no === 0 && (schedule.note_date != null || schedule.note != null));
                 var clientFrequencyNote = client === 'normalWeek';

@@ -1386,7 +1386,7 @@ class WebsiteController extends Controller
         if ($client->service_frequency == 'normalWeek' || $client->service_frequency == 'monthly' || $client->service_frequency == 'quarterly' || $client->service_frequency == 'eightWeek') {
             $startDateClient = Carbon::createFromFormat('d/m/Y', $client->start_date);
             $clientYear = $startDateClient->year;
-            $firstMondayOfYear = Carbon::parse("first Monday of January $clientYear");
+            $firstMondayOfYear = Carbon::create($clientYear, 1, 1);
 
             $customStartDates = [
                 "January - February" => $firstMondayOfYear->copy()->addDays(0),
@@ -1538,13 +1538,13 @@ class WebsiteController extends Controller
 
             $secondStartDateClient = Carbon::createFromFormat('d/m/Y', $client->second_start_date);
             $firstMondayOfMonth = Carbon::parse("first Monday of " . $startDateClient->format('F') . " " . $startDateClient->year);
-            $secondFirstMondayOfMonth = Carbon::parse("first Monday of " . $secondStartDateClient->format('F') . " " . $secondStartDateClient->year);
+            $secondFirstMondayOfMonth = Carbon::createFromFormat('d/m/Y', $client->second_start_date);
 
             if ($secondStartDateClient->lt($secondFirstMondayOfMonth)) {
                 $secondStartDateClient = $secondFirstMondayOfMonth;
             }
 
-            $weekStart = $startDateClient->copy()->startOfWeek(Carbon::MONDAY);
+            $weekStart = $startDateClient->copy();
             $weekNumber = 1;
             while ($weekStart->month == $startDateClient->month) {
                 $weekEnd = $weekStart->copy()->addDays(7);
@@ -1742,8 +1742,6 @@ class WebsiteController extends Controller
             'id' => $id,
             'request_data' => $request->all()
         ]);
-
-        // return $request->all();
         $client = Client::findOrFail($id);
         $status = auth()->user()->hasRole('admin') ? '1' : '0';
         $monthsToGenerate = 2;
