@@ -40,6 +40,7 @@ Route::post('quickbooks/import', [QuickBooksController::class, 'importCustomers'
 Route::post('quickbooks/webhook', [InvoiceController::class, 'handleQuickBooksWebhook'])->name('quickbooks.webhook');
 
 Route::get('/send-notifications', [websiteController::class, 'sendScheduleNotification'])->name('send-notifications');
+Route::get('/send-weekly-deposit-report', [websiteController::class, 'sendWeeklyDepositReport'])->name('send-weekly-deposit-report');
 Route::get('crud_generator', [CrudGeneratorController::class, 'crudGenerator'])->name('crud_generator');
 Route::post('crud_generator_process', [CrudGeneratorController::class, 'crudGeneratorProcess'])->name('crud_generator_process');
 Route::get('permissions', [ThemeController::class, 'permissions'])->name('permissions')->middleware('auth');

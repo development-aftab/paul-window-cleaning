@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\ResolvesDepositDateRange;
 use App\Http\Controllers\Controller;
 use App\Models\{Deposit, StaffRoute, ClientSchedule, ClientPayment, Client, ClientRoute, AssignRoute, Notification};
 use Illuminate\Http\Request;
@@ -12,6 +13,8 @@ use Carbon\Carbon;
 
 class DepositsController extends Controller
 {
+    use ResolvesDepositDateRange;
+
     public function index(Request $request)
     {
         try {
@@ -245,46 +248,6 @@ class DepositsController extends Controller
     }
 
     /**
-     * Calendar date range for a stored week/month/year triple (e.g. week='week2',
-     * month='August - September', year=2026), using the same 4-week cycle-offset map already
-     * used for route reports. Returns null when the month string doesn't match a known cycle
-     * name (e.g. legacy bare month names like "August" saved by createDepositFromPayment()).
-     */
-    private function computeWeekDateRange(?string $week, ?string $month, ?int $year): ?array
-    {
-        if (!$week || !$year) {
-            return null;
-        }
-
-        $cycleOffsets = [
-            'januaryfebruary' => 0,
-            'februarymarch' => 4,
-            'march' => 8,
-            'marchapril' => 12,
-            'aprilmay' => 16,
-            'mayjune' => 20,
-            'junejuly' => 24,
-            'julyaugust' => 28,
-            'augustseptember' => 32,
-            'septemberoctober' => 36,
-            'octobernovember' => 40,
-            'novemberdecember' => 44,
-            'decemberjanuary' => 48,
-        ];
-
-        $normalized = strtolower(preg_replace('/[^a-zA-Z]/', '', (string) $month));
-        if (!array_key_exists($normalized, $cycleOffsets)) {
-            return null;
-        }
-
-        $monthStart = Carbon::parse("first Monday of January {$year}")->addWeeks($cycleOffsets[$normalized]);
-        $weekStart = $monthStart->copy()->addDays(($this->weekNumberFromString($week) - 1) * 7);
-        $weekEnd = $weekStart->copy()->addDays(6);
-
-        return ['start' => $weekStart, 'end' => $weekEnd];
-    }
-
-    /**
      * Whether a row's week date range overlaps the requested date_from/date_to filter range.
      * Either bound may be null (open-ended).
      */
@@ -298,50 +261,6 @@ class DepositsController extends Controller
         }
 
         return true;
-    }
-
-    private function weekNumberFromString(?string $week): int
-    {
-        return ((int) preg_replace('/[^0-9]/', '', (string) $week)) + 1;
-    }
-
-    /**
-     * Find the portal's 7-day calendar week that a given date falls into, purely from the date
-     * itself — the same "first Monday of January + 7-day blocks" tiling the rest of the app uses
-     * to lay out weeks, without depending on a (possibly inconsistent) stored week/month string.
-     */
-    private function calendarWeekRangeForDate(Carbon $date): array
-    {
-        $firstMonday = Carbon::parse('first Monday of January ' . $date->year);
-        if ($date->lt($firstMonday)) {
-            $firstMonday = Carbon::parse('first Monday of January ' . ($date->year - 1));
-        }
-
-        $weekIndex = intdiv($firstMonday->diffInDays($date), 7);
-        $weekStart = $firstMonday->copy()->addWeeks($weekIndex);
-        $weekEnd = $weekStart->copy()->addDays(6);
-
-        return ['start' => $weekStart, 'end' => $weekEnd];
-    }
-
-    /**
-     * Format a week date range as e.g. "Aug 03 - 09, 2026" (same month) or
-     * "Aug 31 - Sep 06, 2026" (crossing a month boundary).
-     */
-    private function formatDateLabel(?array $range): string
-    {
-        if (!$range) {
-            return 'N/A';
-        }
-
-        $start = $range['start'];
-        $end = $range['end'];
-
-        if ($start->format('M') === $end->format('M')) {
-            return $start->format('M d') . ' - ' . $end->format('d') . ', ' . $end->format('Y');
-        }
-
-        return $start->format('M d') . ' - ' . $end->format('M d') . ', ' . $end->format('Y');
     }
 
     public function create(Request $request)

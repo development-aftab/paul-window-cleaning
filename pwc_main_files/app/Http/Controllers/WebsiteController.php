@@ -27,7 +27,7 @@ use App\Models\{AssignRoute,
     Deposit,
     Profile,
     Timelog};
-use Illuminate\Support\Facades\{Log, Mail, Storage, DB, Http, Auth};
+use Illuminate\Support\Facades\{Artisan, Cache, Log, Mail, Storage, DB, Http, Auth};
 use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
@@ -4118,6 +4118,40 @@ class WebsiteController extends Controller
 
         $writer->save('php://output');
         exit;
+    }
+
+    /**
+     * HTTP-triggerable wrapper around `deposits:send-weekly-report`, for hosts where only a
+     * URL-based cron (e.g. cPanel "Cron Jobs" via curl/wget) is available instead of shell/SSH
+     * access to run `php artisan schedule:run`. Point a daily 11:59 PM cron at this URL — it
+     * only actually sends when the day is Sunday (Central time), so hitting it every day is safe.
+     */
+    public function sendWeeklyDepositReport()
+    {
+        $now = Carbon::now('America/Chicago');
+
+        if (!$now->isSunday()) {
+            return response()->json([
+                'message' => 'Skipped: today is not Sunday (Central time).',
+            ]);
+        }
+
+        // Guard against the same cron hitting this URL more than once on the same Sunday
+        // (e.g. a misconfigured job, or a manual re-trigger) causing a duplicate email.
+        $cacheKey = 'weekly_deposit_report_sent_' . $now->toDateString();
+        if (Cache::has($cacheKey)) {
+            return response()->json([
+                'message' => 'Skipped: weekly deposit report was already sent today.',
+            ]);
+        }
+        Cache::put($cacheKey, true, now()->addHours(20));
+
+        Artisan::call('deposits:send-weekly-report');
+
+        return response()->json([
+            'message' => 'Weekly deposit report triggered.',
+            'output' => Artisan::output(),
+        ]);
     }
 
     public function sendScheduleNotification()
