@@ -132,11 +132,11 @@
                                         $completedTotal = $schedule['routes']->where('is_completed', 'completed')->sum('invoice_amount');
 
                                         $total = $cashTotal + $invoiceTotal;
- 
+
                                         $routeId = $staffRoute->id ?? null;
- 
+
                                         $weekKey = 'week' . ($schedule['week_number'] - 1);
- 
+
                                         $carbonDate = \Carbon\Carbon::parse($schedule['start_date']);
                                         $monthKey = strtolower($carbonDate->format('F')); // 'january'
                                         $yearKey = $carbonDate->format('Y'); // '2026'
@@ -1035,7 +1035,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="editMonthlyStartDate" class="form-label"><strong>New Start Date:</strong></label>
+                        <label for="editMonthlyStartDate" class="form-label"><strong>Date of Service:</strong></label>
                         <input type="date" class="form-control" id="editMonthlyStartDate" required>
                         <small class="form-text text-muted">End date will be automatically set to 7 days after start
                             date</small>
@@ -1814,7 +1814,7 @@
                             },
                             success: function(response) {
                                 console.log('Response:', response);
-                                console.log('Response message:', response.message); 
+                                console.log('Response message:', response.message);
 
                                 // Swal.fire({
                                 //     icon: 'success',
@@ -1889,7 +1889,7 @@
                     } else if (result.isDenied) {
                         direction = 'previous';
                     } else {
-                        return;  
+                        return;
                     }
 
                     // Show loading

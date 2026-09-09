@@ -1383,7 +1383,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="editMonthlyStartDate" class="form-label"><strong>New Start Date:</strong></label>
+                        <label for="editMonthlyStartDate" class="form-label"><strong>Date of Service:</strong></label>
                         <input type="date" class="form-control" id="editMonthlyStartDate" required>
                         <small class="form-text text-muted">End date will be automatically set to 7 days after start
                             date</small>
