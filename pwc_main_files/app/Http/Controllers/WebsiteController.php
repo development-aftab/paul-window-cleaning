@@ -3891,10 +3891,9 @@ class WebsiteController extends Controller
                             if (!$firstBilled) $billedRich->createText("\n\n");
                             $firstBilled = false;
                             $clientName = $schedule->clientName->name ?? 'Unknown';
-                            $scope = $schedule->clientSchedulePrice
-                                ->map(fn ($price) => $price->clientPaymentPrice?->name)
-                                ->filter()
-                                ->implode(', ');
+                            $mergedScope = $schedule->calculateMergedScope();
+                            $scope = implode(', ', $mergedScope['scope']);
+                            $extraWork = implode(', ', $mergedScope['extra_work']);
                             $serviceDate = $schedule->service_date
                                 ? \Carbon\Carbon::parse($schedule->service_date)->format('m/d/Y')
                                 : '';
@@ -3908,6 +3907,18 @@ class WebsiteController extends Controller
                             );
                             $nameRun->getFont()->setBold(true)->setSize(9)
                                 ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF1E8449'));
+
+                            if ($extraWork) {
+                                $extraLabelRun = $billedRich->createTextRun(" [Extra Work: ");
+                                $extraLabelRun->getFont()->setItalic(true)->setSize(9)
+                                    ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFB9770E'));
+                                $extraValueRun = $billedRich->createTextRun($extraWork);
+                                $extraValueRun->getFont()->setItalic(true)->setSize(9)
+                                    ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFB9770E'));
+                                $extraCloseRun = $billedRich->createTextRun("]");
+                                $extraCloseRun->getFont()->setItalic(true)->setSize(9)
+                                    ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFB9770E'));
+                            }
 
                             if ($serviceDate) {
                                 $dateRun = $billedRich->createTextRun(" [Service Date: $serviceDate]");

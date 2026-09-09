@@ -104,6 +104,24 @@
                                         <h3 class="pricePlus">
                                             ${{ number_format($clientPriceSum, 2, '.', ',') ?? '' }}</h3>
                                     </div>
+                                    <div class="price_list_wrapper appended_price_list">
+                                        <div class="price_list_flex mt-5">
+                                            @foreach($client->clientPrice as $price)
+                                                <div class="price_list_item">
+                                                    <div class="price_list">
+                                                        <div class="price_list_box">
+                                                            <div class="table_checkbox">
+                                                                <input class="form-check-input" type="checkbox" disabled
+                                                                    @if($clientSchedule->clientSchedulePrice->pluck('price_id')->contains($price->id)) checked @endif>
+                                                                <label>{{ $price->name ?? '' }}</label>
+                                                            </div>
+                                                            <span>${{ $price->value ?? '' }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                     <div class="custom_partially_changed">
                                         <div class="row custom_row">
                                             <div class="col-md-12 custom_no_change">

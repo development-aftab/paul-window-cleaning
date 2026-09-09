@@ -61,7 +61,7 @@ class ClientSchedule extends Model
 
     public function calculateMergedInvoiceAmount(): float
     {
-        $groupSchedules = self::with('clientSchedulePrice.clientPaymentPrice')
+        $groupSchedules = self::with(['clientSchedulePrice.clientPaymentPrice', 'clientSchedulePayment'])
             ->where('client_id', $this->client_id)
             ->where('start_date', $this->start_date)
             ->get();
@@ -85,9 +85,54 @@ class ClientSchedule extends Model
                     }
                 }
             }
+
+            $mergedInvoiceAmount += (float) (optional($sch->clientSchedulePayment)->price_charge_two ?? 0);
         }
 
         return $mergedInvoiceAmount;
+    }
+
+    public function calculateMergedScope(): array
+    {
+        $groupSchedules = self::with(['clientSchedulePrice.clientPaymentPrice', 'clientSchedulePayment'])
+            ->where('client_id', $this->client_id)
+            ->where('start_date', $this->start_date)
+            ->get();
+
+        $scopeNames = [];
+        $extraWorkNames = [];
+
+        foreach ($groupSchedules as $sch) {
+            if ($sch->clientSchedulePrice && $sch->clientSchedulePrice->count() > 0) {
+                foreach ($sch->clientSchedulePrice as $sp) {
+                    $name = optional($sp->clientPaymentPrice)->name;
+                    if (!empty($name)) {
+                        $scopeNames[] = $name;
+                    }
+                }
+            }
+
+            if ($sch->extra_work) {
+                $extraNames = json_decode($sch->extra_work, true);
+                if (is_array($extraNames)) {
+                    foreach ($extraNames as $name) {
+                        if (!empty($name)) {
+                            $scopeNames[] = $name;
+                        }
+                    }
+                }
+            }
+
+            $paymentScope = trim((string) optional($sch->clientSchedulePayment)->scope);
+            if ($paymentScope !== '') {
+                $extraWorkNames[] = $paymentScope;
+            }
+        }
+
+        return [
+            'scope' => array_values(array_unique($scopeNames)),
+            'extra_work' => array_values(array_unique($extraWorkNames)),
+        ];
     }
 
 }

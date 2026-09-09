@@ -111,6 +111,24 @@
                                             <h3 class="pricePlus">
                                                 ${{ number_format($clientPriceSum, 2, '.', ',') ?? '' }}</h3>
                                         </div>
+                                        <div class="price_list_wrapper appended_price_list">
+                                            <div class="price_list_flex mt-5">
+                                                @foreach($client->clientPrice as $price)
+                                                    <div class="price_list_item">
+                                                        <div class="price_list">
+                                                            <div class="price_list_box">
+                                                                <div class="table_checkbox">
+                                                                    <input class="form-check-input" type="checkbox" disabled
+                                                                        @if($clientSchedule->clientSchedulePrice->pluck('price_id')->contains($price->id)) checked @endif>
+                                                                    <label>{{ $price->name ?? '' }}</label>
+                                                                </div>
+                                                                <span>${{ $price->value ?? '' }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                         <!-- Service Date Input -->
                                         <div class="row custom_row mt-3">
                                             <div class="col-md-6">
@@ -198,23 +216,23 @@
                                                             Completed</label>
                                                     </div>
                                                     <div class="row reason_input_fileds_wrapper">
-                                                        <div class="price_list_wrapper appended_price_list">
-                                                            <div class="row">
-                                                                @foreach($client->clientPrice as $price)
-                                                                    <div class="col-md-3 sortable-item">
-                                                                        <div class="price_list">
-                                                                            <div class="price_list_box">
-                                                                                <div class="table_checkbox">
-                                                                                    <input class="form-check-input price_checkbox_two" type="checkbox"  data-price="{{ $price->value ?? 0 }}">
-                                                                                    <label>{{ $price->name ?? '' }}</label>
-                                                                                </div>
-                                                                                <span>${{ $price->value ?? '' }}</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
+{{--                                                        <div class="price_list_wrapper appended_price_list">--}}
+{{--                                                            <div class="row">--}}
+{{--                                                                @foreach($client->clientPrice as $price)--}}
+{{--                                                                    <div class="col-md-3 sortable-item">--}}
+{{--                                                                        <div class="price_list">--}}
+{{--                                                                            <div class="price_list_box">--}}
+{{--                                                                                <div class="table_checkbox">--}}
+{{--                                                                                    <input class="form-check-input price_checkbox_two" type="checkbox"  data-price="{{ $price->value ?? 0 }}">--}}
+{{--                                                                                    <label>{{ $price->name ?? '' }}</label>--}}
+{{--                                                                                </div>--}}
+{{--                                                                                <span>${{ $price->value ?? '' }}</span>--}}
+{{--                                                                            </div>--}}
+{{--                                                                        </div>--}}
+{{--                                                                    </div>--}}
+{{--                                                                @endforeach--}}
+{{--                                                            </div>--}}
+{{--                                                        </div>--}}
                                                         <div class="col-md-6">
                                                             <div class="txt_field">
                                                                 <input class="form-control reason_disabled" type="text" name="scope" placeholder="Scope Of Additional Work Completed" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->scope ?? '') : '' }}">
