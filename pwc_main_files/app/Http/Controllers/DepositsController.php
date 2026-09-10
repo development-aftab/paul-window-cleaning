@@ -1245,8 +1245,8 @@ class DepositsController extends Controller
             'amount' => (float) $deposits->sum('deposit_amount'),
         ];
 
-        $admin = User::where('role', 'admin')->first();
-dd($admin->email);
+        $admin = User::role('admin')->first();
+
         try {
             Mail::to($admin->email)->send(new ZelleDepositMail($data));
         } catch (\Exception $e) {
