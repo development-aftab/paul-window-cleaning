@@ -361,13 +361,21 @@
                     html: `Mark <strong>${amount}</strong> for <strong>${route}</strong> as deposited on <strong>${formattedDate}</strong>?`,
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, save it',
+                    showDenyButton: true,
+                    confirmButtonText: 'Pay Manually',
+                    denyButtonText: 'Pay with Zelle',
                     cancelButtonText: 'Cancel',
                     confirmButtonColor: '#00ADEE',
+                    denyButtonColor: '#6D1ED4',
                     cancelButtonColor: '#6c757d',
                     reverseButtons: false,
                 }).then(function(result) {
-                    if (!result.isConfirmed) {
+                    let paymentType;
+                    if (result.isConfirmed) {
+                        paymentType = 'cash'; // Pay Manually — existing flow, unchanged
+                    } else if (result.isDenied) {
+                        paymentType = 'zelle'; // Pay with Zelle — also notifies the bookkeeper by email
+                    } else {
                         $input.val('');
                         return;
                     }
@@ -381,6 +389,7 @@
                             _token: '{{ csrf_token() }}',
                             is_deposit: 1,
                             deposit_date: depositDate,
+                            payment_type: paymentType,
                         };
                     } else if (paymentIdsRaw) {
                         // Row still backed by raw cash payments — convert them into Deposit record(s) now.
@@ -389,6 +398,7 @@
                             _token: '{{ csrf_token() }}',
                             payment_ids: String(paymentIdsRaw).split(','),
                             deposit_date: depositDate,
+                            payment_type: paymentType,
                         };
                     } else {
                         return;

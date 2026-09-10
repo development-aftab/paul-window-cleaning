@@ -22,6 +22,7 @@ class Deposit extends Model
         'deposit_amount',
         'is_deposit',
         'deposit_date',
+        'payment_type',
         'notes',
     ];
 

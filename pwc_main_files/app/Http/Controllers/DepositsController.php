@@ -4,11 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Concerns\ResolvesDepositDateRange;
 use App\Http\Controllers\Controller;
-use App\Models\{Deposit, StaffRoute, ClientSchedule, ClientPayment, Client, ClientRoute, AssignRoute, Notification};
+use App\Mail\ZelleDepositMail;
+use App\Models\{Deposit,
+    StaffRoute,
+    ClientSchedule,
+    ClientPayment,
+    Client,
+    ClientRoute,
+    AssignRoute,
+    Notification,
+    User};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
 class DepositsController extends Controller
@@ -1113,7 +1123,10 @@ class DepositsController extends Controller
             'payment_ids' => 'required|array|min:1',
             'payment_ids.*' => 'required|exists:client_payments,id',
             'deposit_date' => 'nullable|date',
+            'payment_type' => 'nullable|in:cash,zelle',
         ]);
+
+        $paymentType = $request->input('payment_type', 'cash');
 
         $user = Auth::user();
         $payments = ClientPayment::with([
@@ -1171,12 +1184,13 @@ class DepositsController extends Controller
         // with is_deposit left false, same as before.
         $depositDate = $request->filled('deposit_date') ? Carbon::parse($request->deposit_date) : null;
         $isDeposit = (bool) $depositDate;
+        $createdDeposits = collect();
 
         try {
-            DB::transaction(function () use ($payments, $user, $depositDate, $isDeposit) {
+            DB::transaction(function () use ($payments, $user, $depositDate, $isDeposit, $paymentType, &$createdDeposits) {
                 foreach ($payments as $payment) {
                     $payment->update(['payment_status' => 'paid']);
-                    $this->createDepositFromPayment($payment, $user, $depositDate, $isDeposit);
+                    $createdDeposits->push($this->createDepositFromPayment($payment, $user, $depositDate, $isDeposit, $paymentType));
                 }
             });
         } catch (\Exception $e) {
@@ -1186,6 +1200,10 @@ class DepositsController extends Controller
                 'success' => false,
                 'message' => 'Failed to mark payments as deposited: ' . $e->getMessage(),
             ], 500);
+        }
+
+        if ($paymentType === 'zelle') {
+            $this->sendZelleDepositNotification($createdDeposits);
         }
 
         Notification::create([
@@ -1205,7 +1223,38 @@ class DepositsController extends Controller
         ]);
     }
 
-    private function createDepositFromPayment(ClientPayment $payment, $user, $depositDate = null, bool $isDeposit = false): Deposit
+    /**
+     * Email the bookkeeper the details of one or more Deposit records just marked as paid via
+     * Zelle. Multiple deposits can come from a single "Date Deposited" action (one row on the
+     * Total Undeposited Cash page can represent a merged group of payments) — those are combined
+     * into a single email with the summed amount, matching what the row itself displays.
+     */
+    private function sendZelleDepositNotification($deposits): void
+    {
+        $deposits = collect($deposits)->filter();
+        if ($deposits->isEmpty()) {
+            return;
+        }
+
+        $first = $deposits->first();
+
+        $data = [
+            'staff_name' => $first->staff->name ?? 'Unassigned',
+            'date_range' => $this->depositDateRangeLabel($first),
+            'deposit_date' => $first->deposit_date ? $first->deposit_date->format('m/d/Y') : now()->format('m/d/Y'),
+            'amount' => (float) $deposits->sum('deposit_amount'),
+        ];
+
+        $admin = User::where('role', 'admin')->first();
+dd($admin->email);
+        try {
+            Mail::to($admin->email)->send(new ZelleDepositMail($data));
+        } catch (\Exception $e) {
+            Log::error('Failed to send Zelle deposit notification: ' . $e->getMessage());
+        }
+    }
+
+    private function createDepositFromPayment(ClientPayment $payment, $user, $depositDate = null, bool $isDeposit = false, ?string $paymentType = null): Deposit
     {
         $schedule = $payment->clientSchedule;
         $routeId = $payment->client?->clientRouteStaff?->first()?->route_id;
@@ -1249,6 +1298,7 @@ class DepositsController extends Controller
             'deposit_amount' => $amount,
             'is_deposit' => $isDeposit,
             'deposit_date' => $depositDate ? Carbon::parse($depositDate) : now(),
+            'payment_type' => $paymentType,
         ]);
     }
 
@@ -1269,6 +1319,10 @@ class DepositsController extends Controller
                 ], 403)->header('Content-Type', 'application/json');
             }
 
+            $request->validate([
+                'payment_type' => 'nullable|in:cash,zelle',
+            ]);
+
             $deposit->is_deposit = $request->input('is_deposit', 0);
             if ($request->filled('deposit_date')) {
                 // An explicit date (e.g. from the "Date Deposited" inline picker) always wins.
@@ -1276,7 +1330,15 @@ class DepositsController extends Controller
             } elseif ($deposit->is_deposit && !$deposit->deposit_date) {
                 $deposit->deposit_date = now();
             }
+            if ($request->filled('payment_type')) {
+                $deposit->payment_type = $request->input('payment_type');
+            }
             $deposit->save();
+
+            if ($request->input('payment_type') === 'zelle') {
+                $this->sendZelleDepositNotification([$deposit]);
+            }
+
             Notification::create([
                 'user_id' => $deposit->staff_id,
                 'action_id' => $deposit->staff_id,
