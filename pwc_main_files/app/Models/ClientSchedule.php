@@ -105,14 +105,34 @@ class ClientSchedule extends Model
      */
     public function calculateMergedPriceIds(): array
     {
-        return self::with('clientSchedulePrice')
+        $groupSchedules = self::with('clientSchedulePrice')
             ->where('client_id', $this->client_id)
             ->where('start_date', $this->start_date)
-            ->get()
+            ->get();
+
+        $priceIds = $groupSchedules
             ->flatMap(fn ($sch) => $sch->clientSchedulePrice->pluck('price_id'))
-            ->unique()
-            ->values()
             ->all();
+
+        // "Extra Work Completed" checkboxes save the selected item's *name* into extra_work
+        // (no price_id link), so resolve those names back to their price_id here too — otherwise
+        // an item added that way never shows as checked in the scope-of-work list.
+        $extraNames = $groupSchedules
+            ->flatMap(function ($sch) {
+                $names = json_decode($sch->extra_work ?? '', true);
+                return is_array($names) ? $names : [];
+            })
+            ->filter()
+            ->unique();
+
+        if ($extraNames->isNotEmpty()) {
+            $resolvedIds = ClientPriceList::where('client_id', $this->client_id)
+                ->whereIn('name', $extraNames)
+                ->pluck('id');
+            $priceIds = array_merge($priceIds, $resolvedIds->all());
+        }
+
+        return array_values(array_unique($priceIds));
     }
 
     public function calculateMergedScope(): array
