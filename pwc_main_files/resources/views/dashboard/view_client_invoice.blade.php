@@ -134,28 +134,6 @@
                                                     <label class="form-check-label" for="com_no_change">Completed no
                                                         Change</label>
                                                 </div>
-                                                <div class="row reason_input_fileds_wrapper"
-                                                     @if($clientSchedule->clientSchedulePayment->option != 'completed') hidden
-                                                    @endif>
-                                                    <div class="price_list_wrapper appended_price_list">
-                                                        <div class="price_list_flex">
-                                                            @foreach($client->clientPrice as $price)
-                                                                <div class="price_list_item">
-                                                                    <div class="price_list">
-                                                                        <div class="price_list_box">
-                                                                            <div class="table_checkbox">
-                                                                                <input class="form-check-input" type="checkbox" disabled
-                                                                                    @if(in_array($price->id, $mergedPriceIds)) checked @endif>
-                                                                                <label>{{ $price->name ?? '' }}</label>
-                                                                            </div>
-                                                                            <span>${{ $price->value ?? '' }}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            @endforeach
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             </div>
 
                                             <div class="col-md-12 partially_completed_wrapper">
