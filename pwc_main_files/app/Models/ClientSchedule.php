@@ -70,6 +70,10 @@ class ClientSchedule extends Model
 
         foreach ($groupSchedules as $sch) {
             if ($sch->clientSchedulePrice && $sch->clientSchedulePrice->count() > 0) {
+                if (isset($sch->clientSchedulePayment) && $sch->clientSchedulePayment->option_five == 'partially'){
+                    $mergedInvoiceAmount += (float) (optional($sch->clientSchedulePayment)->price_charge_one ?? 0);
+                    continue;
+                }
                 foreach ($sch->clientSchedulePrice as $sp) {
                     $mergedInvoiceAmount += (float) (optional($sp->clientPaymentPrice)->value ?? 0);
                 }
@@ -99,25 +103,26 @@ class ClientSchedule extends Model
             ->where('start_date', $this->start_date)
             ->get();
 
-        $scopeNames = [];
-        $extraWorkNames = [];
+        $scopeItems = [];
+        $extraWorkItems = [];
 
         foreach ($groupSchedules as $sch) {
             if ($sch->clientSchedulePrice && $sch->clientSchedulePrice->count() > 0) {
                 foreach ($sch->clientSchedulePrice as $sp) {
                     $name = optional($sp->clientPaymentPrice)->name;
                     if (!empty($name)) {
-                        $scopeNames[] = $name;
+                        $scopeItems[$name] = (float) (optional($sp->clientPaymentPrice)->value ?? 0);
                     }
                 }
             }
 
             if ($sch->extra_work) {
                 $extraNames = json_decode($sch->extra_work, true);
+                $extraValues = json_decode($sch->extra_work_price, true);
                 if (is_array($extraNames)) {
-                    foreach ($extraNames as $name) {
+                    foreach ($extraNames as $idx => $name) {
                         if (!empty($name)) {
-                            $scopeNames[] = $name;
+                            $scopeItems[$name] = (float) ($extraValues[$idx] ?? 0);
                         }
                     }
                 }
@@ -125,13 +130,21 @@ class ClientSchedule extends Model
 
             $paymentScope = trim((string) optional($sch->clientSchedulePayment)->scope);
             if ($paymentScope !== '') {
-                $extraWorkNames[] = $paymentScope;
+                $extraWorkItems[$paymentScope] = (float) (optional($sch->clientSchedulePayment)->price_charge_two ?? 0);
             }
         }
 
+        $toItemList = function (array $items): array {
+            $list = [];
+            foreach ($items as $name => $value) {
+                $list[] = ['name' => $name, 'value' => $value];
+            }
+            return $list;
+        };
+
         return [
-            'scope' => array_values(array_unique($scopeNames)),
-            'extra_work' => array_values(array_unique($extraWorkNames)),
+            'scope' => $toItemList($scopeItems),
+            'extra_work' => $toItemList($extraWorkItems),
         ];
     }
 

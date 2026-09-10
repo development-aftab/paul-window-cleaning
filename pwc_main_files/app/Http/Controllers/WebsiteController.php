@@ -3892,8 +3892,12 @@ class WebsiteController extends Controller
                             $firstBilled = false;
                             $clientName = $schedule->clientName->name ?? 'Unknown';
                             $mergedScope = $schedule->calculateMergedScope();
-                            $scope = implode(', ', $mergedScope['scope']);
-                            $extraWork = implode(', ', $mergedScope['extra_work']);
+                            $formatScopeItems = fn (array $items) => implode(', ', array_map(
+                                fn ($item) => $item['name'] . ' ($' . number_format($item['value'], 2) . ')',
+                                $items
+                            ));
+                            $scope = $formatScopeItems($mergedScope['scope']);
+                            $extraWork = $formatScopeItems($mergedScope['extra_work']);
                             $serviceDate = $schedule->service_date
                                 ? \Carbon\Carbon::parse($schedule->service_date)->format('m/d/Y')
                                 : '';
