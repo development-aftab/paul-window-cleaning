@@ -1185,11 +1185,12 @@ class WebsiteController extends Controller
         }
 
         $clientPriceSum = $clientSchedule->calculateMergedInvoiceAmount();
+        $mergedPriceIds = $clientSchedule->calculateMergedPriceIds();
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
         $existingPayment = $clientSchedule->clientSchedulePayment;
         $isEditMode = $existingPayment !== null;
 
-        return view('dashboard.client_invoice', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices', 'selectedMonth', 'existingPayment', 'isEditMode'));
+        return view('dashboard.client_invoice', compact('client', 'clientPriceSum', 'clientSchedule', 'mergedPriceIds', 'multiPrices', 'selectedMonth', 'existingPayment', 'isEditMode'));
     }
 
     public function viewClientInvoice(Request $request, $id)
@@ -1211,9 +1212,10 @@ class WebsiteController extends Controller
         }
 
         $clientPriceSum = $clientSchedule->calculateMergedInvoiceAmount();
+        $mergedPriceIds = $clientSchedule->calculateMergedPriceIds();
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
 
-        return view('dashboard.view_client_invoice', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices'));
+        return view('dashboard.view_client_invoice', compact('client', 'clientPriceSum', 'clientSchedule', 'mergedPriceIds', 'multiPrices'));
     }
 
     public function clientCash(Request $request, $id)
@@ -1241,11 +1243,12 @@ class WebsiteController extends Controller
         }
 
         $clientPriceSum = $clientSchedule->calculateMergedInvoiceAmount();
+        $mergedPriceIds = $clientSchedule->calculateMergedPriceIds();
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
         $existingPayment = $clientSchedule->clientSchedulePayment;
         $isEditMode = $existingPayment !== null;
 
-        return view('dashboard.client_cash', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices', 'selectedMonth', 'existingPayment', 'isEditMode'));
+        return view('dashboard.client_cash', compact('client', 'clientPriceSum', 'clientSchedule', 'mergedPriceIds', 'multiPrices', 'selectedMonth', 'existingPayment', 'isEditMode'));
     }
 
     public function viewClientCash(Request $request, $id)
@@ -1267,9 +1270,10 @@ class WebsiteController extends Controller
         }
 
         $clientPriceSum = $clientSchedule->calculateMergedInvoiceAmount();
+        $mergedPriceIds = $clientSchedule->calculateMergedPriceIds();
         $multiPrices = $this->getMultiPriceWithExtra($clientSchedule);
 
-        return view('dashboard.view_client_cash', compact('client', 'clientPriceSum', 'clientSchedule', 'multiPrices'));
+        return view('dashboard.view_client_cash', compact('client', 'clientPriceSum', 'clientSchedule', 'mergedPriceIds', 'multiPrices'));
     }
 
     private function mergeRouteReportScheduleNotes($schedules)

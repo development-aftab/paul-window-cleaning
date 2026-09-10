@@ -96,6 +96,25 @@ class ClientSchedule extends Model
         return $mergedInvoiceAmount;
     }
 
+    /**
+     * The price_ids checked off across every ClientSchedule row sharing this same client_id +
+     * start_date. A single client+date can have more than one ClientSchedule row (e.g. a note
+     * added on a separate row), and the row a page happens to load via ->first() may not be the
+     * one carrying the clientSchedulePrice records — so scope checkboxes must check membership
+     * across the whole group, not just $this->clientSchedulePrice.
+     */
+    public function calculateMergedPriceIds(): array
+    {
+        return self::with('clientSchedulePrice')
+            ->where('client_id', $this->client_id)
+            ->where('start_date', $this->start_date)
+            ->get()
+            ->flatMap(fn ($sch) => $sch->clientSchedulePrice->pluck('price_id'))
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     public function calculateMergedScope(): array
     {
         $groupSchedules = self::with(['clientSchedulePrice.clientPaymentPrice', 'clientSchedulePayment'])

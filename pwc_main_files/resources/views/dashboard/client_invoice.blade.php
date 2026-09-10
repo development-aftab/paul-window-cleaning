@@ -119,7 +119,7 @@
                                                             <div class="price_list_box">
                                                                 <div class="table_checkbox">
                                                                     <input class="form-check-input" type="checkbox" disabled
-                                                                        @if($clientSchedule->clientSchedulePrice->pluck('price_id')->contains($price->id)) checked @endif>
+                                                                        @if(in_array($price->id, $mergedPriceIds)) checked @endif>
                                                                     <label>{{ $price->name ?? '' }}</label>
                                                                 </div>
                                                                 <span>${{ $price->value ?? '' }}</span>
@@ -156,7 +156,7 @@
                                                                             <div class="price_list_box">
                                                                                 <div class="table_checkbox">
                                                                                     <input class="form-check-input" type="checkbox" disabled
-                                                                                        @if($clientSchedule->clientSchedulePrice->pluck('price_id')->contains($price->id)) checked @endif>
+                                                                                        @if(in_array($price->id, $mergedPriceIds)) checked @endif>
                                                                                     <label>{{ $price->name ?? '' }}</label>
                                                                                 </div>
                                                                                 <span>${{ $price->value ?? '' }}</span>
