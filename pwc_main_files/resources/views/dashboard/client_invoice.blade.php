@@ -105,7 +105,7 @@
                                                 <input type="hidden" name="month" value="{{ $selectedMonth ?? '' }}">
 {{--                                                <span>(Invoice)</span>--}}
                                                 @if ($isEditMode)
-                                                    <span class="report_lock_badge"><i class="fa-solid fa-pen"></i> Editable for 24 hours</span>
+                                                    <span class="report_lock_badge"><i class="fa-solid fa-pen"></i> Editable for 30 days</span>
                                                 @endif
                                             </div>
                                             <h3 class="pricePlus">

@@ -375,7 +375,7 @@
                                             <div class="routes_wrapper" id="week-{{ $schedule['week_number'] }}" data-week="{{ $schedule['week_number'] }}">
                                                 @foreach ($schedule['routes'] as $key => $route)
                                                     @php
-                                                        $isLocked = !empty($route['submitted_at']) && \Carbon\Carbon::parse($route['submitted_at'])->diffInHours(now()) >= 24;
+                                                        $isLocked = !empty($route['submitted_at']) && \Carbon\Carbon::parse($route['submitted_at'])->diffInDays(now()) >= 30;
                                                         $isEditableWindow = !empty($route['submitted_at']) && !$isLocked;
                                                         $routeStatusClass = $isEditableWindow ? 'route_status_editable' : ($isLocked ? 'route_status_locked' : 'route_status_pending');
                                                     @endphp
@@ -781,7 +781,7 @@
                                                     <div class="routes_wrapper" id="week-{{ $schedule['week_number'] }}" data-week="{{ $schedule['week_number'] }}">
                                                         @foreach ($schedule['routes'] as $key => $route)
                                                             @php
-                                                                $isLocked = !empty($route['submitted_at']) && \Carbon\Carbon::parse($route['submitted_at'])->diffInHours(now()) >= 24;
+                                                                $isLocked = !empty($route['submitted_at']) && \Carbon\Carbon::parse($route['submitted_at'])->diffInDays(now()) >= 30;
                                                                 $isEditableWindow = !empty($route['submitted_at']) && !$isLocked;
                                                                 $routeStatusClass = $isEditableWindow ? 'route_status_editable' : ($isLocked ? 'route_status_locked' : 'route_status_pending');
                                                             @endphp
@@ -1177,7 +1177,7 @@
                                                     </div>
                                                     @forelse ($pendingRoutes as $route)
                                                         @php
-                                                            $isLocked = !empty($route['submitted_at']) && \Carbon\Carbon::parse($route['submitted_at'])->diffInHours(now()) >= 24;
+                                                            $isLocked = !empty($route['submitted_at']) && \Carbon\Carbon::parse($route['submitted_at'])->diffInDays(now()) >= 30;
                                                             $isEditableWindow = !empty($route['submitted_at']) && !$isLocked;
                                                             $routeStatusClass = $isEditableWindow ? 'route_status_editable' : ($isLocked ? 'route_status_locked' : 'route_status_pending');
                                                         @endphp

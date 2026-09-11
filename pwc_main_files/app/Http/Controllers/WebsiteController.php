@@ -1179,7 +1179,7 @@ class WebsiteController extends Controller
             return redirect()->back();
         }
 
-        $isLocked = $clientSchedule->submitted_at && now()->diffInHours($clientSchedule->submitted_at) >= 24;
+        $isLocked = $clientSchedule->submitted_at && now()->diffInDays($clientSchedule->submitted_at) >= 30;
         if ($clientSchedule->clientSchedulePayment !== null && $isLocked) {
             return redirect()->route('view_client_invoice', ['id' => $id, 'start_date' => $start_week_date, 'end_date' => $end_week_date]);
         }
@@ -1237,7 +1237,7 @@ class WebsiteController extends Controller
             return redirect()->back();
         }
 
-        $isLocked = $clientSchedule->submitted_at && now()->diffInHours($clientSchedule->submitted_at) >= 24;
+        $isLocked = $clientSchedule->submitted_at && now()->diffInDays($clientSchedule->submitted_at) >= 30;
         if ($clientSchedule->clientSchedulePayment !== null && $isLocked) {
             return redirect()->route('view_client_cash', ['id' => $id, 'start_date' => $start_week_date, 'end_date' => $end_week_date]);
         }
@@ -3339,7 +3339,7 @@ class WebsiteController extends Controller
     {
         $schedule = ClientSchedule::findOrFail($request->schedule_id);
 
-        if (!$schedule->submitted_at || now()->diffInHours($schedule->submitted_at) >= 24) {
+        if (!$schedule->submitted_at || now()->diffInDays($schedule->submitted_at) >= 30) {
             return redirect()->back()->with(['title' => 'Locked', 'message' => 'This report is locked and can no longer be edited.', 'type' => 'error']);
         }
 
