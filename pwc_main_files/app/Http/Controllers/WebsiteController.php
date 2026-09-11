@@ -3984,7 +3984,8 @@ class WebsiteController extends Controller
                         }
                     }
 
-                    // Omit breakdown: Client names (bold) + amount (normal) + Reason label (bold) + reason text (not bold)
+                    // Omit breakdown: bullet + bold maroon client name, then the reason —
+                    // same bullet/bold visual language as Billed/Unpaid, data unchanged.
                     $omitSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option ?? '') == 'omit');
                     $omitRich = new \PhpOffice\PhpSpreadsheet\RichText\RichText();
                     if ($omitSchedules->isEmpty()) {
@@ -3997,12 +3998,20 @@ class WebsiteController extends Controller
                             $clientName = $schedule->clientName->name ?? 'Unknown';
                             $reason = $schedule->clientSchedulePayment->reason ?? '';
 
-                            $nameRun = $omitRich->createTextRun($clientName . ": " . $reason);
-                            $nameRun->getFont()->setSize(9);
+                            $bulletRun = $omitRich->createTextRun("\u{25CF} ");
+                            $bulletRun->getFont()->setBold(true)->setSize(9)
+                                ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF5D6D7E'));
+
+                            $nameRun = $omitRich->createTextRun($clientName);
+                            $nameRun->getFont()->setBold(true)->setSize(9)
+                                ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF5D6D7E'));
+
+                            $omitRich->createText(": " . $reason);
                         }
                     }
 
-                    // Partial breakdown: Client names (bold) + amount (normal) + Partial Scope label (bold) + scope text (not bold)
+                    // Partial breakdown: bullet + bold blue client name (scope), then amount —
+                    // same bullet/bold visual language as Billed/Unpaid, data unchanged.
                     $partialSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->option_five ?? '') == 'partially');
                     $partialRich = new \PhpOffice\PhpSpreadsheet\RichText\RichText();
                     if ($partialSchedules->isEmpty()) {
@@ -4016,11 +4025,17 @@ class WebsiteController extends Controller
                             $scope = $schedule->clientSchedulePayment->partial_completed_scope ?? '';
                             $amount = $schedule->calculateMergedInvoiceAmount() ?: ($schedule->clientSchedulePayment->final_price ?? 0);
 
+                            $bulletRun = $partialRich->createTextRun("\u{25CF} ");
+                            $bulletRun->getFont()->setBold(true)->setSize(9)
+                                ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF2E86C1'));
+
                             $nameRun = $partialRich->createTextRun(
-                                $scope ? "$clientName ($scope): " : "$clientName: "
+                                $scope ? "$clientName ($scope)" : $clientName
                             );
-                            $nameRun->getFont()->setSize(9);
-                            $amount = $schedule->calculateMergedInvoiceAmount() ?: ($schedule->clientSchedulePayment->final_price ?? 0);
+                            $nameRun->getFont()->setBold(true)->setSize(9)
+                                ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF2E86C1'));
+
+                            $partialRich->createText(": ");
                             $partialRich->createText(number_format($amount, 2));
                         }
                     }
@@ -4054,20 +4069,23 @@ class WebsiteController extends Controller
                     $sheet->getStyle("G$rowIndex")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                         ->getStartColor()->setARGB('FFFDEDEC');
 
-                    // Omit with client names and reasons (bold names and labels, normal text)
+                    // Omit with client names and reasons - shaded amber so it reads as its
+                    // own distinct block, same treatment as Billed/Unpaid
                     $sheet->setCellValue("H$rowIndex", $omitRich);
                     $sheet->getStyle("H$rowIndex")->getAlignment()->setWrapText(true);
+                    $sheet->getStyle("H$rowIndex")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                        ->getStartColor()->setARGB('FFF4F6F6');
 
-                    // Partial with client names and scope (bold names and labels, normal text)
+                    // Partial with client names and scope - shaded light blue
                     $sheet->setCellValue("I$rowIndex", $partialRich);
                     $sheet->getStyle("I$rowIndex")->getAlignment()->setWrapText(true);
+                    $sheet->getStyle("I$rowIndex")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                        ->getStartColor()->setARGB('FFEBF5FB');
 
-                    // Zebra-stripe the non-Billed/Unpaid columns so rows are easy to
-                    // scan without diluting the fixed green/red column shading
+                    // Zebra-stripe the remaining plain columns so rows are easy to scan
+                    // without diluting the fixed Billed/Unpaid/Omit/Partial column shading
                     if ($routeRowCounter % 2 === 0) {
                         $sheet->getStyle("A$rowIndex:E$rowIndex")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                            ->getStartColor()->setARGB('FFF7F7F9');
-                        $sheet->getStyle("H$rowIndex:I$rowIndex")->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                             ->getStartColor()->setARGB('FFF7F7F9');
                     }
 
