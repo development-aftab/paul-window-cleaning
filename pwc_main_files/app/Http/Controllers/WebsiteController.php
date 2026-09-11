@@ -3900,7 +3900,14 @@ class WebsiteController extends Controller
                                 fn ($item) => $item['name'] . ' ($' . number_format($item['value'], 2) . ')',
                                 $items
                             ));
-                            $scope = $formatScopeItems($mergedScope['scope']);
+                            $isPartial = optional($schedule->clientSchedulePayment)->option_five === 'partially';
+                            $partialScopeName = trim((string) optional($schedule->clientSchedulePayment)->partial_completed_scope);
+                            $scope = $isPartial
+                                ? ($partialScopeName ? $formatScopeItems([[
+                                    'name' => $partialScopeName,
+                                    'value' => (float) (optional($schedule->clientSchedulePayment)->price_charge_one ?? 0),
+                                  ]]) : '')
+                                : $formatScopeItems($mergedScope['scope']);
                             $extraWork = $formatScopeItems($mergedScope['extra_work']);
                             $serviceDate = $schedule->service_date
                                 ? \Carbon\Carbon::parse($schedule->service_date)->format('m/d/Y')

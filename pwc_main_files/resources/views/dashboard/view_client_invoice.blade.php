@@ -151,7 +151,7 @@
                                                 <div class="row reason_input_fileds_wrapper"
                                                      @if($clientSchedule->clientSchedulePayment->option_five != 'partially') hidden
                                                     @endif>
-                                                    <div class="col-md-6">
+                                                    <div class="col-md-4">
                                                         <div class="txt_field">
                                                             <input class="form-control reason_disabled" type="text"
                                                                    name="reason" placeholder="Reason"
@@ -159,7 +159,14 @@
                                                                    value="{{ $clientSchedule->clientSchedulePayment->reason ?? '' }}">
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-6">
+                                                    <div class="col-md-4">
+                                                        <div class="txt_field">
+                                                            <input class="form-control reason_disabled" type="text"
+                                                                   name="partial_completed_scope" placeholder="Scope Of Work Completed"
+                                                                   disabled="disabled" value="{{ $clientSchedule->clientSchedulePayment->partial_completed_scope ?? '' }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
                                                         <div class="txt_field">
                                                             <input class="form-control reason_disabled" type="text"
                                                                    name="price_charged_one"
