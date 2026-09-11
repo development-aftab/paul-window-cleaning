@@ -159,7 +159,7 @@
                                                     <td>
                                                         <span class="badge bg-secondary">{{ ucfirst($paymentType) }}</span>
                                                     </td>
-                                                    <td>${{ $job->clientSchedulePayment->final_price ?? 'N/A' }}</td>
+                                                    <td>${{ number_format($job->calculateMergedInvoiceAmount() ?: ($job->clientSchedulePayment->final_price ?? 0), 2) }}</td>
                                                     <td data-sort="{{ $job->service_date ? \Carbon\Carbon::parse($job->service_date)->format('Y-m-d') : '' }}">
                                                         {{ $job->service_date ? \Carbon\Carbon::parse($job->service_date)->format('m-d-Y') : 'N/A' }}
                                                     </td>
@@ -219,9 +219,9 @@
                                                                        data-day-number="{{ $job->clientSchedulePayment->day_number ?? '' }}"
                                                                        data-start-time="{{ $job->clientSchedulePayment->start_time ?? '' }}"
                                                                        data-end-time="{{ $job->clientSchedulePayment->end_time ?? '' }}"
-                                                                       data-final-price="{{ $job->clientSchedulePayment->final_price ?? '' }}"
+                                                                       data-final-price="{{ $job->calculateMergedInvoiceAmount() ?: ($job->clientSchedulePayment->final_price ?? '') }}"
                                                                        data-client-price-list="{{ optional($job->clientName?->clientPrice)->toJson() ?? '[]' }}"
-                                                                       data-schedule-price-ids="{{ $job->clientSchedulePrice->pluck('price_id')->toJson() }}">
+                                                                       data-schedule-price-ids="{{ json_encode($job->calculateMergedPriceIds()) }}">
                                                                         <i class="fa-solid fa-file-lines me-2"></i>View
                                                                         Report
                                                                     </a>
@@ -263,6 +263,9 @@
                             <h3 class="pricePlus" id="modal_cash_final_price">$0.00</h3>
                         </div>
 
+                        <!-- Scope Of Work -->
+                        <div class="price_list_wrapper appended_price_list" id="modal_cash_scope_price_list"></div>
+
                         <!-- Service Date -->
                         <div class="row custom_row mt-3">
                             <div class="col-md-6">
@@ -282,11 +285,6 @@
                                                disabled>
                                         <label class="form-check-label" for="modal_cash_completed">Completed no
                                             Change</label>
-                                    </div>
-                                    <div class="row reason_input_fileds_wrapper" id="modal_cash_completed_price_list_wrapper"
-                                         style="display: none;">
-                                        <div class="price_list_wrapper appended_price_list" id="modal_cash_completed_price_list">
-                                        </div>
                                     </div>
                                 </div>
 
@@ -472,6 +470,9 @@
                             <h3 class="pricePlus" id="modal_invoice_final_price">$0.00</h3>
                         </div>
 
+                        <!-- Scope Of Work -->
+                        <div class="price_list_wrapper appended_price_list" id="modal_invoice_scope_price_list"></div>
+
                         <!-- Service Date -->
                         <div class="row custom_row mt-3">
                             <div class="col-md-6">
@@ -491,11 +492,6 @@
                                                disabled>
                                         <label class="form-check-label" for="modal_invoice_completed">Completed no
                                             Change</label>
-                                    </div>
-                                    <div class="row reason_input_fileds_wrapper" id="modal_invoice_completed_price_list_wrapper"
-                                         style="display: none;">
-                                        <div class="price_list_wrapper appended_price_list" id="modal_invoice_completed_price_list">
-                                        </div>
                                     </div>
                                 </div>
 
@@ -735,7 +731,7 @@
                 selectedIds = (selectedIds || []).map(function(id) {
                     return String(id);
                 });
-                var html = '<div class="price_list_flex">';
+                var html = '<div class="price_list_flex mt-5">';
                 priceList.forEach(function(price) {
                     var isChecked = selectedIds.indexOf(String(price.id)) !== -1;
                     html += '<div class="price_list_item">' +
@@ -792,12 +788,12 @@
                     // Reset all checkboxes and fields
                     $('#modal_cash_completed, #modal_cash_noPayment, #modal_cash_partially, #modal_cash_option_two, #modal_cash_option_three, #modal_cash_option_four, #modal_cash_logTime, #modal_cash_omit')
                         .prop('checked', false);
-                    $('#modal_cash_noPayment_reason, #modal_cash_partially_fields, #modal_cash_extra_paid_fields, #modal_cash_extra_work_fields, #modal_cash_log_time_fields, #modal_cash_omit_reason, #modal_cash_completed_price_list_wrapper')
+                    $('#modal_cash_noPayment_reason, #modal_cash_partially_fields, #modal_cash_extra_paid_fields, #modal_cash_extra_work_fields, #modal_cash_log_time_fields, #modal_cash_omit_reason')
                         .hide();
                     $('#modal_cash_reason_noPayment, #modal_cash_reason_partially, #modal_cash_scope_partially, #modal_cash_price_charged_one, #modal_cash_amount, #modal_cash_scope_extra_work, #modal_cash_price_charged_two, #modal_cash_start_time, #modal_cash_end_time, #modal_cash_reason_omit')
                         .val('');
                     $('#modal_cash_day_number').text('0');
-                    $('#modal_cash_completed_price_list, #modal_cash_noPayment_price_list').empty();
+                    $('#modal_cash_noPayment_price_list').empty();
 
                     // Set client name and final price
                     $('#modal_cash_client_name').text(clientName);
@@ -805,14 +801,12 @@
                         '$0.00');
                     $('#modal_cash_service_date').val(formattedDate);
 
+                    // Scope Of Work — always visible, regardless of completion status
+                    $('#modal_cash_scope_price_list').html(buildPriceListHtml(clientPriceList, schedulePriceIds));
+
                     // Set completion status checkboxes
                     if (option === 'completed') {
                         $('#modal_cash_completed').prop('checked', true);
-                        var completedPriceListHtml = buildPriceListHtml(clientPriceList, schedulePriceIds);
-                        if (completedPriceListHtml) {
-                            $('#modal_cash_completed_price_list').html(completedPriceListHtml);
-                            $('#modal_cash_completed_price_list_wrapper').show();
-                        }
                     } else if (option === 'no_payment') {
                         $('#modal_cash_noPayment').prop('checked', true);
                         $('#modal_cash_noPayment_reason').show();
@@ -890,14 +884,13 @@
                     // Reset all checkboxes and fields
                     $('#modal_invoice_completed, #modal_invoice_partially, #modal_invoice_option_two, #modal_invoice_option_three, #modal_invoice_omit')
                         .prop('checked', false);
-                    $('#modal_invoice_partially_fields, #modal_invoice_extra_work_fields, #modal_invoice_log_time_fields, #modal_invoice_omit_reason, #modal_invoice_completed_price_list_wrapper')
+                    $('#modal_invoice_partially_fields, #modal_invoice_extra_work_fields, #modal_invoice_log_time_fields, #modal_invoice_omit_reason')
                         .hide();
                     $('#modal_invoice_reason_partially, #modal_invoice_scope_partially, #modal_invoice_price_charged_one')
                         .val('');
                     $('#modal_invoice_scope_extra_work, #modal_invoice_price_charged_two').val('');
                     $('#modal_invoice_start_time, #modal_invoice_end_time').val('');
                     $('#modal_invoice_reason_omit').val('');
-                    $('#modal_invoice_completed_price_list').empty();
 
                     // Set client name and final price
                     $('#modal_invoice_client_name').text(clientName);
@@ -905,14 +898,12 @@
                         2) : '$0.00');
                     $('#modal_invoice_service_date').val(formattedDate);
 
+                    // Scope Of Work — always visible, regardless of completion status
+                    $('#modal_invoice_scope_price_list').html(buildPriceListHtml(clientPriceList, schedulePriceIds));
+
                     // Set completion status checkboxes
                     if (option === 'completed') {
                         $('#modal_invoice_completed').prop('checked', true);
-                        var invoiceCompletedPriceListHtml = buildPriceListHtml(clientPriceList, schedulePriceIds);
-                        if (invoiceCompletedPriceListHtml) {
-                            $('#modal_invoice_completed_price_list').html(invoiceCompletedPriceListHtml);
-                            $('#modal_invoice_completed_price_list_wrapper').show();
-                        }
                     } else if (option === 'omit') {
                         $('#modal_invoice_omit').prop('checked', true);
                         if (reason) {
