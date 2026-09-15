@@ -26,7 +26,6 @@ class CreateProfilesTable extends Migration
             $table->string('city')->nullable();
             $table->string('address')->nullable();
             $table->string('postal')->nullable();
-            $table->json('additional_emails')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

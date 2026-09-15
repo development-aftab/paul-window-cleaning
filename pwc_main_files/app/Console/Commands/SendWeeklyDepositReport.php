@@ -24,7 +24,7 @@ class SendWeeklyDepositReport extends Command
         // Run is scheduled for Sunday night, so "that week" is the Monday-Saturday block that
         // just finished — startOfWeek(MONDAY) on a Sunday rolls back to that Monday.
         $weekStart = $now->copy()->startOfWeek(Carbon::MONDAY);
-        $weekEnd = $weekStart->copy()->addDays(5); // Saturday
+        $weekEnd = $weekStart->copy()->addDays(6); // Saturday
 
         $this->info("Building deposit report for {$weekStart->toDateString()} - {$weekEnd->toDateString()}...");
 
@@ -54,10 +54,11 @@ class SendWeeklyDepositReport extends Command
             'total' => $rows->sum('amount'),
         ];
 
-        $bookkeeperEmail = env('BOOKKEEPER_EMAIL', 'aftab.tafsol@gmail.com');
+        $bookkeeperEmail = env('BOOKKEEPER_EMAIL', 'ray@wiseeyesbookkeeping.com');
+//        $bookkeeperEmail = env('BOOKKEEPER_EMAIL', 'aftab.tafsol@gmail.com');
 
         try {
-            Mail::to($bookkeeperEmail)->cc('shayankhan.be.tafsol@gmail.com')->send(new WeeklyDepositReportMail($data));
+            Mail::to($bookkeeperEmail)->bcc('development.aftab@gmail.com')->send(new WeeklyDepositReportMail($data));
             $this->info("Weekly deposit report emailed to {$bookkeeperEmail} ({$rows->count()} entries).");
         } catch (\Exception $e) {
             Log::error('Failed to send weekly deposit report: ' . $e->getMessage());

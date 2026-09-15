@@ -17,7 +17,6 @@ class CreateAdminUserSeeder extends Seeder
      */
     public function run()
     {
-
         $admin = User::firstOrCreate(array(
             'email' => 'developer@yopmail.com',
             'name' => 'Developer'
@@ -28,7 +27,7 @@ class CreateAdminUserSeeder extends Seeder
         if ($admin->profile == null) {
             $profile = new Profile();
             $profile->user_id = $admin->id;
-            $profile->pic = 'no_avatar.jpg';
+            $profile->pic = 'users/no_avatar.jpg';
             $profile->save();
         }
 
@@ -42,7 +41,7 @@ class CreateAdminUserSeeder extends Seeder
         if ($user->profile == null) {
             $profile = new Profile();
             $profile->user_id = $user->id;
-            $profile->pic = 'no_avatar.jpg';
+            $profile->pic = 'users/no_avatar.jpg';
             $profile->save();
         }
 

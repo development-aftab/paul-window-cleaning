@@ -54,7 +54,13 @@ class TimelogController extends Controller
 
         $request->validate([
             'route_id' => 'required|exists:staff_routes,id',
+            'service_date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required',
         ]);
+
+        $start = Carbon::parse($request->service_date . ' ' . $request->start_time);
+        $end = Carbon::parse($request->service_date . ' ' . $request->end_time);
 
         $isAssigned = StaffRoute::whereHas('assignRoute', function ($query) {
             $query->where('staff_id', auth()->user()->id);
@@ -72,7 +78,7 @@ class TimelogController extends Controller
         if ($activeTimelog) {
             return redirect()->back()->with(['title' => 'Error', 'message' => 'You already have an active time log for this route. Please end it first.', 'type' => 'error']);
         }
-        $serviceDate = Carbon::parse(date('Y-m-d'));
+        $serviceDate = Carbon::parse($request->service_date);
         $year = $serviceDate->year;
         $firstMondayOfYear = Carbon::parse("first Monday of January $year");
         $customStartDates = [
@@ -117,9 +123,12 @@ class TimelogController extends Controller
             'week' => $weekString,
             'month' => $monthName,
             'year' => $year,
-            'start_time' => now()->format('H:i:s'),
-            'end_time' => null,
-            'total_hours' => null,
+//            'start_time' => now()->format('H:i:s'),
+//            'end_time' => null,
+//            'total_hours' => null,
+            'start_time' => $start->format('H:i:s'),
+            'end_time' => $end->format('H:i:s'),
+            'total_hours' => $end->diffInMinutes($start) / 60,
             'notes' => $request->notes,
         ]);
 
