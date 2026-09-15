@@ -1,3 +1,4 @@
 *.xml
 /.idea
 .idea/php.xml
+.idea/deployment.xml
