@@ -54,7 +54,7 @@ class SendWeeklyDepositReport extends Command
             'total' => $rows->sum('amount'),
         ];
 
-        $bookkeeperEmail = env('BOOKKEEPER_EMAIL', 'ray@wiseeyesbookkeeping.com');
+        $bookkeeperEmail = env('BOOKKEEPER_EMAIL', 'aftab.tafsol@gmail.com');
 
         try {
             Mail::to($bookkeeperEmail)->cc('shayankhan.be.tafsol@gmail.com')->send(new WeeklyDepositReportMail($data));
