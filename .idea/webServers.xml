@@ -2,7 +2,7 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="5b0cbc17-eef2-4b18-8a3f-b55c3efbac5d" name="ftp.thebackendprojects.com" url="http://88.223.85.155">
+      <webServer id="474aa8bd-caa1-42b5-a041-95afb8f467d5" name="paulswindowcleaning.org" url="http://88.223.85.155">
         <fileTransfer host="88.223.85.155" port="21">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
