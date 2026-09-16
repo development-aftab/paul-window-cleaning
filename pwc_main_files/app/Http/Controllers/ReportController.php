@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\ClientPayment;
 use App\Models\ClientSchedule;
+use App\Models\Deposit;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -189,6 +190,113 @@ class ReportController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Payment marked as paid successfully.',
+        ]);
+    }
+
+    /**
+     * Admin only: "Pay with Zelle" for an entry staff marked as Completed, No Payment Received.
+     * Marks the client payment as paid and records it as a Zelle deposit, so it leaves
+     * Unpaid Accounts and never shows up in the staff member's undeposited cash.
+     */
+    public function payWithZelle(Request $request)
+    {
+        if (!Auth::user()->hasRole('admin')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to perform this action.',
+            ], 403);
+        }
+
+        $request->validate([
+            'payment_id' => 'required|exists:client_payments,id',
+        ]);
+
+        $payment = ClientPayment::with(['clientSchedule', 'client.clientRouteStaff'])->findOrFail($request->payment_id);
+
+        if ($payment->status === 'paid') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment is already marked as paid.',
+            ], 422);
+        }
+
+        try {
+            DB::transaction(function () use ($payment) {
+                $payment->update([
+                    'status' => 'paid',
+                    'payment_date' => now()->format('Y-m-d'),
+                    'payment_status' => 'paid',
+                    'payment_method' => 'Zelle',
+                ]);
+
+                // Reuse a deposit if one is already linked to this payment / schedule, otherwise create it
+                $deposit = Deposit::where('client_payment_id', $payment->id)->first()
+                    ?? ($payment->schedule_id ? Deposit::where('schedule_id', $payment->schedule_id)->first() : null);
+
+                if ($deposit) {
+                    $deposit->update([
+                        'payment_type' => 'zelle',
+                        'is_deposit' => true,
+                        'deposit_date' => $deposit->deposit_date ?? now(),
+                    ]);
+                } else {
+                    $this->createZelleDeposit($payment);
+                }
+            });
+        } catch (\Exception $e) {
+            \Log::error('Error marking payment as paid via Zelle: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark payment as paid via Zelle. Please try again.',
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment marked as paid via Zelle.',
+        ]);
+    }
+
+    /**
+     * Same week / month / route logic as DepositsController::createDepositFromPayment().
+     */
+    private function createZelleDeposit(ClientPayment $payment): Deposit
+    {
+        $schedule = $payment->clientSchedule;
+        $routeId = $payment->client?->clientRouteStaff?->first()?->route_id;
+
+        $referenceDate = Carbon::parse(
+            $schedule?->service_date
+            ?? $schedule?->start_date
+            ?? $payment->payment_date
+            ?? now()
+        );
+
+        $week = $schedule?->week;
+        if ($week === null || $week === '') {
+            $week = 'week0';
+        } elseif (is_numeric($week)) {
+            $week = 'week' . $week;
+        } elseif (!str_starts_with((string) $week, 'week')) {
+            $week = 'week' . preg_replace('/[^0-9]/', '', (string) $week);
+        }
+
+        $amount = (float) ($payment->final_price ?? 0);
+
+        return Deposit::create([
+            'route_id' => $routeId,
+            'staff_id' => $payment->staff_id ?? $schedule?->staff_id,
+            'schedule_id' => $payment->schedule_id,
+            'client_payment_id' => $payment->id,
+            'week' => $week,
+            'month' => $schedule?->month ?: $referenceDate->format('F'),
+            'year' => (int) $referenceDate->format('Y'),
+            'total_amount' => $amount,
+            'deposit_amount' => $amount,
+            'is_deposit' => true,
+            'deposit_date' => now(),
+            'payment_type' => 'zelle',
         ]);
     }
 }

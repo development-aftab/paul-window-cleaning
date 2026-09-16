@@ -115,6 +115,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::controller(\App\Http\Controllers\ReportController::class)->group(function () {
         Route::get('reports/unpaid-accounts', 'unpaidAccounts')->name('reports.unpaid');
         Route::post('reports/unpaid-accounts/mark-paid', 'markPaymentPaid')->name('reports.unpaid.mark-paid');
+        Route::post('reports/unpaid-accounts/pay-with-zelle', 'payWithZelle')->name('reports.unpaid.pay-zelle');
     });
 });
 

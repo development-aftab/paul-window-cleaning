@@ -144,13 +144,44 @@
                                                 <th>Route</th>
                                                 <th>Week</th>
                                                 <th>Staff Name</th>
+                                                <th>Log</th>
                                                 <th>Status</th>
                                                 <th>Action</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             @forelse ($completeJobs->filter(function($job) { return $job->clientSchedulePayment; }) as $job)
-                                                @php $paymentType = $job->clientSchedulePayment->payment_type; @endphp
+                                                @php
+                                                    $paymentType = $job->clientSchedulePayment->payment_type;
+
+                                                    // Time logged on the job (Log time: start / end)
+                                                    $logMinutes = null;
+                                                    $logLabel = '-';
+                                                    $logTitle = '';
+                                                    $logStart = $job->clientSchedulePayment->start_time ?? null;
+                                                    $logEnd = $job->clientSchedulePayment->end_time ?? null;
+                                                    if ($logStart && $logEnd) {
+                                                        try {
+                                                            $logStartAt = \Carbon\Carbon::parse('2000-01-01 ' . $logStart);
+                                                            $logEndAt = \Carbon\Carbon::parse('2000-01-01 ' . $logEnd);
+                                                            if ($logEndAt->lt($logStartAt)) {
+                                                                $logEndAt->addDay(); // ended after midnight
+                                                            }
+                                                            $logMinutes = $logStartAt->diffInMinutes($logEndAt);
+                                                            $logTitle = $logStartAt->format('h:i A') . ' - ' . $logEndAt->format('h:i A');
+                                                            if ($logMinutes < 60) {
+                                                                $logLabel = $logMinutes . ' Min';
+                                                            } else {
+                                                                $logHours = rtrim(rtrim(number_format($logMinutes / 60, 2, '.', ''), '0'), '.');
+                                                                $logLabel = $logHours . ' ' . ((float) $logHours == 1 ? 'Hour' : 'Hours');
+                                                            }
+                                                        } catch (\Exception $e) {
+                                                            $logMinutes = null;
+                                                            $logLabel = '-';
+                                                            $logTitle = '';
+                                                        }
+                                                    }
+                                                @endphp
                                                 <tr data-client-id="{{ $job->client_id }}"
                                                     data-route-id="{{ $job->clientName->clientRouteStaff->first()->route_id ?? '' }}"
                                                     data-week="{{ $job->week }}"
@@ -176,6 +207,7 @@
                                                             N/A
                                                         @endif
                                                     </td>
+                                                    <td data-sort="{{ $logMinutes ?? -1 }}" @if($logTitle) title="{{ $logTitle }}" @endif>{{ $logLabel }}</td>
                                                     <td>
                                                     <span class="badge bg-success">
                                                         {{ ucfirst($job->status) }}

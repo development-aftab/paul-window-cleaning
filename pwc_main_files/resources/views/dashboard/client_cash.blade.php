@@ -232,7 +232,7 @@
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="txt_field">
-                                                                <input class="form-control reason_disabled" type="text" name="partial_completed_scope" placeholder="Scope Of Work Completed" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->partial_completed_scope ?? '') : '' }}">
+                                                                <input class="form-control reason_disabled" type="text" name="partial_completed_scope" placeholder="Scope Of Work Completed (This will appear on the invoices)" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->partial_completed_scope ?? '') : '' }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
@@ -289,7 +289,7 @@
 {{--                                                        </div>--}}
                                                         <div class="col-md-6">
                                                             <div class="txt_field">
-                                                                <input class="form-control reason_disabled" type="text" name="scope" placeholder="Scope Of Additional Work Completed" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->scope ?? '') : '' }}">
+                                                                <input class="form-control reason_disabled" type="text" name="scope" placeholder="Scope Of Additional Work Completed (This will appear on the invoices)" disabled="disabled" value="{{ $isEditMode ? ($existingPayment->scope ?? '') : '' }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6">
