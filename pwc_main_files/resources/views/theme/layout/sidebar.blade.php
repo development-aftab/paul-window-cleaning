@@ -244,7 +244,7 @@
                             <div class="menu-content">
                                 {{--                                <a href="{{url('client_management')}}" class="nav_list @if (request()->route()->getName() == 'client_management' || request()->route()->getName() == 'create_client' || request()->route()->getName() == 'client-details') active @endif" aria-current="page"> --}}
                                 <a href="{{ url('clients') }}"
-                                    class="nav_list @if (request()->is('clients*')) active @endif"
+                                    class="nav_list @if (request()->is('clients*') || request()->is('client-schedule*') || request()->is('branch/*')) active @endif"
                                     aria-current="page">
                                     <div class="sidebar_icon"><i class="fa-solid fa-users-viewfinder"></i></div>
                                     Clients
@@ -300,12 +300,34 @@
                             </div>
                         </div>
                     @elseif(auth()->user()->hasRole('admin'))
+                        @php
+                            // Active state per menu link (URL patterns), used for the link highlight
+                            // AND to keep its dropdown group open on page load.
+                            $isStaffManagement = request()->is('staffmembers*');
+                            $isPayroll = request()->is('payroll*');
+                            $isStaffRequests = request()->is('staff-request*');
+                            $isInvoices = request()->is('invoice*') || request()->is('schedule/route/invoices*') || request()->is('client/invoice*');
+                            $isClients = request()->is('clients*') || request()->is('client-schedule*') || request()->is('branch/*');
+                            $isRoutes = request()->is('staffroutes*') || request()->is('client_cash*') || request()->is('view_client_cash*') || request()->is('client_invoice*') || request()->is('view_client_invoice*');
+                            $isCompleteJobs = request()->is('complete-jobs*');
+                            $isRouteReports = request()->is('route_report*');
+                            $isDeposits = request()->is('deposits*');
+                            $isUnpaid = request()->is('reports/unpaid*');
+                            $isCms = request()->is('cms');
+                            $isTestimonials = request()->is('testimonials*');
+                            $isQuotes = request()->is('contacts*');
+
+                            $staffOpen = $isStaffManagement || $isPayroll || $isStaffRequests;
+                            $clientsOpen = $isInvoices || $isClients;
+                            $reportsOpen = $isCompleteJobs || $isRouteReports || $isDeposits || $isUnpaid;
+                            $frontPageOpen = $isCms || $isTestimonials || $isQuotes;
+                        @endphp
                         <div class="menu-item ">
                             <div class="menu-content">
-                                <button class="collapse_btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStaff" aria-expanded="false" aria-controls="collapseStaff">
+                                <button class="collapse_btn {{ $staffOpen ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStaff" aria-expanded="{{ $staffOpen ? 'true' : 'false' }}" aria-controls="collapseStaff">
                                     <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Staff <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
                                 </button>
-                                <div class="collapse" id="collapseStaff">
+                                <div class="collapse {{ $staffOpen ? 'show' : '' }}" id="collapseStaff">
                                     <ul>
                                         {{--                                        <li>--}}
                                         {{--                                            <a href="{{ url('staffmembers') }}"--}}
@@ -316,7 +338,7 @@
                                         {{--                                        </li>--}}
                                         <li>
                                             <a href="{{ url('staffmembers') }}"
-                                               class="nav_list @if (request()->is('staffmembers*')) active @endif"
+                                               class="nav_list @if ($isStaffManagement) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-money-bill-wave"></i></div>
                                                 Management
@@ -324,7 +346,7 @@
                                         </li>
                                         <li>
                                             <a href="{{ route('payroll.index') }}"
-                                               class="nav_list @if (request()->is('payroll*')) active @endif"
+                                               class="nav_list @if ($isPayroll) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-money-bill-wave"></i></div>
                                                 Payroll
@@ -332,7 +354,7 @@
                                         </li>
                                         <li>
                                             <a href="{{ url('staff-request') }}"
-                                               class="nav_list @if (request()->is('staff-request')) active @endif"
+                                               class="nav_list @if ($isStaffRequests) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-user-plus"></i></div>
                                                 Requests
@@ -344,14 +366,14 @@
                         </div>
                         <div class="menu-item ">
                             <div class="menu-content">
-                                <button class="collapse_btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClients" aria-expanded="false" aria-controls="collapseClients">
+                                <button class="collapse_btn {{ $clientsOpen ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClients" aria-expanded="{{ $clientsOpen ? 'true' : 'false' }}" aria-controls="collapseClients">
                                     <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Clients <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
                                 </button>
-                                <div class="collapse" id="collapseClients">
+                                <div class="collapse {{ $clientsOpen ? 'show' : '' }}" id="collapseClients">
                                     <ul>
                                         <li>
                                             <a href="{{ route('invoices') }}"
-                                               class="nav_list @if (request()->is('invoice*')) active @endif"
+                                               class="nav_list @if ($isInvoices) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-wallet"></i></div>
                                                 Invoice
@@ -359,7 +381,7 @@
                                         </li>
                                         <li>
                                             <a href="{{ url('clients') }}"
-                                               class="nav_list @if (request()->is('clients*') || request()->is('client-schedule*')) active @endif"
+                                               class="nav_list @if ($isClients) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-users"></i></div>
                                                 Manage
@@ -373,7 +395,7 @@
                         <div class="menu-item">
                             <div class="menu-content">
                                 <a href="{{ url('staffroutes') }}"
-                                    class="nav_list @if (request()->is('staffroutes*')) active @endif"
+                                    class="nav_list @if ($isRoutes) active @endif"
                                     aria-current="page">
                                     <div class="sidebar_icon"><i class="fa-solid fa-map-location-dot"></i></div>
                                     Routes
@@ -382,10 +404,10 @@
                         </div>
                         <div class="menu-item ">
                             <div class="menu-content">
-                                <button class="collapse_btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReports" aria-expanded="false" aria-controls="collapseReports">
+                                <button class="collapse_btn {{ $reportsOpen ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReports" aria-expanded="{{ $reportsOpen ? 'true' : 'false' }}" aria-controls="collapseReports">
                                     <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Reports <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
                                 </button>
-                                <div class="collapse" id="collapseReports">
+                                <div class="collapse {{ $reportsOpen ? 'show' : '' }}" id="collapseReports">
                                     <ul>
 {{--                                        <li>--}}
 {{--                                            <a href="{{ url('clients') }}"--}}
@@ -397,7 +419,7 @@
 {{--                                        </li>--}}
                                         <li>
                                             <a href="{{ url('complete-jobs') }}"
-                                               class="nav_list @if (request()->is('complete-jobs*')) active @endif"
+                                               class="nav_list @if ($isCompleteJobs) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-check-circle"></i></div>
                                                 Complete Jobs
@@ -413,7 +435,7 @@
 {{--                                        </li>--}}
                                         <li>
                                             <a href="{{ url('route_report') }}"
-                                               class="nav_list @if (request()->is('route_report*')) active @endif"
+                                               class="nav_list @if ($isRouteReports) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-chart-line"></i></div>
                                                 Route Reports
@@ -421,7 +443,7 @@
                                         </li>
                                         <li>
                                             <a href="{{ url('deposits') }}"
-                                               class="nav_list @if (request()->is('deposits')) active @endif"
+                                               class="nav_list @if ($isDeposits) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-wallet"></i></div>
                                                 Total Undeposited Cash
@@ -429,7 +451,7 @@
                                         </li>
                                         <li>
                                             <a href="{{ route('reports.unpaid') }}"
-                                               class="nav_list @if (request()->is('reports/unpaid*')) active @endif"
+                                               class="nav_list @if ($isUnpaid) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                                                 Unpaid Accounts
@@ -441,14 +463,14 @@
                         </div>
                         <div class="menu-item ">
                             <div class="menu-content">
-                                <button class="collapse_btn" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFrontPage" aria-expanded="false" aria-controls="collapseFrontPage">
+                                <button class="collapse_btn {{ $frontPageOpen ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFrontPage" aria-expanded="{{ $frontPageOpen ? 'true' : 'false' }}" aria-controls="collapseFrontPage">
                                     <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Front Page <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
                                 </button>
-                                <div class="collapse" id="collapseFrontPage">
+                                <div class="collapse {{ $frontPageOpen ? 'show' : '' }}" id="collapseFrontPage">
                                     <ul>
                                         <li>
                                             <a href="{{ url('cms') }}"
-                                               class="nav_list @if (request()->is('cms')) active @endif"
+                                               class="nav_list @if ($isCms) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-bars-progress"></i></div>
                                                 CMS
@@ -456,7 +478,7 @@
                                         </li>
                                         <li>
                                             <a href="{{ url('testimonials') }}"
-                                               class="nav_list @if (request()->is('testimonials*')) active @endif"
+                                               class="nav_list @if ($isTestimonials) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-comment"></i></div>
                                                 Testimonials
@@ -464,7 +486,7 @@
                                         </li>
                                         <li>
                                             <a href="{{ url('contacts') }}"
-                                               class="nav_list @if (request()->is('contacts*')) active @endif"
+                                               class="nav_list @if ($isQuotes) active @endif"
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-envelope-open-text"></i></div>
                                                 Quotes
@@ -492,7 +514,7 @@
                     <div class="menu-item  logout">
                         <div class="menu-content logout active">
                             <a href="{{ url('logout') }}"
-                                class="nav_list{{ request()->is('logout') ? 'active' : '' }}" aria-current="page">
+                                class="nav_list {{ request()->is('logout') ? 'active' : '' }}" aria-current="page">
                                 <div class="sidebar_icon"><i class="fa-solid fa-right-from-bracket"></i></div>
                                 Logout
                             </a>
