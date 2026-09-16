@@ -434,6 +434,25 @@
                 }
             });
 
+            // Top price list (read-only): uncheck everything while "Partially Completed"
+            // is ticked, and put back exactly what was checked when it's unticked.
+            var $topPriceCheckboxes = $(".price_list_flex .table_checkbox input.form-check-input");
+            $topPriceCheckboxes.each(function() {
+                $(this).data("original-checked", $(this).prop("checked"));
+            });
+
+            function syncTopPriceCheckboxes() {
+                var isPartial = $("#partiallyCompleted").prop("checked");
+                $topPriceCheckboxes.each(function() {
+                    $(this).prop("checked", isPartial ? false : !!$(this).data("original-checked"));
+                });
+            }
+
+            // Bound after the exclusivity handler, so it also restores the list when another
+            // option unticks "Partially Completed"
+            $(mainCheckboxes).change(syncTopPriceCheckboxes);
+            syncTopPriceCheckboxes();
+
             // Reveal/enable fields for whichever option came pre-checked (edit mode)
             $(".check_show_hide:checked").trigger("change");
         });
