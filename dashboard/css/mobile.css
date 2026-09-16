@@ -1,0 +1,592 @@
+/* =====================================================================
+   Paul's Window Cleaning — Dashboard responsive layer (tablet & mobile)
+   Loaded LAST (after dashboard.css and sidebar.css) in
+   theme/layout/master.blade.php. Every rule lives inside a media query,
+   so desktop (>= 992px) is not affected at all. CSS only — no markup,
+   IDs, classes or JavaScript behaviour is changed.
+   Breakpoints (Bootstrap / Metronic):
+     <= 991.98px  tablet + phone (sidebar becomes the slide-in drawer)
+     <= 767.98px  phone (Bootstrap col-md-* stack)
+     <= 575.98px  small phone
+   ===================================================================== */
+
+@media (max-width: 991.98px) {
+
+    /* ---------- Page frame ---------- */
+    #kt_app_wrapper {
+        overflow-x: hidden;          /* stop wide widgets from widening the whole page */
+    }
+    #kt_app_main {
+        min-width: 0;
+        max-width: 100%;
+    }
+    .app-wrapper,
+    [data-kt-app-header-sticky=on] .app-wrapper {
+        padding: 14px 0 28px;
+        margin-top: 0;
+    }
+    .custom_container {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    /* ---------- Header: in the page flow, wraps into rows ---------- */
+    #kt_app_header,
+    [data-kt-app-header-sticky=on] #kt_app_header,
+    [data-kt-app-header-minimize=on] #kt_app_header {
+        position: relative !important;
+        height: auto !important;
+        min-height: 64px;
+        background-color: #FFFFFF;
+        border-bottom: 1px solid #E7EBF0 !important;
+        box-shadow: 0 2px 12px rgba(57, 58, 73, 0.05);
+        z-index: 100;
+    }
+    #kt_app_header_container {
+        flex-wrap: wrap;
+        align-items: center !important;
+        gap: 10px;
+        padding: 10px 14px !important;
+    }
+    /* hamburger */
+    #kt_app_header_container > .d-lg-none:first-child {
+        margin: 0 !important;
+        flex: 0 0 auto;
+    }
+    #kt_app_sidebar_mobile_toggle {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 12px;
+        background: #F1F4F8;
+    }
+    #kt_app_sidebar_mobile_toggle i {
+        color: #393A49;
+    }
+    /* template demo logo placeholder next to the hamburger (not the site logo) */
+    #kt_app_header_container > .flex-grow-1:not(#kt_app_header_wrapper) {
+        display: none !important;
+    }
+
+    #kt_app_header_wrapper {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center !important;
+        justify-content: space-between;
+        gap: 10px 12px;
+    }
+    /* page title block */
+    #kt_app_header_wrapper > .custom_justify_between,
+    #kt_app_header_wrapper > .back_btn_navbar,
+    #kt_app_header_wrapper > h2.navbar_PageTitle {
+        order: 1;
+        flex: 1 1 0;
+        min-width: 0;
+        flex-wrap: nowrap;
+        gap: 10px;
+    }
+    #kt_app_header h2.navbar_PageTitle {
+        font-size: 18px;
+        line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+    }
+    .back_btn_navbar i {
+        width: 36px;
+        height: 36px;
+        padding: 8px;
+        font-size: 15px;
+    }
+    .back_btn_navbar_create_staff,
+    .create_clients_navbar {
+        column-gap: 10px;
+    }
+    /* bell + avatar */
+    #kt_app_header_wrapper > .app-navbar {
+        order: 2;
+        flex: 0 0 auto;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    #kt_app_header .app-navbar .app-navbar-item {
+        margin: 0 !important;
+    }
+    #kt_app_header .custom_user_name {
+        display: none !important;     /* avatar still links to Profile Settings */
+    }
+    .notification_icon .custom_icon,
+    .custom_flex .profile_image {
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+    }
+    .custom_flex .profile_image {
+        padding: 0;
+    }
+    .notification_icon .custom_icon i {
+        font-size: 18px;
+        line-height: 20px;
+    }
+    .notification_icon .custom_badge {
+        right: 2px;
+        top: 2px;
+        bottom: auto;
+        width: 16px;
+        height: 16px;
+        font-size: 9px;
+    }
+    #kt_app_header_menu_toggle {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    /* page search: full-width second row */
+    #kt_app_header_wrapper > .custom_search {
+        order: 3;
+        flex: 0 0 100%;
+        margin-left: 0;
+    }
+    .custom_search input.search_input {
+        width: 100%;
+        font-size: 16px;               /* prevents iOS zoom on focus */
+        padding: 10px 42px 10px 16px;
+    }
+    .custom_search .search_icon {
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* Notifications dropdown: pinned to the screen width */
+    .custom_notification {
+        position: fixed !important;
+        inset: 72px 12px auto 12px !important;
+        width: auto !important;
+        max-width: none;
+        transform: none !important;
+        max-height: calc(100vh - 96px);
+        overflow-y: auto;
+        z-index: 1000;
+    }
+    .right_sidebar_notification_ul {
+        height: auto;
+        max-height: 55vh;
+    }
+    .notification_wrapper .status_time_img {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+    }
+    .notification_wrapper .notification_user_details {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* ---------- Sidebar drawer (logo is hidden by the template on mobile) ---------- */
+    #kt_app_sidebar.custom_sidebar .custom_sidebar_menu {
+        height: calc(100vh - 110px);
+    }
+
+    /* ---------- Typography ---------- */
+    h1 { font-size: 24px; }
+    h2 { font-size: 20px; }
+    h3 { font-size: 17px; }
+    h4 { font-size: 15px; }
+
+    /* ---------- Cards / boxes ---------- */
+    .custom_div,
+    .shadow_box_wrapper {
+        padding: 16px;
+    }
+    .custom_row {
+        row-gap: 16px;
+    }
+    .custom_justify_between {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /* ---------- Buttons ---------- */
+    .btn_global {
+        padding: 10px 16px;
+    }
+
+    /* ---------- Forms ---------- */
+    .txt_field input[type="text"],
+    .txt_field input[type="email"],
+    .txt_field input[type="password"],
+    .txt_field input[type="tel"],
+    .txt_field input[type="number"],
+    .txt_field input[type="date"],
+    .txt_field select,
+    .txt_field textarea {
+        padding: 12px 14px;
+        font-size: 16px;
+    }
+    .txt_field label {
+        font-size: 15px;
+        line-height: 22px;
+    }
+    textarea::placeholder {
+        font-size: 15px;
+    }
+    .custom_select_route .select2-container {
+        width: 100% !important;
+    }
+    .radio_btn_wrapper {
+        flex-wrap: wrap;
+        gap: 12px 20px;
+    }
+
+    /* ---------- Tables (swipe horizontally instead of squashing) ---------- */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+    .custom_table .table-responsive th,
+    .custom_table .table-responsive tbody td {
+        font-size: 14px;
+        padding: 11px 10px;
+        white-space: nowrap;
+    }
+    .grey_color_td_span,
+    .blue_color_td_span {
+        padding: 6px 14px;
+        font-size: 13px;
+    }
+    span.green_success,
+    span.brown_color_td_span {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+    .dataTables_wrapper .dataTables_paginate .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* ---------- Tabs: swipe instead of overflow ---------- */
+    .clients_tab ul.nav.nav-pills,
+    .complete_jobs_section .nav-pills,
+    .tabs_wrapper .create_staff_tabs_btn_wrapper ul {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+    .clients_tab ul.nav.nav-pills .nav-link,
+    .complete_jobs_section .nav-pills .nav-link,
+    .tabs_wrapper .create_staff_tabs_btn_wrapper ul li button {
+        white-space: nowrap;
+        padding: 12px 14px;
+        font-size: 15px;
+    }
+    .cms_tabs_wrapper ul.nav-tabs {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .nav-tabs .nav-link:hover {
+        transform: none;              /* scale-on-hover pushes tabs off screen on touch */
+    }
+
+    /* ---------- Modals & alerts ---------- */
+    .modal .modal-content {
+        padding: 16px;
+    }
+    .modal .modal-body {
+        margin: 14px 0;
+    }
+    .staff_request_modal .modal-dialog.modal-dialog-centered {
+        max-width: calc(100% - 20px);
+        transform: none;
+        margin: 10px auto;
+    }
+    .swal2-container .swal2-modal {
+        width: 92%;
+        padding: 24px 18px;
+    }
+    .swal2-modal .swal2-title {
+        font-size: 20px;
+        line-height: 1.3;
+        padding-top: 20px;
+    }
+    .swal2-modal .swal2-html-container {
+        font-size: 15px;
+        padding: 10px 0 24px;
+    }
+    .swal2-modal .swal2-actions {
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    /* ---------- Preloader ---------- */
+    .preloader .loader_img {
+        width: 70vw;
+        max-width: 300px;
+        height: 110px;
+    }
+
+    /* ---------- Dashboard ---------- */
+    .cards_dashboard_index_wrapper > div:first-child {
+        flex-wrap: wrap;
+        gap: 4px 8px;
+        padding: 12px 14px;
+    }
+    .staff_routes_group_scroll {
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+    }
+    .staff_routes_group_scroll > .new_yorks-cards_wrapper_compact {
+        scroll-snap-align: start;
+    }
+    .notification_dashboard_wrapper .service_complete_wrapper {
+        max-height: 320px;
+    }
+    .total_undeposited_cash_wrap {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /* ---------- Routes / weeks grid ---------- */
+    .staff_routes_week_row .staff_routes_week_wrapper {
+        width: 50% !important;        /* JS sets an inline width when expanding/collapsing */
+    }
+    .staff_routes_week_row .staff_routes_week_wrapper.expanded {
+        width: 100% !important;
+    }
+    .routes_section .custom_justify_between {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .routes_section .custom_tabs {
+        width: auto;
+        flex: 1 1 200px;
+        padding: 12px 14px;
+    }
+    .new_route_select {
+        width: 100%;
+    }
+    .assign_staff_filter {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    /* ---------- Staff pages ---------- */
+    .tabs_wrapper .tabs_content_wrapper {
+        width: calc(50% - 10px);
+        max-width: calc(50% - 10px);
+    }
+    .tabs_wrapper .filter_download_dropdown_wrapper,
+    .filter_download_dropdown_wrapper .searchbar_download_filter_wrapper {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    body .filter_download_dropdown_wrapper .dropdown_months_wrapper button {
+        padding: 12px 14px !important;
+        font-size: 15px;
+    }
+    .create_staff_member_two_sec .staff_member_routes,
+    .profile_settings_sec .profile_settings_wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+        row-gap: 16px;
+    }
+    .create_staff_member_two_sec .staff_member_routes .create-staff_mem_discription,
+    .profile_settings_sec .profile_settings_wrapper .profile_settings_edit_changePass {
+        flex-wrap: wrap;
+        gap: 8px 16px;
+    }
+    .staff_req_card_grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* ---------- Clients / job forms ---------- */
+    .create_clients_sec_staff .date_of_service_checkbox_wrap {
+        flex-wrap: wrap;
+        gap: 12px 24px;
+    }
+    .create_clients_sec_staff .muler_honda_wrap {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .create_clients_wrapper h4.main_heading,
+    .create_clients_wrapper h4.branch_title {
+        font-size: 19px;
+    }
+    .create_clients_wrapper_staff .custom_radio input[type="number"] {
+        width: 80px;
+    }
+    .custom_checkbox_wrapper.unavailable_days .custom_radio {
+        min-width: 25%;
+    }
+    .custom_assigned_wrapper .weeks_assigned .custom_checkbox_wrapper.assign_week .custom_radio label,
+    .days_assigned .custom_checkbox_wrapper .custom_radio label {
+        height: 90px;
+    }
+    .download_modal_pdf_wrapper {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .business_card .business_card_images .custom_images {
+        height: 200px;
+    }
+    .cash_flow .custom_cash_check {
+        border-left: 0;
+        padding: 0;
+    }
+    .cms_sec .add_more_cms_wrapper {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .cms_sec .cms_img_wrapper {
+        column-gap: 20px;
+        row-gap: 20px;
+    }
+
+    /* ---------- Route report ---------- */
+    .route_report_section .txt_field {
+        min-width: calc(50% - 8px) !important;
+    }
+    .filter_selects_wrapper {
+        flex-wrap: wrap;
+        max-width: none;
+    }
+    .tooltip_hover {
+        min-width: 0 !important;       /* inline min-width: 300/320px overflowed the screen */
+        max-width: 80vw !important;
+    }
+}
+
+/* ===================================================================== */
+@media (max-width: 767.98px) {
+
+    .app-wrapper,
+    [data-kt-app-header-sticky=on] .app-wrapper {
+        padding: 12px 0 24px;
+    }
+    .custom_container {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    #kt_app_header h2.navbar_PageTitle {
+        font-size: 17px;
+    }
+
+    .custom_div,
+    .shadow_box_wrapper {
+        padding: 14px;
+        border-radius: 10px;
+    }
+
+    /* Stacked grids */
+    .staff_routes_week_row .staff_routes_week_wrapper {
+        width: 100% !important;
+        padding: 0;
+        margin-bottom: 12px;
+    }
+    .tabs_wrapper .tabs_content_wrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+    .staff_req_card_grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
+    .staff_req_card_grid > * {
+        grid-row: auto !important;
+    }
+    .route_report_section .txt_field,
+    .filter_selects_wrapper .txt_field {
+        min-width: 100% !important;
+    }
+    .custom_checkbox_wrapper.unavailable_days .custom_radio {
+        min-width: 33.33%;
+    }
+    .custom_checkbox_wrapper.assign_week .custom_radio {
+        min-width: 50%;
+    }
+    .custom_assigned_wrapper .weeks_assigned .custom_checkbox_wrapper.assign_week .custom_radio {
+        width: 49%;
+    }
+    .days_assigned .custom_checkbox_wrapper .custom_radio {
+        width: 49%;
+    }
+
+    /* Bootstrap column borders meant for a 4-column desktop grid */
+    .col-md-3:has(.weeks_wrapper) {
+        border-left: 0;
+    }
+
+    .profile_image .image-input-wrapper,
+    .profile_settings_only_img,
+    .create_staff_member_two_sec .staff_member_routes div:has(img) {
+        width: 120px;
+        height: 120px;
+    }
+
+    .modal-dialog {
+        margin: 10px;
+    }
+
+    /* Deposits / cash cards */
+    .custom_cash_check {
+        border-left: 0;
+        padding: 0;
+    }
+
+    /* Tables slightly tighter */
+    .custom_table .table-responsive th,
+    .custom_table .table-responsive tbody td {
+        font-size: 13.5px;
+        padding: 10px 8px;
+    }
+}
+
+/* ===================================================================== */
+@media (max-width: 575.98px) {
+
+    #kt_app_header_container {
+        padding: 8px 10px !important;
+        gap: 8px;
+    }
+    #kt_app_header h2.navbar_PageTitle {
+        font-size: 16px;
+    }
+    .notification_icon .custom_icon,
+    .custom_flex .profile_image,
+    #kt_app_sidebar_mobile_toggle {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    h1 { font-size: 22px; }
+    h2 { font-size: 18px; }
+    h3 { font-size: 16px; }
+
+    .btn_global {
+        padding: 9px 14px;
+        font-size: 13.5px;
+    }
+
+    .route_report_section .txt_field {
+        min-width: 100% !important;
+    }
+    .custom_checkbox_wrapper.unavailable_days .custom_radio {
+        min-width: 50%;
+    }
+    .custom_checkbox_wrapper.assign_week .custom_radio {
+        min-width: 100%;
+    }
+
+    .custom_radio label {
+        padding: 12px 14px;
+        font-size: 15px;
+    }
+    .choose_form.custom_label .custom_radio label {
+        min-width: 0;
+    }
+}
