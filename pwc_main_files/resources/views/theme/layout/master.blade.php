@@ -31,6 +31,7 @@
     <link href="{{ asset('dashboard') }}/css/dashboard.css" rel="stylesheet" />
     <link href="{{ asset('dashboard') }}/css/sidebar.css?v={{ @filemtime(public_path('dashboard/css/sidebar.css')) }}" rel="stylesheet" />
     <link href="{{ asset('dashboard') }}/css/dashboard-home.css?v={{ @filemtime(public_path('dashboard/css/dashboard-home.css')) }}" rel="stylesheet" />
+    <link href="{{ asset('dashboard') }}/css/notifications.css?v={{ @filemtime(public_path('dashboard/css/notifications.css')) }}" rel="stylesheet" />
 {{--dev--}}
     <link href="{{ asset('dashboard') }}/css/mobile.css?v={{ @filemtime(public_path('dashboard/css/mobile.css')) }}" rel="stylesheet" />
     @stack('css')

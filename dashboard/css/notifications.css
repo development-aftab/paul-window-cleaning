@@ -1,0 +1,234 @@
+/* =====================================================================
+   Header notifications dropdown (bell) – compact, professional layout
+   ---------------------------------------------------------------------
+   CSS only: markup, Metronic menu trigger and the mark-as-read script
+   are untouched. Loaded after dashboard.css and before mobile.css, so
+   the phone positioning in mobile.css still applies below 992px.
+   ===================================================================== */
+
+/* ---------- Desktop: fixed-width panel right under the bell ---------- */
+@media (min-width: 992px) {
+    #kt_app_header .app-navbar-item:has(> .custom_notification) {
+        position: relative;
+    }
+
+    .notification_wrapper.custom_notification {
+        width: 400px !important;
+        max-width: calc(100vw - 32px);
+        top: 100% !important;
+        right: 0 !important;
+        left: auto !important;
+        bottom: auto !important;
+        transform: translateY(10px) !important;
+        overflow: hidden;
+    }
+
+    .notification_wrapper.custom_notification .right_sidebar_notification_ul {
+        height: auto;
+        max-height: 380px;
+    }
+}
+
+/* ---------- Panel ---------- */
+.notification_wrapper.custom_notification {
+    padding: 0;
+    border-radius: 14px;
+    border: 1px solid #E9EEF2;
+    box-shadow: 0 16px 40px rgba(16, 24, 40, 0.14);
+    background: #fff;
+}
+
+.notification_wrapper .navbar_notification_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid #EEF2F5;
+}
+
+.notification_wrapper .navbar_notification_header h2 {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.3;
+}
+
+/* ---------- List ---------- */
+.notification_wrapper .right_sidebar_notification_ul {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #C9D3DB transparent;
+    border-radius: 0 !important;
+}
+
+.notification_wrapper .right_sidebar_notification_ul::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notification_wrapper .right_sidebar_notification_ul::-webkit-scrollbar-thumb {
+    background: #C9D3DB;
+    border-radius: 6px;
+}
+
+.notification_wrapper ul.notification_list {
+    margin: 0;
+    padding: 0;
+    display: block;
+}
+
+.notification_wrapper ul.notification_list > li {
+    padding: 12px 18px;
+    border-bottom: 1px solid #F0F3F6;
+    background: #fff;
+    backdrop-filter: none;
+    transition: background-color .15s ease;
+}
+
+.notification_wrapper ul.notification_list > li:last-child {
+    border-bottom: 0;
+}
+
+.notification_wrapper ul.notification_list > li:hover {
+    background: #F7FAFC;
+}
+
+.notification_wrapper ul.notification_list > li.unread {
+    background: #F2FAFE;
+    box-shadow: inset 3px 0 0 #00ADEE;
+}
+
+.notification_wrapper .notification_user_details {
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.notification_wrapper .img_name_user {
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: flex-start;
+    column-gap: 12px;
+}
+
+.notification_wrapper .status_time_img {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+}
+
+.notification_wrapper .status_time_img img {
+    border-color: #E3E8ED;
+}
+
+.notification_wrapper .user_profile {
+    min-width: 0;
+    gap: 2px;
+}
+
+.notification_wrapper .user_profile h3 {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.35;
+    font-family: 'Hellix-SemiBold';
+    color: #1D2939;
+}
+
+.notification_wrapper .user_profile h4 {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #667085;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.notification_wrapper .notification_user_details p {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 2px 0 0;
+    font-size: 11.5px;
+    line-height: 1.2;
+    color: #98A2B3;
+    white-space: nowrap;
+}
+
+.notification_wrapper .notification_user_details p i {
+    font-size: 7px;
+    color: #00ADEE;
+}
+
+/* read items: no blue dot */
+.notification_wrapper ul.notification_list > li:not(.unread) .notification_user_details p i {
+    color: #D0D5DD;
+}
+
+/* ---------- Footer ---------- */
+.notification_wrapper .view_all_notification {
+    border-top: 1px solid #EEF2F5;
+    background: #FAFBFC;
+}
+
+.notification_wrapper .view_all_notification a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 16px;
+    text-decoration: none;
+}
+
+.notification_wrapper .view_all_notification a h4 {
+    margin: 0;
+    font-size: 13.5px;
+    color: #00ADEE;
+}
+
+.notification_wrapper .view_all_notification a i {
+    font-size: 11px;
+    color: #00ADEE;
+    transform: rotate(-90deg);
+}
+
+.notification_wrapper .view_all_notification a:hover h4 {
+    text-decoration: underline;
+}
+
+/* ---------- Bell unread count badge ---------- */
+.notification_icon .custom_badge.notification_count {
+    top: -3px;
+    right: -4px;
+    bottom: auto;
+    left: auto;
+    width: auto;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 5px;
+    border-radius: 999px;
+    border: 2px solid #fff;
+    background: #E5484D;
+    box-shadow: 0 2px 6px rgba(229, 72, 77, 0.35);
+    color: #fff;
+    font-family: 'Inter', 'Hellix-SemiBold', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
+    white-space: nowrap;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    pointer-events: none;
+}
+
+@media (max-width: 575.98px) {
+    .notification_icon .custom_badge.notification_count {
+        top: -4px;
+        right: -5px;
+        min-width: 17px;
+        height: 17px;
+        padding: 0 4px;
+        font-size: 9.5px;
+    }
+}
