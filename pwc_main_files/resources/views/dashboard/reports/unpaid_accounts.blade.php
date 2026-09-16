@@ -60,6 +60,10 @@
     .mark-paid-btn {
         white-space: nowrap;
     }
+
+    .pay-zelle-btn {
+        white-space: nowrap;
+    }
 </style>
 @endpush
 
@@ -125,6 +129,8 @@
                                             @if(auth()->user()->hasRole('staff'))
                                                 <th class="min-w-175px">Payment Date</th>
                                                 <th class="min-w-100px text-end">Action</th>
+                                            @elseif(auth()->user()->hasRole('admin'))
+                                                <th class="min-w-150px text-end">Action</th>
                                             @endif
                                         </tr>
                                     </thead>
@@ -161,13 +167,19 @@
                                                 </td>
                                                 <td class="text-end">
                                                     @if(optional($schedule->clientSchedulePayment)->id)
-                                                        <button
-                                                            type="button"
-                                                            class="btn btn-sm btn-primary mark-paid-btn"
-                                                            data-payment-id="{{ $schedule->clientSchedulePayment->id }}"
-                                                        >
+                                                        <button type="button" class="btn btn-sm btn-primary mark-paid-btn"  data-payment-id="{{ $schedule->clientSchedulePayment->id }}" >
                                                             Save
                                                         </button>
+                                                    @endif
+                                                </td>
+                                            @elseif(auth()->user()->hasRole('admin'))
+                                                <td class="text-end">
+                                                    @if(optional($schedule->clientSchedulePayment)->id)
+                                                        <button type="button" class="btn btn-sm btn-primary pay-zelle-btn" data-payment-id="{{ $schedule->clientSchedulePayment->id }}" data-client-name="{{ $schedule->clientName->name ?? 'this client' }}" data-amount="{{ number_format(optional($schedule->clientSchedulePayment)->final_price ?? 0, 2) }}">
+                                                            <i class="fa-solid fa-money-bill-transfer"></i> Pay with Zelle
+                                                        </button>
+                                                    @else
+                                                        <span class="text-muted fs-7">No payment record</span>
                                                     @endif
                                                 </td>
                                             @endif
@@ -178,7 +190,7 @@
                                             <td class="text-end fw-bolder fs-5 text-danger">
                                                 ${{ number_format($schedules->sum(fn($s) => optional($s->clientSchedulePayment)->final_price ?? 0), 2) }}
                                             </td>
-                                            <td colspan="{{ auth()->user()->hasRole('staff') ? 4 : 2 }}"></td>
+                                            <td colspan="{{ auth()->user()->hasRole('staff') ? 4 : (auth()->user()->hasRole('admin') ? 3 : 2) }}"></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -203,6 +215,55 @@
 @push('js')
 <script>
     $(document).ready(function() {
+        $(document).on('click', '.pay-zelle-btn', function() {
+            const button = $(this);
+            const paymentId = button.data('payment-id');
+
+            Swal.fire({
+                title: 'Pay with Zelle?',
+                text: 'Mark ' + button.data('client-name') + ' ($' + button.data('amount') + ') as paid via Zelle?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, mark as paid',
+                cancelButtonText: 'Cancel',
+            }).then(function(result) {
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                button.prop('disabled', true);
+
+                $.ajax({
+                    url: '{{ route('reports.unpaid.pay-zelle') }}',
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        payment_id: paymentId,
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: response.message,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false,
+                        }).then(function() {
+                            window.location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseJSON?.message || 'Failed to update payment. Please try again.';
+                        Swal.fire({
+                            title: 'Error!',
+                            text: message,
+                            icon: 'error',
+                        });
+                        button.prop('disabled', false);
+                    },
+                });
+            });
+        });
+
         $(document).on('click', '.mark-paid-btn', function() {
             const button = $(this);
             const paymentId = button.data('payment-id');
