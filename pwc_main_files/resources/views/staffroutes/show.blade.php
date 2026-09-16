@@ -2363,10 +2363,21 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile only: a card that is opened can't be dragged (so scrolling / tapping inside it
+            // doesn't start a drag). Closed cards drag as before; desktop is unchanged.
+            function isOpenCardOnMobile(evt, item) {
+                if (!window.matchMedia('(max-width: 767.98px)').matches || !item) {
+                    return false;
+                }
+                return item.querySelector('.accordion-collapse.show, .accordion-collapse.collapsing') !== null;
+            }
+
             @foreach ($mergedSchedules as $schedule)
                 new Sortable(document.getElementById('week-{{ $schedule['week_number'] }}'), {
                     group: 'week-{{ $schedule['week_number'] }}',
                     animation: 250,
+                    filter: isOpenCardOnMobile,
+                    preventOnFilter: false,
                     onEnd: function(evt) {
                         // const sortedItems = Array.from(evt.from.children).map(item => item.getAttribute('data-id'));
                         const sortedItems = Array.from(evt.from.children).map(item => {
