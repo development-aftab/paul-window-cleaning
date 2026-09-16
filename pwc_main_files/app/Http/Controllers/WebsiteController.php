@@ -3699,6 +3699,8 @@ class WebsiteController extends Controller
         $completeJobs = ClientSchedule::with([
             'clientName',  // Client relationship
             'clientName.clientPrice',  // Client price list
+            'clientName.clientRouteStaff.route',  // Route shown in the table (was lazy-loaded per client)
+            'StaffName',  // Staff name (was User::find() per row)
             'clientSchedulePrice',  // Specific services attached to this schedule/job
             'clientSchedulePayment',  // Payment relationship
         ])->where('status', 'completed')->orderBy('created_at', 'desc')->get();
@@ -3709,7 +3711,54 @@ class WebsiteController extends Controller
             ->unique('id')
             ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
             ->values();
-        return view('complete-jobs.index', compact('completeJobs', 'routes', 'clients'));
+
+        // Only jobs with a payment are listed in the view.
+        $listedJobs = $completeJobs->filter(function ($job) {
+            return $job->clientSchedulePayment;
+        });
+
+        // Load every schedule of the listed client + start_date groups in ONE query, instead of
+        // calculateMergedInvoiceAmount() / calculateMergedPriceIds() querying the group per row.
+        $groupKey = function ($clientId, $startDate) {
+            return strtolower(rtrim((string) $clientId)) . '|' . strtolower(rtrim((string) $startDate));
+        };
+        $groupedSchedules = collect();
+        if ($listedJobs->isNotEmpty()) {
+            $groupedSchedules = ClientSchedule::with(['clientSchedulePrice.clientPaymentPrice', 'clientSchedulePayment'])
+                ->whereIn('client_id', $listedJobs->pluck('client_id')->filter()->unique()->values())
+                ->whereIn('start_date', $listedJobs->pluck('start_date')->filter()->unique()->values())
+                ->get()
+                ->groupBy(function ($schedule) use ($groupKey) {
+                    return $groupKey($schedule->client_id, $schedule->start_date);
+                });
+        }
+
+        // Calculate each group once and attach the result to every listed job of that group.
+        $mergedTotals = [];
+        foreach ($listedJobs as $job) {
+            $key = $groupKey($job->client_id, $job->start_date);
+            if (!array_key_exists($key, $mergedTotals)) {
+                $group = ($job->client_id && $job->start_date) ? $groupedSchedules->get($key) : null;
+                // Fallback to the original per-job query if the group could not be pre-loaded.
+                $mergedTotals[$key] = [
+                    'amount' => $group ? $job->calculateMergedInvoiceAmount($group) : $job->calculateMergedInvoiceAmount(),
+                    'price_ids' => $group ? $job->calculateMergedPriceIds($group) : $job->calculateMergedPriceIds(),
+                ];
+            }
+            $job->merged_invoice_amount = $mergedTotals[$key]['amount'];
+            $job->merged_price_ids = $mergedTotals[$key]['price_ids'];
+        }
+
+        // Each client's price list is sent to the page once (used by the "View Report" modal).
+        $clientPriceLists = $listedJobs
+            ->pluck('clientName')
+            ->filter()
+            ->unique('id')
+            ->mapWithKeys(function ($client) {
+                return [$client->id => $client->clientPrice];
+            });
+
+        return view('complete-jobs.index', compact('completeJobs', 'routes', 'clients', 'clientPriceLists'));
     }
 
     public function updatePricePositions(Request $request)

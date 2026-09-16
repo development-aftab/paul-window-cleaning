@@ -159,7 +159,7 @@
                                                     <td>
                                                         <span class="badge bg-secondary">{{ ucfirst($paymentType) }}</span>
                                                     </td>
-                                                    <td>${{ number_format($job->calculateMergedInvoiceAmount() ?: ($job->clientSchedulePayment->final_price ?? 0), 2) }}</td>
+                                                    <td>${{ number_format($job->merged_invoice_amount ?: ($job->clientSchedulePayment->final_price ?? 0), 2) }}</td>
                                                     <td data-sort="{{ $job->service_date ? \Carbon\Carbon::parse($job->service_date)->format('Y-m-d') : '' }}">
                                                         {{ $job->service_date ? \Carbon\Carbon::parse($job->service_date)->format('m-d-Y') : 'N/A' }}
                                                     </td>
@@ -171,7 +171,7 @@
                                                     <td>Week {{ (int) str_replace('week', '', $job->week) + 1 }}</td>
                                                     <td>
                                                         @if ($job->staff_id)
-                                                            {{ \App\Models\User::find($job->staff_id)->name ?? 'N/A' }}
+                                                            {{ $job->StaffName->name ?? 'N/A' }}
                                                         @else
                                                             N/A
                                                         @endif
@@ -202,6 +202,7 @@
                                                                     <a class="dropdown-item view-report-btn"
                                                                        href="javascript:void(0)"
                                                                        data-job-id="{{ $job->id }}"
+                                                                       data-client-id="{{ $job->client_id }}"
                                                                        data-payment-type="{{ $paymentType }}"
                                                                        data-client-name="{{ $job->clientName->name ?? 'N/A' }}"
                                                                        data-service-date="{{ $job->service_date }}"
@@ -219,9 +220,8 @@
                                                                        data-day-number="{{ $job->clientSchedulePayment->day_number ?? '' }}"
                                                                        data-start-time="{{ $job->clientSchedulePayment->start_time ?? '' }}"
                                                                        data-end-time="{{ $job->clientSchedulePayment->end_time ?? '' }}"
-                                                                       data-final-price="{{ $job->calculateMergedInvoiceAmount() ?: ($job->clientSchedulePayment->final_price ?? '') }}"
-                                                                       data-client-price-list="{{ optional($job->clientName?->clientPrice)->toJson() ?? '[]' }}"
-                                                                       data-schedule-price-ids="{{ json_encode($job->calculateMergedPriceIds()) }}">
+                                                                       data-final-price="{{ $job->merged_invoice_amount ?: ($job->clientSchedulePayment->final_price ?? '') }}"
+                                                                       data-schedule-price-ids="{{ json_encode($job->merged_price_ids) }}">
                                                                         <i class="fa-solid fa-file-lines me-2"></i>View
                                                                         Report
                                                                     </a>
@@ -613,6 +613,9 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
+        // Price list per client id, output once instead of repeated on every row.
+        var clientPriceLists = @json($clientPriceLists ?? []);
+
         $(document).ready(function() {
 
             $(".selectRoute").select2({
@@ -771,7 +774,7 @@
                 var finalPrice = $(this).data('final-price');
                 var clientName = $(this).data('client-name');
                 var paymentType = $(this).data('payment-type'); // 'cash' or 'invoice'
-                var clientPriceList = $(this).data('client-price-list');
+                var clientPriceList = clientPriceLists[$(this).attr('data-client-id')] || [];
                 var schedulePriceIds = $(this).data('schedule-price-ids');
 
                 // Format service date

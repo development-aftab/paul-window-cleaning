@@ -59,9 +59,14 @@ class ClientSchedule extends Model
         return $this->belongsTo(User::class, 'staff_id', 'id');
     }
 
-    public function calculateMergedInvoiceAmount(): float
+    /**
+     * @param \Illuminate\Support\Collection|null $groupSchedules Optional pre-loaded schedules of this
+     *        client + start_date group (with clientSchedulePrice.clientPaymentPrice and clientSchedulePayment
+     *        loaded). When null the group is queried, exactly as before.
+     */
+    public function calculateMergedInvoiceAmount($groupSchedules = null): float
     {
-        $groupSchedules = self::with(['clientSchedulePrice.clientPaymentPrice', 'clientSchedulePayment'])
+        $groupSchedules = $groupSchedules ?? self::with(['clientSchedulePrice.clientPaymentPrice', 'clientSchedulePayment'])
             ->where('client_id', $this->client_id)
             ->where('start_date', $this->start_date)
             ->get();
@@ -103,9 +108,13 @@ class ClientSchedule extends Model
      * one carrying the clientSchedulePrice records — so scope checkboxes must check membership
      * across the whole group, not just $this->clientSchedulePrice.
      */
-    public function calculateMergedPriceIds(): array
+    /**
+     * @param \Illuminate\Support\Collection|null $groupSchedules Optional pre-loaded schedules of this
+     *        client + start_date group (with clientSchedulePrice loaded). When null the group is queried, exactly as before.
+     */
+    public function calculateMergedPriceIds($groupSchedules = null): array
     {
-        $groupSchedules = self::with('clientSchedulePrice')
+        $groupSchedules = $groupSchedules ?? self::with('clientSchedulePrice')
             ->where('client_id', $this->client_id)
             ->where('start_date', $this->start_date)
             ->get();
