@@ -139,11 +139,11 @@
             border-bottom: 1px solid #C8E6C9 !important;
             color: #2E7D32 !important;
         }
-        
+
         .staff-data-row.deposited-row td:first-child {
             border-left: 3px solid #4CAF50 !important;
         }
-        
+
         .staff-data-row.deposited-row input.deposit-date-input,
         .staff-data-row.deposited-row input.deposit-date-input:disabled {
             background-color: rgba(255, 255, 255, 0.6);
@@ -361,21 +361,13 @@
                     html: `Mark <strong>${amount}</strong> for <strong>${route}</strong> as deposited on <strong>${formattedDate}</strong>?`,
                     icon: 'question',
                     showCancelButton: true,
-                    showDenyButton: true,
-                    confirmButtonText: 'Pay Manually',
-                    denyButtonText: 'Pay with Zelle',
+                    confirmButtonText: 'Yes, save it',
                     cancelButtonText: 'Cancel',
                     confirmButtonColor: '#00ADEE',
-                    denyButtonColor: '#6D1ED4',
                     cancelButtonColor: '#6c757d',
                     reverseButtons: false,
                 }).then(function(result) {
-                    let paymentType;
-                    if (result.isConfirmed) {
-                        paymentType = 'cash'; // Pay Manually — existing flow, unchanged
-                    } else if (result.isDenied) {
-                        paymentType = 'zelle'; // Pay with Zelle — also notifies the bookkeeper by email
-                    } else {
+                    if (!result.isConfirmed) {
                         $input.val('');
                         return;
                     }
@@ -389,7 +381,6 @@
                             _token: '{{ csrf_token() }}',
                             is_deposit: 1,
                             deposit_date: depositDate,
-                            payment_type: paymentType,
                         };
                     } else if (paymentIdsRaw) {
                         // Row still backed by raw cash payments — convert them into Deposit record(s) now.
@@ -398,7 +389,6 @@
                             _token: '{{ csrf_token() }}',
                             payment_ids: String(paymentIdsRaw).split(','),
                             deposit_date: depositDate,
-                            payment_type: paymentType,
                         };
                     } else {
                         return;
@@ -495,28 +485,28 @@
                 const $btn = $(this);
                 const sortType = $btn.data('sort');
                 const isAsc = $btn.hasClass('asc');
-                
+
                 // Reset both buttons
                 $('.btn-sort-staff').removeClass('asc desc btn-primary').addClass('btn-outline-secondary')
                     .each(function() {
                         $(this).text($(this).text().replace(/↑|↓/, '↕'));
                     });
-                
+
                 // Toggle current button
                 $btn.removeClass('btn-outline-secondary').addClass('btn-primary');
                 $btn.addClass(isAsc ? 'desc' : 'asc');
                 const sortDir = isAsc ? -1 : 1;
-                
+
                 // Update button text icon
                 const baseText = sortType === 'name' ? 'Name ' : 'Total Amount ';
                 $btn.text(baseText + (isAsc ? '↓' : '↑'));
 
                 const tbodies = $('.staff-groups-table .staff-group-tbody').get();
-                
+
                 tbodies.sort(function(a, b) {
                     const $a = $(a);
                     const $b = $(b);
-                    
+
                     if (sortType === 'name') {
                         const nameA = $a.data('staff-name').toLowerCase();
                         const nameB = $b.data('staff-name').toLowerCase();
@@ -527,16 +517,16 @@
                         return (totalA - totalB) * sortDir;
                     }
                 });
-                
+
                 // Re-append sorted tbodies and fix spacer rows
                 const $table = $('.staff-groups-table');
                 $.each(tbodies, function(index, tbody) {
                     const $tbody = $(tbody);
-                    
+
                     // The spacer row logic: only non-first groups should have the spacer visible.
                     // We can just find the .staff-spacer-row inside this tbody.
                     let $spacer = $tbody.find('.staff-spacer-row');
-                    
+
                     if (index === 0) {
                         $spacer.hide(); // Hide spacer for first group
                     } else {
@@ -547,7 +537,7 @@
                             $spacer.show();
                         }
                     }
-                    
+
                     $table.append($tbody);
                 });
             });
