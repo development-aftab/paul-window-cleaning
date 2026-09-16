@@ -29,6 +29,7 @@
     <link href="{{ asset('website') }}/assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
     <!--end::Global Stylesheets Bundle-->
     <link href="{{ asset('dashboard') }}/css/dashboard.css" rel="stylesheet" />
+    <link href="{{ asset('dashboard') }}/css/sidebar.css?v={{ @filemtime(public_path('dashboard/css/sidebar.css')) }}" rel="stylesheet" />
     @stack('css')
 </head>
 <!--end::Head-->
@@ -87,11 +88,11 @@
                     </div>
                     <!--end::Sidebar mobile toggle-->
                     <!--begin::Mobile logo-->
-                    <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
-                        <a href="../../demo1/dist/index.html" class="d-lg-none">
-                            <img alt="Logo" src="{{ asset('website') }}/assets/media/logos/default-small.svg" class="h-30px" />
+{{--                    <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
+                        <a href="#" class="d-lg-none">
+                            <img alt="Logo" src="{{ asset('website') }}/assets/images/Frame.svg" class="h-30px" />
                         </a>
-                    </div>
+                    </div>--}}
                     <!--end::Mobile logo-->
                     <!--begin::Header wrapper-->
                     <div class="d-flex  justify-content-between flex-lg-grow-1" id="kt_app_header_wrapper">

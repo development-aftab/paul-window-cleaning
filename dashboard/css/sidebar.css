@@ -1,0 +1,396 @@
+/* =====================================================================
+   Paul's Window Cleaning — Admin / Staff sidebar
+   Loaded after dashboard.css (see theme/layout/master.blade.php).
+   Everything is scoped to #kt_app_sidebar.custom_sidebar so no other
+   page element is affected. Markup, links and Bootstrap collapse
+   behaviour are unchanged — this file only restyles them.
+   ===================================================================== */
+
+/* Fonts — relative paths so they load on live (/website/...) and on
+   local sub-folder installs (/paulswindowcleaning.org/website/...). */
+@font-face {
+    font-family: 'PWC Hellix';
+    src: url('../../website/assets/fonts/hellix/Hellix-Medium.woff2') format('woff2'),
+         url('../../website/assets/fonts/hellix/Hellix-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'PWC Hellix';
+    src: url('../../website/assets/fonts/hellix/Hellix-SemiBold.woff2') format('woff2'),
+         url('../../website/assets/fonts/hellix/Hellix-SemiBold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+#kt_app_sidebar.custom_sidebar {
+    --sb-primary: #00ADEE;
+    --sb-primary-dark: #0092C9;
+    --sb-primary-soft: #E6F7FD;
+    --sb-primary-softer: #F2FBFE;
+    --sb-text: #393A49;
+    --sb-muted: #6B7185;
+    --sb-icon-bg: #F1F4F8;
+    --sb-border: #E7EBF0;
+    --sb-radius: 12px;
+    --sb-font: 'PWC Hellix', 'Hellix-Medium', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+
+    background: #FFFFFF;
+    background-image: none;
+    border-right: 1px solid var(--sb-border);
+    box-shadow: 4px 0 24px rgba(57, 58, 73, 0.04);
+    padding: 24px 0 0 0;
+    font-family: var(--sb-font);
+}
+
+/* ---------- Logo ---------- */
+#kt_app_sidebar.custom_sidebar .app-sidebar-logo {
+    margin-bottom: 20px;
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--sb-border);
+}
+
+/* ---------- Menu scroll area ---------- */
+#kt_app_sidebar.custom_sidebar .custom_sidebar_menu {
+    width: 100%;
+    max-width: 100%;
+    height: calc(100vh - 250px);
+    max-height: none;
+    margin: 0;
+    padding: 4px 0 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #D5DCE4 transparent;
+}
+#kt_app_sidebar.custom_sidebar .custom_sidebar_menu::-webkit-scrollbar { width: 4px; }
+#kt_app_sidebar.custom_sidebar .custom_sidebar_menu::-webkit-scrollbar-track { background: transparent; }
+#kt_app_body #kt_app_sidebar.custom_sidebar .custom_sidebar_menu::-webkit-scrollbar-thumb { background: #D5DCE4; border-radius: 4px; }
+#kt_app_body #kt_app_sidebar.custom_sidebar .custom_sidebar_menu::-webkit-scrollbar-thumb:hover { background: #B8C2CE; }
+
+#kt_app_sidebar.custom_sidebar .custom_sidebar_menu .menu-item {
+    padding: 0;
+    margin: 0;
+}
+#kt_app_sidebar.custom_sidebar .custom_sidebar_menu .menu-item .menu-content,
+#kt_app_sidebar.custom_sidebar .custom_sidebar_menu .menu-item .menu-content:has(a.active),
+#kt_app_sidebar.custom_sidebar .custom_sidebar_menu .menu-item .menu-content.active {
+    padding: 2px 14px !important;
+    margin: 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+/* ---------- Top-level link + group button (shared look) ---------- */
+#kt_app_sidebar.custom_sidebar .menu-content a.nav_list,
+#kt_app_sidebar.custom_sidebar .menu-content button.collapse_btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 46px;
+    padding: 6px 12px 6px 6px;
+    margin: 0;
+    border: 0;
+    border-radius: var(--sb-radius);
+    background: transparent;
+    box-shadow: none;
+    color: var(--sb-text);
+    font-family: var(--sb-font);
+    font-size: 14.5px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+
+/* Icon tile (first icon in a row) */
+#kt_app_sidebar.custom_sidebar .menu-content > a.nav_list > .sidebar_icon,
+#kt_app_sidebar.custom_sidebar .menu-content > button.collapse_btn > .sidebar_icon:first-child {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--sb-icon-bg);
+    transition: background-color .18s ease;
+}
+#kt_app_sidebar.custom_sidebar .menu-content .sidebar_icon i {
+    font-size: 15px;
+    color: var(--sb-muted);
+    transition: color .18s ease, transform .2s ease;
+}
+
+/* Chevron (last icon in a group button) */
+#kt_app_sidebar.custom_sidebar .menu-content > button.collapse_btn > .sidebar_icon:last-child {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: transparent;
+}
+#kt_app_sidebar.custom_sidebar .menu-content > button.collapse_btn > .sidebar_icon:last-child i {
+    font-size: 11px;
+    color: var(--sb-muted);
+}
+#kt_app_sidebar.custom_sidebar .menu-content > button.collapse_btn[aria-expanded="true"] > .sidebar_icon:last-child i {
+    transform: rotate(180deg);
+}
+
+/* Hover */
+#kt_app_sidebar.custom_sidebar .menu-content a.nav_list:hover,
+#kt_app_sidebar.custom_sidebar .menu-content button.collapse_btn:hover {
+    background: var(--sb-primary-softer);
+    color: var(--sb-primary-dark);
+}
+#kt_app_sidebar.custom_sidebar .menu-content > a.nav_list:hover > .sidebar_icon,
+#kt_app_sidebar.custom_sidebar .menu-content > button.collapse_btn:hover > .sidebar_icon:first-child {
+    background: var(--sb-primary-soft);
+}
+#kt_app_sidebar.custom_sidebar .menu-content a.nav_list:hover .sidebar_icon i,
+#kt_app_sidebar.custom_sidebar .menu-content button.collapse_btn:hover .sidebar_icon i {
+    color: var(--sb-primary);
+}
+
+/* Keyboard focus only (no black box after mouse click) */
+#kt_app_sidebar.custom_sidebar .menu-content a.nav_list:focus,
+#kt_app_sidebar.custom_sidebar .menu-content button.collapse_btn:focus {
+    outline: none;
+}
+#kt_app_sidebar.custom_sidebar .menu-content a.nav_list:focus-visible,
+#kt_app_sidebar.custom_sidebar .menu-content button.collapse_btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 173, 238, .30);
+}
+
+/* Active top-level link (Dashboard, Routes, staff links) */
+#kt_app_sidebar.custom_sidebar .menu-content > a.nav_list.active {
+    background: var(--sb-primary);
+    color: #FFFFFF;
+    font-weight: 600;
+    border-radius: var(--sb-radius);
+    padding: 6px 12px 6px 6px;
+    box-shadow: 0 8px 18px rgba(0, 173, 238, .28);
+}
+#kt_app_sidebar.custom_sidebar .menu-content > a.nav_list.active > .sidebar_icon {
+    background: rgba(255, 255, 255, .20);
+}
+#kt_app_sidebar.custom_sidebar .menu-content > a.nav_list.active .sidebar_icon i {
+    color: #FFFFFF;
+}
+
+/* Group that contains the current page */
+#kt_app_sidebar.custom_sidebar .menu-content:has(.collapse a.nav_list.active) > button.collapse_btn,
+#kt_app_sidebar.custom_sidebar .menu-content:has(.collapsing a.nav_list.active) > button.collapse_btn {
+    background: var(--sb-primary-soft);
+    color: var(--sb-primary-dark);
+    font-weight: 600;
+    border-radius: var(--sb-radius);
+    padding: 6px 12px 6px 6px;
+    box-shadow: none;
+}
+#kt_app_sidebar.custom_sidebar .menu-content:has(.collapse a.nav_list.active) > button.collapse_btn > .sidebar_icon:first-child,
+#kt_app_sidebar.custom_sidebar .menu-content:has(.collapsing a.nav_list.active) > button.collapse_btn > .sidebar_icon:first-child {
+    background: var(--sb-primary);
+}
+#kt_app_sidebar.custom_sidebar .menu-content:has(.collapse a.nav_list.active) > button.collapse_btn > .sidebar_icon:first-child i,
+#kt_app_sidebar.custom_sidebar .menu-content:has(.collapsing a.nav_list.active) > button.collapse_btn > .sidebar_icon:first-child i {
+    color: #FFFFFF;
+}
+#kt_app_sidebar.custom_sidebar .menu-content:has(.collapse a.nav_list.active) > button.collapse_btn > .sidebar_icon:last-child i,
+#kt_app_sidebar.custom_sidebar .menu-content:has(.collapsing a.nav_list.active) > button.collapse_btn > .sidebar_icon:last-child i {
+    color: var(--sb-primary-dark);
+}
+
+/* ---------- Sub-menu ---------- */
+#kt_app_sidebar.custom_sidebar .menu-content .collapse,
+#kt_app_sidebar.custom_sidebar .menu-content .collapsing {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+}
+#kt_app_sidebar.custom_sidebar .menu-content .collapse ul,
+#kt_app_sidebar.custom_sidebar .menu-content .collapsing ul {
+    list-style: none;
+    margin: 4px 0 8px 22px;
+    padding: 2px 0 2px 14px;
+    border-left: 1px solid var(--sb-border);
+}
+#kt_app_sidebar.custom_sidebar .menu-content .collapse ul li,
+#kt_app_sidebar.custom_sidebar .menu-content .collapsing ul li,
+#kt_app_sidebar.custom_sidebar .menu-content .collapse ul li:not(:last-child),
+#kt_app_sidebar.custom_sidebar .menu-content .collapsing ul li:not(:last-child) {
+    margin: 0 0 2px 0;
+}
+#kt_app_sidebar.custom_sidebar .menu-content .collapse ul li a.nav_list,
+#kt_app_sidebar.custom_sidebar .menu-content .collapsing ul li a.nav_list {
+    position: relative;
+    gap: 10px;
+    min-height: 38px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--sb-muted);
+    font-size: 14px;
+    font-weight: 500;
+}
+#kt_app_sidebar.custom_sidebar .menu-content .collapse ul li a.nav_list .sidebar_icon,
+#kt_app_sidebar.custom_sidebar .menu-content .collapsing ul li a.nav_list .sidebar_icon {
+    flex: 0 0 18px;
+    width: 18px;
+    display: inline-flex;
+    justify-content: center;
+    background: transparent;
+}
+#kt_app_sidebar.custom_sidebar .menu-content .collapse ul li a.nav_list .sidebar_icon i,
+#kt_app_sidebar.custom_sidebar .menu-content .collapsing ul li a.nav_list .sidebar_icon i {
+    font-size: 13px;
+    color: #9AA1B2;
+}
+#kt_app_sidebar.custom_sidebar .menu-content .collapse ul li a.nav_list:hover,
+#kt_app_sidebar.custom_sidebar .menu-content .collapsing ul li a.nav_list:hover {
+    background: var(--sb-primary-softer);
+    color: var(--sb-primary-dark);
+}
+#kt_app_sidebar.custom_sidebar .menu-content .collapse ul li a.nav_list:hover .sidebar_icon i {
+    color: var(--sb-primary);
+}
+
+/* Active sub-menu item */
+#kt_app_sidebar.custom_sidebar .menu-content .collapse ul li a.nav_list.active,
+#kt_app_sidebar.custom_sidebar .menu-content .collapsing ul li a.nav_list.active {
+    background: var(--sb-primary-softer);
+    color: var(--sb-primary-dark);
+    font-weight: 600;
+    padding: 8px 10px;
+    border-radius: 10px;
+    box-shadow: none;
+}
+#kt_app_sidebar.custom_sidebar .menu-content .collapse ul li a.nav_list.active::before,
+#kt_app_sidebar.custom_sidebar .menu-content .collapsing ul li a.nav_list.active::before {
+    content: "";
+    position: absolute;
+    left: -16px;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--sb-primary);
+}
+#kt_app_sidebar.custom_sidebar .menu-content .collapse ul li a.nav_list.active .sidebar_icon i,
+#kt_app_sidebar.custom_sidebar .menu-content .collapsing ul li a.nav_list.active .sidebar_icon i {
+    color: var(--sb-primary);
+}
+
+/* ---------- Logout (pinned to bottom) ---------- */
+#kt_app_sidebar.custom_sidebar .menu-item.logout {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    padding: 12px 0 18px;
+    background: #FFFFFF;
+    border-top: 1px solid var(--sb-border);
+}
+#kt_app_sidebar.custom_sidebar .menu-item.logout .menu-content.logout,
+#kt_app_sidebar.custom_sidebar .menu-item.logout .menu-content.logout.active {
+    padding: 0 14px !important;
+    margin: 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+#kt_app_sidebar.custom_sidebar .menu-item.logout .menu-content a.nav_list {
+    color: var(--sb-text);
+    font-weight: 500;
+    background: transparent;
+    box-shadow: none;
+}
+#kt_app_sidebar.custom_sidebar .menu-item.logout .menu-content a.nav_list .sidebar_icon i {
+    color: var(--sb-muted);
+}
+#kt_app_sidebar.custom_sidebar .menu-item.logout .menu-content a.nav_list:hover {
+    background: #FEF2F2;
+    color: #DC2626;
+}
+#kt_app_sidebar.custom_sidebar .menu-item.logout .menu-content a.nav_list:hover > .sidebar_icon {
+    background: #FEE2E2;
+}
+#kt_app_sidebar.custom_sidebar .menu-item.logout .menu-content a.nav_list:hover .sidebar_icon i {
+    color: #DC2626;
+}
+
+/* ---------- Minimized sidebar (toggle arrow) — icons only until hover ---------- */
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .app-sidebar-logo {
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+}
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .custom_sidebar_menu {
+    width: 100%;
+    margin-left: 0;
+    overflow: hidden;
+}
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .menu-item .menu-content,
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .menu-item .menu-content:has(a.active),
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .menu-item.logout .menu-content.logout {
+    padding: 2px 14px !important;   /* menu wrapper keeps full width, so align icons to the 75px strip */
+    opacity: 1;
+}
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .menu-content > a.nav_list,
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .menu-content > a.nav_list.active,
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .menu-content > button.collapse_btn,
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .menu-content:has(.collapse a.nav_list.active) > button.collapse_btn {
+    justify-content: center;
+    gap: 0;
+    width: 46px;
+    height: 46px;
+    min-height: 46px;
+    margin: 0;
+    padding: 6px;
+    font-size: 0;            /* hides the label text, icons keep their own size */
+    border-radius: var(--sb-radius);
+}
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .menu-content > button.collapse_btn > .sidebar_icon:last-child,
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .menu-content .collapse,
+[data-kt-app-sidebar-minimize=on] #kt_app_sidebar.custom_sidebar:not(:hover) .menu-content .collapsing {
+    display: none;
+}
+
+/* ---------- Small screens (off-canvas drawer) ---------- */
+@media (max-width: 991.98px) {
+    #kt_app_sidebar.custom_sidebar {
+        padding-top: 16px;
+    }
+    #kt_app_sidebar.custom_sidebar .custom_sidebar_menu {
+        height: calc(100vh - 220px);
+    }
+    #kt_app_sidebar.custom_sidebar .menu-content a.nav_list,
+    #kt_app_sidebar.custom_sidebar .menu-content button.collapse_btn {
+        font-size: 14px;
+    }
+}
+
+/* Short screens: keep logout from covering the last menu items */
+@media (max-height: 640px) {
+    #kt_app_sidebar.custom_sidebar .custom_sidebar_menu {
+        height: calc(100vh - 210px);
+    }
+    #kt_app_sidebar.custom_sidebar .app-sidebar-logo {
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+    }
+}

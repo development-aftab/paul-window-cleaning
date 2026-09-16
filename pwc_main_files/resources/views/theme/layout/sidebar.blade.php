@@ -325,7 +325,7 @@
                         <div class="menu-item ">
                             <div class="menu-content">
                                 <button class="collapse_btn {{ $staffOpen ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStaff" aria-expanded="{{ $staffOpen ? 'true' : 'false' }}" aria-controls="collapseStaff">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Staff <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
+                                    <div class="sidebar_icon"><i class="fa-solid fa-user-tie"></i></div> Staff <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
                                 </button>
                                 <div class="collapse {{ $staffOpen ? 'show' : '' }}" id="collapseStaff">
                                     <ul>
@@ -340,7 +340,7 @@
                                             <a href="{{ url('staffmembers') }}"
                                                class="nav_list @if ($isStaffManagement) active @endif"
                                                aria-current="page">
-                                                <div class="sidebar_icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                                                <div class="sidebar_icon"><i class="fa-solid fa-id-card"></i></div>
                                                 Management
                                             </a>
                                         </li>
@@ -367,7 +367,7 @@
                         <div class="menu-item ">
                             <div class="menu-content">
                                 <button class="collapse_btn {{ $clientsOpen ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClients" aria-expanded="{{ $clientsOpen ? 'true' : 'false' }}" aria-controls="collapseClients">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Clients <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
+                                    <div class="sidebar_icon"><i class="fa-solid fa-users"></i></div> Clients <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
                                 </button>
                                 <div class="collapse {{ $clientsOpen ? 'show' : '' }}" id="collapseClients">
                                     <ul>
@@ -375,7 +375,7 @@
                                             <a href="{{ route('invoices') }}"
                                                class="nav_list @if ($isInvoices) active @endif"
                                                aria-current="page">
-                                                <div class="sidebar_icon"><i class="fa-solid fa-wallet"></i></div>
+                                                <div class="sidebar_icon"><i class="fa-solid fa-file-invoice"></i></div>
                                                 Invoice
                                             </a>
                                         </li>
@@ -383,7 +383,7 @@
                                             <a href="{{ url('clients') }}"
                                                class="nav_list @if ($isClients) active @endif"
                                                aria-current="page">
-                                                <div class="sidebar_icon"><i class="fa-solid fa-users"></i></div>
+                                                <div class="sidebar_icon"><i class="fa-solid fa-address-book"></i></div>
                                                 Manage
                                             </a>
                                         </li>
@@ -405,7 +405,7 @@
                         <div class="menu-item ">
                             <div class="menu-content">
                                 <button class="collapse_btn {{ $reportsOpen ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReports" aria-expanded="{{ $reportsOpen ? 'true' : 'false' }}" aria-controls="collapseReports">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Reports <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
+                                    <div class="sidebar_icon"><i class="fa-solid fa-chart-pie"></i></div> Reports <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
                                 </button>
                                 <div class="collapse {{ $reportsOpen ? 'show' : '' }}" id="collapseReports">
                                     <ul>
@@ -464,7 +464,7 @@
                         <div class="menu-item ">
                             <div class="menu-content">
                                 <button class="collapse_btn {{ $frontPageOpen ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFrontPage" aria-expanded="{{ $frontPageOpen ? 'true' : 'false' }}" aria-controls="collapseFrontPage">
-                                    <div class="sidebar_icon"><i class="fa-solid fa-user-group"></i></div> Front Page <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
+                                    <div class="sidebar_icon"><i class="fa-solid fa-globe"></i></div> Front Page <div class="sidebar_icon"><i class="fa-solid fa-chevron-down"></i></div>
                                 </button>
                                 <div class="collapse {{ $frontPageOpen ? 'show' : '' }}" id="collapseFrontPage">
                                     <ul>
@@ -472,7 +472,7 @@
                                             <a href="{{ url('cms') }}"
                                                class="nav_list @if ($isCms) active @endif"
                                                aria-current="page">
-                                                <div class="sidebar_icon"><i class="fa-solid fa-bars-progress"></i></div>
+                                                <div class="sidebar_icon"><i class="fa-solid fa-pen-to-square"></i></div>
                                                 CMS
                                             </a>
                                         </li>
