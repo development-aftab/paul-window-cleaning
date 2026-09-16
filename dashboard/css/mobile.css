@@ -590,3 +590,132 @@
         min-width: 0;
     }
 }
+
+/* =====================================================================
+   Job report form (client_cash / cash & invoice report pages) – phones
+   Loaded before the page's own inline <style>, so selectors below are
+   deliberately a step more specific than those inline rules.
+   ===================================================================== */
+@media (max-width: 767.98px) {
+    /* Header row: "Editable for 30 days" badge + price */
+    .create_clients_sec_staff .create_clients_wrapper_staff > .custom_justify_between {
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 14px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff > .custom_justify_between .report_lock_badge {
+        margin-left: 0;
+        padding: 5px 10px;
+        font-size: 12.5px;
+        white-space: nowrap;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff > .custom_justify_between .pricePlus {
+        font-size: 18px;
+        white-space: nowrap;
+        margin-left: auto;
+    }
+
+    /* Price chips (top list + "did not receive payment" list): tidy 2-column grid */
+    .create_clients_sec_staff .create_clients_wrapper_staff .price_list_wrapper .price_list_flex {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .price_list_wrapper .price_list_flex.mt-5 {
+        margin-top: 16px !important;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .price_list_wrapper .price_list_item {
+        min-width: 0;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .price_list_wrapper .price_list_item:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .price_list_wrapper .price_list_flex .price_list {
+        height: 100%;
+        padding: 11px 12px;
+        display: flex;
+        align-items: center;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .price_list_wrapper .price_list_flex .price_list_box {
+        width: 100%;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .price_list_wrapper .price_list_flex .table_checkbox {
+        min-width: 0;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .price_list_wrapper .price_list_flex .table_checkbox label {
+        white-space: normal;
+        line-height: 1.25;
+        font-size: 14px;
+    }
+
+    /* "Partially Completed" price list (stacked rows) */
+    .create_clients_sec_staff .create_clients_wrapper_staff .reason_input_fileds_wrapper .appended_price_list > .row {
+        row-gap: 8px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .reason_input_fileds_wrapper .appended_price_list .sortable-item .price_list {
+        margin-bottom: 0;
+        padding: 12px 14px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .reason_input_fileds_wrapper .appended_price_list .sortable-item .table_checkbox {
+        column-gap: 10px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .reason_input_fileds_wrapper .appended_price_list .sortable-item .table_checkbox label {
+        font-size: 14px;
+        line-height: 1.25;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .reason_input_fileds_wrapper .appended_price_list .sortable-item .price_list span {
+        font-size: 15px;
+    }
+
+    /* Fields revealed under an option: spacing so stacked inputs don't touch */
+    .create_clients_sec_staff .create_clients_wrapper_staff .reason_input_fileds_wrapper {
+        row-gap: 10px;
+        margin-bottom: 6px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .reason_input_fileds_wrapper > .price_list_wrapper {
+        margin-bottom: 2px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .reason_input_fileds_wrapper > [class*="col-"]:empty {
+        display: none;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .reason_input_fileds_wrapper .txt_field input::placeholder {
+        font-size: 14px;
+    }
+
+    /* Option checkboxes: same size for every option, check mark stays centred */
+    .create_clients_sec_staff .create_clients_wrapper_staff .custom_partially_changed {
+        margin-top: 16px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .custom_partially_changed > .custom_row {
+        row-gap: 14px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .partially_completed_wrapper .custom_radio {
+        padding-bottom: 8px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .custom_radio:not(.custom_border_check) label {
+        font-size: 16px;
+        line-height: 1.3;
+        gap: 10px;
+        flex-wrap: wrap;
+        text-align: left;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .custom_radio:not(.custom_border_check) label:before {
+        flex: 0 0 20px;
+    }
+    .create_clients_sec_staff .create_clients_wrapper_staff .custom_radio:not(.custom_border_check) input:checked + label:after {
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* "Paid extra for [#] dates" */
+    .create_clients_sec_staff .create_clients_wrapper_staff .custom_radio label input[type="number"] {
+        width: 70px;
+        height: 30px;
+        padding: 2px 8px;
+        font-size: 15px;
+    }
+}
