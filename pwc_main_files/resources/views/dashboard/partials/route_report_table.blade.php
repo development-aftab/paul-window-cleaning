@@ -61,7 +61,8 @@
                 $totalSales = $schedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
 
                 // Cash Logic
-                $cashSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'cash' && ($s->clientSchedulePayment->status ?? '') == 'paid' && ($s->clientSchedulePayment->option ?? '') != 'omit');
+                // Exclude entries admin marked "Pay with Zelle" (paid outside, not cash in hand)
+                $cashSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'cash' && ($s->clientSchedulePayment->status ?? '') == 'paid' && ($s->clientSchedulePayment->option ?? '') != 'omit' && strtolower($s->clientSchedulePayment->payment_method ?? '') !== 'zelle');
                 $cashRecord = $cashSchedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
 
                 // Deposits
@@ -114,15 +115,32 @@
                                     <li class="customer-card">
                                         <span class="customer-info">
                                             <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                            {{-- ZELLE-SALES-HOVER START: Zelle tag (to undo, keep only the original payment-tag span inside @else) --}}
+                                            @if (strtolower($s->clientSchedulePayment->payment_method ?? '') === 'zelle' && ($s->clientSchedulePayment->payment_type ?? '') == 'cash')
+                                                <span class="payment-tag zelle" style="background:#6d1ed4;color:#fff;">Zelle</span>
+                                            @else
                                             <span class="payment-tag {{ ($s->clientSchedulePayment->payment_type ?? '') == 'cash' ? 'cash' : 'invoice' }}">
                                                 {{ ucfirst($s->clientSchedulePayment->payment_type ?? 'N/A') }}
                                             </span>
+                                            @endif
+                                            {{-- ZELLE-SALES-HOVER END --}}
                                         </span>
                                         <span class="customer-price">${{ number_format($s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0), 2) }}</span>
                                     </li>
                                 @endforeach
                             </ul>
                             <hr class="sales-divider">
+                            {{-- ZELLE-SALES-HOVER START: "Paid via Zelle" summary line --}}
+                            @php
+                                $zelleSalesTotal = $schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'cash' && ($s->clientSchedulePayment->status ?? '') == 'paid' && strtolower($s->clientSchedulePayment->payment_method ?? '') === 'zelle')->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
+                            @endphp
+                            @if ($zelleSalesTotal > 0)
+                                <div class="total-summary-row" style="margin-bottom: 10px;">
+                                    <span class="total-label">Paid via Zelle</span>
+                                    <span class="total-value">${{ number_format($zelleSalesTotal, 2) }}</span>
+                                </div>
+                            @endif
+                            {{-- ZELLE-SALES-HOVER END --}}
                             <div class="total-summary-row">
                                 <span class="total-label">Total Sales</span>
                                 <span class="total-value">${{ number_format($totalSales, 2) }}</span>

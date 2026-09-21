@@ -64,6 +64,82 @@
     .pay-zelle-btn {
         white-space: nowrap;
     }
+
+    .zelle-processed-badge {
+        background: #6d1ed4;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 6px;
+        white-space: nowrap;
+    }
+
+    .zelle-total {
+        color: #6d1ed4;
+    }
+
+    /* Unpaid / Zelle tabs */
+    .ua-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        background: #fff;
+        padding: 8px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+        width: fit-content;
+        max-width: 100%;
+    }
+
+    .ua-tab-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 0;
+        background: transparent;
+        color: #32346A;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 10px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .ua-tab-btn:hover {
+        background: rgba(0, 173, 238, 0.08);
+        color: #00ADEE;
+    }
+
+    .ua-tab-btn.active {
+        background: #00ADEE;
+        color: #fff;
+    }
+
+    .ua-tab-btn[data-target="#ua-tab-zelle"].active {
+        background: #6d1ed4;
+    }
+
+    .ua-tab-count {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: rgba(50, 52, 106, 0.08);
+    }
+
+    .ua-tab-btn.active .ua-tab-count {
+        background: rgba(255, 255, 255, 0.22);
+    }
+
+    .ua-tab-pane {
+        display: none;
+    }
+
+    .ua-tab-pane.active {
+        display: block;
+    }
 </style>
 @endpush
 
@@ -107,6 +183,28 @@
 {{--            </div>--}}
 {{--        </div>--}}
 
+        @php
+            $isAdminUA = auth()->user()->hasRole('admin');
+            $unpaidCount = $groupedData->flatten(1)->count();
+            $unpaidSum = $groupedData->flatten(1)->sum(fn($s) => optional($s->clientSchedulePayment)->final_price ?? 0);
+            $zelleCount = $isAdminUA ? ($zelleGroupedData ?? collect())->flatten(1)->count() : 0;
+            $zelleSum = $isAdminUA ? ($zelleGroupedData ?? collect())->flatten(1)->sum(fn($s) => optional($s->clientSchedulePayment)->final_price ?? 0) : 0;
+        @endphp
+
+        @if($isAdminUA)
+            <div class="ua-tabs mb-6">
+                <button type="button" class="ua-tab-btn active" data-target="#ua-tab-unpaid">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Unpaid Accounts
+                    <span class="ua-tab-count">{{ $unpaidCount }} · ${{ number_format($unpaidSum, 2) }}</span>
+                </button>
+                <button type="button" class="ua-tab-btn" data-target="#ua-tab-zelle">
+                    <i class="fa-solid fa-money-bill-transfer"></i> Zelle Payments
+                    <span class="ua-tab-count">{{ $zelleCount }} · ${{ number_format($zelleSum, 2) }}</span>
+                </button>
+            </div>
+        @endif
+
+        <div class="ua-tab-pane active" id="ua-tab-unpaid">
         <div class="row">
             <div class="col-md-12">
                 @forelse($groupedData as $staffName => $schedules)
@@ -208,6 +306,80 @@
                 @endforelse
             </div>
         </div>
+        </div>
+
+        {{-- Admin only: Zelle Payments (entries marked "Pay with Zelle") --}}
+        @if(auth()->user()->hasRole('admin'))
+            <div class="ua-tab-pane" id="ua-tab-zelle">
+            <div class="row">
+                <div class="col-md-12">
+                    @forelse($zelleGroupedData ?? collect() as $staffName => $schedules)
+                        <div class="card card-flush shadow-sm mb-5">
+                            <div class="card-header pt-5">
+                                <h3 class="card-title align-items-start flex-column">
+                                    <span class="card-label fw-bolder fs-3 mb-1">{{ $staffName }}</span>
+                                </h3>
+                            </div>
+                            <div class="card-body py-3">
+                                <div class="table-responsive">
+                                    <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
+                                        <thead>
+                                            <tr class="fw-bolder text-muted">
+                                                <th class="min-w-150px">Client</th>
+                                                <th class="min-w-100px text-end">Amount</th>
+                                                <th class="min-w-150px">Date Serviced</th>
+                                                <th class="min-w-150px">Route</th>
+                                                <th class="min-w-150px text-end">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($schedules as $schedule)
+                                            <tr>
+                                                <td>
+                                                    <span class="text-dark fw-bold d-block fs-6">{{ $schedule->clientName->name ?? 'N/A' }}</span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span class="text-dark fw-bold d-block fs-6">${{ number_format(optional($schedule->clientSchedulePayment)->final_price ?? 0, 2) }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="text-dark fw-bold d-block fs-6">{{ $schedule->service_date ? \Carbon\Carbon::parse($schedule->service_date)->format('m-d-Y') : 'N/A' }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="text-dark fw-bold d-block fs-6">{{ $schedule->route_name }}</span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span class="badge zelle-processed-badge">
+                                                        <i class="fa-solid fa-circle-check"> </i> &nbsp; &nbsp;Payment processed with Zelle
+                                                    </span>
+                                                    @if(optional($schedule->clientSchedulePayment)->payment_date)
+                                                        <span class="d-block text-muted fs-7 mt-1">on {{ \Carbon\Carbon::parse($schedule->clientSchedulePayment->payment_date)->format('m-d-Y') }}</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                            <tr class="bg-light">
+                                                <td class="fw-bolder">Total</td>
+                                                <td class="text-end fw-bolder fs-5 zelle-total">
+                                                    ${{ number_format($schedules->sum(fn($s) => optional($s->clientSchedulePayment)->final_price ?? 0), 2) }}
+                                                </td>
+                                                <td colspan="3"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="card card-flush shadow-sm">
+                            <div class="card-body text-center p-10">
+                                <h3 class="fs-5 fw-bolder text-muted m-0">No Zelle payments recorded yet.</h3>
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+            </div>
+        @endif
     </div>
 </section>
 @endsection
@@ -215,6 +387,23 @@
 @push('js')
 <script>
     $(document).ready(function() {
+        // Unpaid / Zelle tabs (remember last tab via URL hash)
+        function showUaTab(target) {
+            if (!$(target).length) return;
+            $('.ua-tab-btn').removeClass('active');
+            $('.ua-tab-btn[data-target="' + target + '"]').addClass('active');
+            $('.ua-tab-pane').removeClass('active');
+            $(target).addClass('active');
+        }
+        $(document).on('click', '.ua-tab-btn', function() {
+            const target = $(this).data('target');
+            showUaTab(target);
+            history.replaceState(null, '', target);
+        });
+        if (window.location.hash === '#ua-tab-zelle') {
+            showUaTab('#ua-tab-zelle');
+        }
+
         $(document).on('click', '.pay-zelle-btn', function() {
             const button = $(this);
             const paymentId = button.data('payment-id');

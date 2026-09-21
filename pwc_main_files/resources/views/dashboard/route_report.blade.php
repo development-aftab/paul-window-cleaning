@@ -492,7 +492,7 @@
             background: #f8fafc !important;
             border: 1px dashed #dbe3ee;
             border-radius: 10px;
-            color: #94a3b8;
+            color: #64748b !important; /* override dashboard.css white tooltip li text */
             font-style: normal;
             font-weight: 600;
             font-size: 12.5px;

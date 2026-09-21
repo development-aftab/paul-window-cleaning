@@ -151,8 +151,37 @@ class ReportController extends Controller
         });
         $groupedData = $groupedData->sortKeys();
 
+        // Admin only: entries marked "Pay with Zelle" (paid outside the app via Zelle)
+        $zelleGroupedData = collect();
+        if (Auth::user()->hasRole('admin')) {
+            $zelleSchedules = ClientSchedule::with([
+                'clientSchedulePayment',
+                'clientName.clientRouteStaff.route',
+                'StaffName'
+            ])
+                ->where('status', 'completed')
+                ->whereHas('clientSchedulePayment', function ($sub) {
+                    $sub->where('status', 'paid')
+                        ->where('payment_type', 'cash')
+                        ->whereRaw('LOWER(payment_method) = ?', ['zelle']);
+                })
+                ->get()
+                ->sortByDesc(fn($s) => optional($s->clientSchedulePayment)->payment_date)
+                ->values();
+
+            foreach ($zelleSchedules as $schedule) {
+                $schedule->route_name = $schedule->clientName?->clientRouteStaff?->first()?->route?->name ?? 'N/A';
+            }
+
+            $zelleGroupedData = $zelleSchedules->groupBy(function ($item) {
+                return optional($item->StaffName)->first_name
+                    ?? optional($item->StaffName)->name
+                    ?? 'Unknown Staff';
+            })->sortKeys();
+        }
+
         return view('dashboard.reports.unpaid_accounts', compact(
-            'groupedData', 'months', 'selectedMonth', 'previousMonth', 'nextMonth'
+            'groupedData', 'zelleGroupedData', 'months', 'selectedMonth', 'previousMonth', 'nextMonth'
         ));
     }
 
