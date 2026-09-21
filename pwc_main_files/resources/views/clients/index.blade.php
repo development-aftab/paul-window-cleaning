@@ -202,9 +202,9 @@
                                                             @php
                                                                 $clientUpdated =
                                                                     $client->updated_at ?? $client->created_at;
-                                                                $scheduleUpdated = $client->clientSchedule->max(
-                                                                    'updated_at',
-                                                                );
+                                                                $scheduleUpdated = $client->client_schedule_max_updated_at
+                                                                    ? \Carbon\Carbon::parse($client->client_schedule_max_updated_at)
+                                                                    : null;
                                                                 $branchUpdated = $client->childClients->max(
                                                                     'updated_at',
                                                                 );
@@ -675,9 +675,9 @@
                                                             @php
                                                                 $clientUpdated =
                                                                     $client->updated_at ?? $client->created_at;
-                                                                $scheduleUpdated = $client->clientSchedule->max(
-                                                                    'updated_at',
-                                                                );
+                                                                $scheduleUpdated = $client->client_schedule_max_updated_at
+                                                                    ? \Carbon\Carbon::parse($client->client_schedule_max_updated_at)
+                                                                    : null;
                                                                 $branchUpdated = $client->childClients->max(
                                                                     'updated_at',
                                                                 );

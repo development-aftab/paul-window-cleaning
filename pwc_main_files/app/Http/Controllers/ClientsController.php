@@ -45,14 +45,34 @@ class ClientsController extends Controller
 
     public function index()
     {
+        // Performance: eager-load everything the list view touches (avoids N+1 queries)
+        // and fetch only MAX(updated_at) of schedules instead of loading every schedule row.
         $clients = Client::where('is_child', false)
-            ->with(['user.roles', 'childClients' => function ($query) {
-                $query->with('clientRouteStaff')->orderBy('updated_at', 'desc');
-            }, 'clientSchedule'])
+            ->with([
+                'user.roles',
+                'user.profile',
+                'profile',
+                'staff.profile',
+                'parentClient',
+                'clientRoute',
+                'clientRouteStaff',
+                'childClients' => function ($query) {
+                    $query->with([
+                        'clientRouteStaff',
+                        'clientRoute',
+                        'user.profile',
+                        'staff.profile',
+                        'parentClient',
+                    ])->orderBy('updated_at', 'desc');
+                },
+            ])
+            ->withMax('clientSchedule', 'updated_at')
             ->get()
             ->sortByDesc(function ($client) {
                 $clientUpdated = $client->updated_at ?? $client->created_at;
-                $scheduleUpdated = $client->clientSchedule->max('updated_at');
+                $scheduleUpdated = $client->client_schedule_max_updated_at
+                    ? Carbon::parse($client->client_schedule_max_updated_at)
+                    : null;
                 $branchUpdated = $client->childClients->max('updated_at');
                 return collect([$clientUpdated, $scheduleUpdated, $branchUpdated])
                     ->filter()
