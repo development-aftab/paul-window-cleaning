@@ -74,10 +74,10 @@
                                                     <label for="client_name">Commission Percentage *</label>
                                                 </div>
                                             </div>
-                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4">
+                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4" style="display: none">{{-- Start Date hidden: auto-filled by date picker default --}}
                                                 <div class=" d-flex align-items-start mb-3">
                                                     <div class="form-floating txt_field flex-grow-1 me-2">
-                                                        <input type="date" class="form-control startDate" name="start_date[0]" placeholder="" required>
+                                                        <input type="hidden" class="form-control startDate" name="start_date[0]" placeholder="" required>
                                                         <label for="">Start Date *</label>
                                                     </div>
                                                 </div>
@@ -481,10 +481,10 @@
                                                                 <label for="client_name">Commission Percentage *</label>
                                                             </div>
                                                         </div>
-                                                        <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4">
+                                                        <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4" style="display: none">{{-- Start Date hidden: auto-filled by date picker default --}}
                                                             <div class=" d-flex align-items-start mb-3">
                                                                 <div class="form-floating txt_field flex-grow-1 me-2">
-                                                                    <input type="date" class="form-control startDate" name="start_date[1]" placeholder="" required>
+                                                                    <input type="hidden" class="form-control startDate" name="start_date[1]" placeholder="" required>
                                                                     <label for="">Start Date *</label>
                                                                 </div>
                                                             </div>
@@ -898,10 +898,10 @@
                                                     <label for="client_name">Commission Percentage</label>
                                                 </div>
                                             </div>
-                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4">
+                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4" style="display: none">{{-- Start Date hidden: auto-filled by date picker default --}}
                                                 <div class=" d-flex align-items-start mb-3">
                                                     <div class="form-floating txt_field flex-grow-1 me-2">
-                                                        <input type="date" class="form-control startDate" name="start_date[0]" id="startDate" placeholder="">
+                                                        <input type="hidden" class="form-control startDate" name="start_date[0]" id="startDate" placeholder="">
                                                         <label for="">Start Date *</label>
                                                     </div>
                                                 </div>
@@ -1307,10 +1307,10 @@
                                                                 <label for="client_name">Commission Percentage</label>
                                                             </div>
                                                         </div>
-                                                        <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4">
+                                                        <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4" style="display: none">{{-- Start Date hidden: auto-filled by date picker default --}}
                                                             <div class=" d-flex align-items-start mb-3">
                                                                 <div class="form-floating txt_field flex-grow-1 me-2">
-                                                                    <input type="date" class="form-control startDate" name="start_date[1]" id="startDate" placeholder="">
+                                                                    <input type="hidden" class="form-control startDate" name="start_date[1]" id="startDate" placeholder="">
                                                                     <label for="">Start Date</label>
                                                                 </div>
                                                             </div>
