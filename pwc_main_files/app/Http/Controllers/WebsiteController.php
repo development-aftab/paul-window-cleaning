@@ -301,7 +301,55 @@ class WebsiteController extends Controller
                 ->count();
         }
 
+        // Staff dashboard cards: live figures that match the Deposits and Unpaid Accounts reports
+        $undepositedCashTotal = null;
+        $unpaidAccountsCount = null;
+        $unpaidAccountsTotal = null;
+        if (auth()->user()->hasRole('staff')) {
+            try {
+                $undepositedCashTotal = (float) app(\App\Http\Controllers\DepositsController::class)
+                    ->buildStaffSections(Auth::id(), new Request())
+                    ->sum('total');
+            } catch (\Throwable $e) {
+                Log::error('Dashboard undeposited cash: ' . $e->getMessage());
+            }
+
+            try {
+                $unpaidAccountsCount = 0;
+                $unpaidAccountsTotal = 0.0;
+                $hasAssignedRoute = DB::table('assign_routes')
+                    ->whereNull('deleted_at')
+                    ->where('staff_id', Auth::id())
+                    ->exists();
+                if ($hasAssignedRoute) {
+                    $unpaidRows = ClientSchedule::with('clientSchedulePayment')
+                        ->where('client_schedules.status', 'completed')
+                        ->whereHas('clientName', function ($q) {
+                            $q->where('payment_type', 'cash');
+                        })
+                        ->where('client_schedules.staff_id', Auth::id())
+                        ->where(function ($q) {
+                            $q->whereHas('clientSchedulePayment', function ($sub) {
+                                $sub->where('status', 'pending');
+                            })->orWhereDoesntHave('clientSchedulePayment');
+                        })
+                        ->join('clients', 'client_schedules.client_id', '=', 'clients.id')
+                        ->select('client_schedules.*')
+                        ->get();
+                    $unpaidAccountsCount = $unpaidRows->count();
+                    $unpaidAccountsTotal = (float) $unpaidRows->sum(fn ($s) => (float) (optional($s->clientSchedulePayment)->final_price ?? 0));
+                }
+            } catch (\Throwable $e) {
+                Log::error('Dashboard unpaid accounts: ' . $e->getMessage());
+                $unpaidAccountsCount = null;
+                $unpaidAccountsTotal = null;
+            }
+        }
+
         return view('dashboard.dashboard_index', [
+            'undepositedCashTotal' => $undepositedCashTotal,
+            'unpaidAccountsCount' => $unpaidAccountsCount,
+            'unpaidAccountsTotal' => $unpaidAccountsTotal,
             'staffRoute' => $staffRoute,
             'currentMonth' => $currentMonthName,
             'currentYear' => $currentYear,

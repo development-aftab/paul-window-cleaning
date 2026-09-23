@@ -75,7 +75,7 @@ class DepositsController extends Controller
      * sits alone in its group (e.g. paid late, outside the normal batch) is shown individually
      * with its own client name and exact service date.
      */
-    private function buildStaffSections($onlyStaffId, Request $request)
+    public function buildStaffSections($onlyStaffId, Request $request)
     {
         $rows = collect();
         $filterDateFrom = $request->filled('date_from') ? Carbon::parse($request->date_from)->startOfDay() : null;

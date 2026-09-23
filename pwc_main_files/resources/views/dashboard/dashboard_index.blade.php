@@ -166,41 +166,41 @@
                                                         </div>
                                                     </div>
                                                     @php
-                                                            $totalJobs = ($route->jobs_pending ?? 0) + ($route->jobs_completed ?? 0);
-                                                            $completedPercentage = $totalJobs > 0 ? round(($route->jobs_completed / $totalJobs) * 100) : 0;
+                                                        $totalJobs = ($route->jobs_pending ?? 0) + ($route->jobs_completed ?? 0);
+                                                        $completedPercentage = $totalJobs > 0 ? round(($route->jobs_completed / $totalJobs) * 100) : 0;
 
-                                                            // Determine color, icon and background based on percentage
-                                                            if ($totalJobs === 0) {
-                                                                $progressColor = '#9e9e9e';
-                                                                $progressBg = '#eeeeee';
-                                                                $progressIcon = 'fa-ban';
-                                                                $progressText = 'Inactive';
-                                                            } elseif ($completedPercentage <= 20) {
-                                                                $progressColor = '#ff5500';
-                                                                $progressBg = '#fbf2ec';
-                                                                $progressIcon = 'fa-hourglass-start';
-                                                                $progressText = 'Completed';
-                                                            } elseif ($completedPercentage <= 50) {
-                                                                $progressColor = '#ff9800';
-                                                                $progressBg = '#FFF3E0';
-                                                                $progressIcon = 'fa-spinner';
-                                                                $progressText = 'In Progress';
-                                                            } elseif ($completedPercentage <= 80) {
-                                                                $progressColor = '#ff9800';
-                                                                $progressBg = '#FFF3E0';
-                                                                $progressIcon = 'fa-hourglass-half';
-                                                                $progressText = 'Nearly';
-                                                            } elseif ($completedPercentage < 100) {
-                                                                $progressColor = '#ff9800';
-                                                                $progressBg = '#FFF3E0';
-                                                                $progressIcon = 'fa-check-circle';
-                                                                $progressText = 'Almost Done';
-                                                            } else {
-                                                                $progressColor = '#4caf50';
-                                                                $progressBg = '#b5fbd0';
-                                                                $progressIcon = 'fa-check-circle';
-                                                                $progressText = 'Completed';
-                                                            }
+                                                        // Determine color, icon and background based on percentage
+                                                        if ($totalJobs === 0) {
+                                                            $progressColor = '#9e9e9e';
+                                                            $progressBg = '#eeeeee';
+                                                            $progressIcon = 'fa-ban';
+                                                            $progressText = 'Inactive';
+                                                        } elseif ($completedPercentage <= 20) {
+                                                            $progressColor = '#ff5500';
+                                                            $progressBg = '#fbf2ec';
+                                                            $progressIcon = 'fa-hourglass-start';
+                                                            $progressText = 'Completed';
+                                                        } elseif ($completedPercentage <= 50) {
+                                                            $progressColor = '#ff9800';
+                                                            $progressBg = '#FFF3E0';
+                                                            $progressIcon = 'fa-spinner';
+                                                            $progressText = 'In Progress';
+                                                        } elseif ($completedPercentage <= 80) {
+                                                            $progressColor = '#ff9800';
+                                                            $progressBg = '#FFF3E0';
+                                                            $progressIcon = 'fa-hourglass-half';
+                                                            $progressText = 'Nearly';
+                                                        } elseif ($completedPercentage < 100) {
+                                                            $progressColor = '#ff9800';
+                                                            $progressBg = '#FFF3E0';
+                                                            $progressIcon = 'fa-check-circle';
+                                                            $progressText = 'Almost Done';
+                                                        } else {
+                                                            $progressColor = '#4caf50';
+                                                            $progressBg = '#b5fbd0';
+                                                            $progressIcon = 'fa-check-circle';
+                                                            $progressText = 'Completed';
+                                                        }
                                                     @endphp
                                                     <div style="background: {{ $progressBg }}; border-radius: 8px; padding: 4px 5px;">
                                                         <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
@@ -222,37 +222,37 @@
                             </div>
                         </div>
                     </div>
-{{--                    <div class="col-md-8">--}}
-{{--                        <div class="chart_wrapper_sec shadow_box_wrapper">--}}
-{{--                            <div class="statistics_wrapper">--}}
-{{--                                <h3>Gross Commercial Sales</h3>--}}
-{{--                                <div class="date_range_picker_wrapper">--}}
-{{--                                    <label class="form-label"><i class="fa-regular fa-calendar"></i></label>--}}
-{{--                                    <input class="form-control form-control-solid" placeholder="Pick date rage" id="kt_daterangepicker_1" />--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                            <div class="chart_wrapper">--}}
-{{--                                <canvas id="line-chart"></canvas>--}}
-{{--                                <svg style="display: none;">--}}
-{{--                                    <defs>--}}
-{{--                                        <linearGradient id="gradient1" x1="0%" y1="0%" x2="0%" y2="100%">--}}
-{{--                                            <stop offset="20%" style="stop-color:#2280C2;stop-opacity:1" />--}}
-{{--                                            <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />--}}
-{{--                                        </linearGradient>--}}
-{{--                                    </defs>--}}
-{{--                                </svg>--}}
-{{--                                <svg style="display: none;">--}}
-{{--                                    <defs>--}}
-{{--                                        <linearGradient id="gradient2" x1="0%" y1="0%" x2="0%" y2="100%">--}}
-{{--                                            <stop offset="10%" style="stop-color:#2010801A;stop-opacity:1" />--}}
-{{--                                            <stop offset="0%" style="stop-color:#20108000;stop-opacity:1" />--}}
-{{--                                        </linearGradient>--}}
-{{--                                    </defs>--}}
-{{--                                </svg>--}}
-{{--                            </div>--}}
+                    {{--                    <div class="col-md-8">--}}
+                    {{--                        <div class="chart_wrapper_sec shadow_box_wrapper">--}}
+                    {{--                            <div class="statistics_wrapper">--}}
+                    {{--                                <h3>Gross Commercial Sales</h3>--}}
+                    {{--                                <div class="date_range_picker_wrapper">--}}
+                    {{--                                    <label class="form-label"><i class="fa-regular fa-calendar"></i></label>--}}
+                    {{--                                    <input class="form-control form-control-solid" placeholder="Pick date rage" id="kt_daterangepicker_1" />--}}
+                    {{--                                </div>--}}
+                    {{--                            </div>--}}
+                    {{--                            <div class="chart_wrapper">--}}
+                    {{--                                <canvas id="line-chart"></canvas>--}}
+                    {{--                                <svg style="display: none;">--}}
+                    {{--                                    <defs>--}}
+                    {{--                                        <linearGradient id="gradient1" x1="0%" y1="0%" x2="0%" y2="100%">--}}
+                    {{--                                            <stop offset="20%" style="stop-color:#2280C2;stop-opacity:1" />--}}
+                    {{--                                            <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />--}}
+                    {{--                                        </linearGradient>--}}
+                    {{--                                    </defs>--}}
+                    {{--                                </svg>--}}
+                    {{--                                <svg style="display: none;">--}}
+                    {{--                                    <defs>--}}
+                    {{--                                        <linearGradient id="gradient2" x1="0%" y1="0%" x2="0%" y2="100%">--}}
+                    {{--                                            <stop offset="10%" style="stop-color:#2010801A;stop-opacity:1" />--}}
+                    {{--                                            <stop offset="0%" style="stop-color:#20108000;stop-opacity:1" />--}}
+                    {{--                                        </linearGradient>--}}
+                    {{--                                    </defs>--}}
+                    {{--                                </svg>--}}
+                    {{--                            </div>--}}
 
-{{--                        </div>--}}
-{{--                    </div>--}}
+                    {{--                        </div>--}}
+                    {{--                    </div>--}}
                     <div class="col-md-4">
                         <div class="notification_dashboard_wrapper shadow_box_wrapper">
                             <h3>Coming Soon</h3>
@@ -285,18 +285,18 @@
                                                     @endif
                                                     @if ($schedule->calendar_month)
                                                         , {{ $schedule->calendar_month }}
-                                                    @endif
-                                                    @if ($scopeOfWork)
-                                                        &mdash; {{ $scopeOfWork }}
+                                                        @endif
+                                                        @if ($scopeOfWork)
+                                                            &mdash; {{ $scopeOfWork }}
                                                     @endif
                                                 </p>
                                                 <span>{{ $dateRange }}</span>
                                             </div>
                                         </li>
                                     @empty
-                                            <div>
-                                                <h5>No Coming Schedules Found!</h5>
-                                            </div>
+                                        <div>
+                                            <h5>No Coming Schedules Found!</h5>
+                                        </div>
                                     @endforelse
                                 </ul>
                             </div>
@@ -498,16 +498,20 @@
                                 <div class="customer_payroll_sheets shadow_box_wrapper">
                                     <div class="row">
                                         <div class="col-md-4">
-                                            <div class="payroll_cards shadow_box_wrapper">
-                                                <h3>Total Undeposited Cash</h3>
-                                                <h4>5,000</h4>
-                                            </div>
+                                            <a href="{{ url('deposits') }}" class="payroll_card_link" title="Open Total Undeposited Cash">
+                                                <div class="payroll_cards shadow_box_wrapper">
+                                                    <h3>Total Undeposited Cash</h3>
+                                                    <h4>{{ $undepositedCashTotal === null ? 'View report' : '$' . number_format($undepositedCashTotal, 2) }}</h4>
+                                                </div>
+                                            </a>
                                         </div>
                                         <div class="col-md-4">
-                                            <div class="payroll_cards shadow_box_wrapper">
-                                                <h3>{{ auth()->user()->hasRole('staff') ? 'Unpaid Accounts' : 'Unpaid Customers' }}</h3>
-                                                <h4>0 - 69</h4>
-                                            </div>
+                                            <a href="{{ route('reports.unpaid') }}" class="payroll_card_link" title="Open Unpaid Accounts">
+                                                <div class="payroll_cards shadow_box_wrapper">
+                                                    <h3>{{ auth()->user()->hasRole('staff') ? 'Unpaid Accounts' : 'Unpaid Customers' }}</h3>
+                                                    <h4>{{ $unpaidAccountsTotal === null ? 'View report' : '$' . number_format($unpaidAccountsTotal, 2) . ' - ' . $unpaidAccountsCount . ($unpaidAccountsCount === 1 ? ' account' : ' accounts') }}</h4>
+                                                </div>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -521,31 +525,31 @@
                                         <div class="table-responsive">
                                             <table class="table deposits-table">
                                                 <thead>
-                                                    <tr>
-                                                        <th>Date</th>
-                                                        <th>Route</th>
-                                                        <th>Week</th>
-                                                        <th>Amount</th>
-                                                        <th>Deposited</th>
-                                                    </tr>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Route</th>
+                                                    <th>Week</th>
+                                                    <th>Amount</th>
+                                                    <th>Deposited</th>
+                                                </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @forelse ($deposits as $deposit)
-                                                        <tr>
-                                                            <td>{{ $deposit->deposit_date ? $deposit->deposit_date->format('m-d-Y') : 'N/A' }}</td>
-                                                            <td>{{ $deposit->route->name ?? 'N/A' }}</td>
-                                                            <td>Week {{ (int) str_replace('week', '', $deposit->week) + 1 }}</td>
-                                                            <td>${{ number_format($deposit->total_amount, 2) }}</td>
-                                                            <td>
-                                                                <input type="checkbox" disabled {{ $deposit->deposit_amount > 0 ? 'checked' : '' }}>
-                                                                ${{ number_format($deposit->deposit_amount, 2) }}
-                                                            </td>
-                                                        </tr>
-                                                    @empty
-                                                        <tr>
-                                                            <td colspan="5" class="text-center">No Deposits Found</td>
-                                                        </tr>
-                                                    @endforelse
+                                                @forelse ($deposits as $deposit)
+                                                    <tr>
+                                                        <td>{{ $deposit->deposit_date ? $deposit->deposit_date->format('m-d-Y') : 'N/A' }}</td>
+                                                        <td>{{ $deposit->route->name ?? 'N/A' }}</td>
+                                                        <td>Week {{ (int) str_replace('week', '', $deposit->week) + 1 }}</td>
+                                                        <td>${{ number_format($deposit->total_amount, 2) }}</td>
+                                                        <td>
+                                                            <input type="checkbox" disabled {{ $deposit->deposit_amount > 0 ? 'checked' : '' }}>
+                                                            ${{ number_format($deposit->deposit_amount, 2) }}
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="5" class="text-center">No Deposits Found</td>
+                                                    </tr>
+                                                @endforelse
                                                 </tbody>
                                             </table>
                                         </div>
@@ -747,9 +751,9 @@
                         [0, "desc"]
                     ], // Sort by date
                     "columnDefs": [{
-                            "orderable": false,
-                            "targets": 4
-                        } // Deposited column not sortable
+                        "orderable": false,
+                        "targets": 4
+                    } // Deposited column not sortable
                     ]
                 });
             }
