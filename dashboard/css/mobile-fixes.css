@@ -1,0 +1,784 @@
+/* =====================================================================
+   Paul's Window Cleaning — Admin / Staff panel: mobile fixes (phase 2)
+   Loaded AFTER mobile.css in theme/layout/master.blade.php.
+   CSS only. No markup, ids, classes or JS are touched. Every rule is
+   inside a max-width media query, so desktop (>= 992px) is unaffected.
+   To undo: delete the <link> to this file in master.blade.php.
+   Breakpoints: <=991.98 tablet+phone | <=767.98 phone | <=575.98 small
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. TABLET + PHONE  (<= 991.98px)
+   --------------------------------------------------------------------- */
+@media (max-width: 991.98px) {
+
+    /* ---- Page must never scroll sideways ---- */
+    html,
+    body#kt_app_body {
+        max-width: 100%;
+        overflow-x: hidden !important;
+    }
+    #kt_app_root,
+    #kt_app_page,
+    #kt_app_wrapper,
+    #kt_app_main {
+        max-width: 100%;
+        overflow-x: hidden;
+        overflow-x: clip;   /* clip = no hidden scroll box (modern browsers) */
+    }
+    #kt_app_main {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+    }
+    #kt_app_main .container-fluid,
+    #kt_app_main .row {
+        max-width: 100%;
+    }
+
+    /* ---- Media never wider than its box ---- */
+    #kt_app_main img,
+    #kt_app_main video,
+    #kt_app_main canvas,
+    #kt_app_main iframe,
+    #kt_app_main embed,
+    #kt_app_main object {
+        max-width: 100%;
+    }
+    #kt_app_main pre {
+        max-width: 100%;
+        overflow-x: auto;
+        white-space: pre-wrap;
+    }
+
+    /* Any inline "width: NNNpx" can shrink, never overflow */
+    #kt_app_main [style*="width:"],
+    .modal [style*="width:"] {
+        max-width: 100%;
+    }
+    /* Inline fixed min-widths (tooltips, filters, selects) */
+    #kt_app_main [style*="min-width: 2"],
+    #kt_app_main [style*="min-width: 3"],
+    #kt_app_main [style*="min-width:2"],
+    #kt_app_main [style*="min-width:3"] {
+        min-width: 0 !important;
+    }
+
+    /* ---- Sidebar drawer: never wider than the screen ---- */
+    #kt_app_sidebar {
+        max-width: 86vw;
+    }
+
+    /* ---- Header: keep the title from pushing icons off-screen ---- */
+    #kt_app_header,
+    #kt_app_header_container,
+    #kt_app_header_wrapper {
+        max-width: 100%;
+    }
+    #kt_app_header_wrapper > * {
+        min-width: 0;
+    }
+    #kt_app_header .navbar_PageTitle,
+    #kt_app_header h2,
+    #kt_app_header h3 {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ---- Toolbars / filter rows: wrap instead of overflowing ---- */
+    #kt_app_main .app-toolbar,
+    #kt_app_main .card-header,
+    #kt_app_main .card-toolbar,
+    #kt_app_main .searchbar_download_filter_wrapper,
+    #kt_app_main .filter_download_dropdown_wrapper,
+    #kt_app_main .dropdown_months_wrapper,
+    #kt_app_main .assign_staff_filter,
+    #kt_app_main .filter_selects_wrapper,
+    #kt_app_main .download_modal_pdf_wrapper,
+    #kt_app_main .cards_dashboard_index_wrapper > div:first-child {
+        flex-wrap: wrap;
+        row-gap: 10px;
+    }
+    #kt_app_main .custom_justify_between > *,
+    #kt_app_main .filter_download_dropdown_wrapper > * {
+        min-width: 0;
+    }
+
+    /* ---- Buttons: comfortable tap size ---- */
+    #kt_app_main .btn,
+    #kt_app_main .btn_global,
+    .modal .btn,
+    .modal .btn_global {
+        min-height: 40px;
+        max-width: 100%;
+    }
+    #kt_app_main .btn_global,
+    #kt_app_main .btn {
+        white-space: normal;
+        line-height: 1.25;
+    }
+
+    /* ---- Form controls: full width, no iOS auto-zoom ---- */
+    #kt_app_main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+    #kt_app_main select,
+    #kt_app_main textarea,
+    .modal input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+    .modal select,
+    .modal textarea {
+        max-width: 100%;
+        font-size: 16px;
+    }
+    #kt_app_main .form-control,
+    #kt_app_main .form-select,
+    .modal .form-control,
+    .modal .form-select {
+        min-height: 44px;
+    }
+    #kt_app_main .input-group {
+        flex-wrap: nowrap;
+        max-width: 100%;
+    }
+    #kt_app_main .input-group > .form-control,
+    #kt_app_main .input-group > .form-select {
+        min-width: 0;
+    }
+    #kt_app_main .select2-container,
+    .modal .select2-container {
+        max-width: 100%;
+    }
+    .select2-container--open .select2-dropdown {
+        max-width: calc(100vw - 20px);
+    }
+    .select2-container .select2-selection--single,
+    .select2-container .select2-selection--multiple {
+        min-height: 44px;
+    }
+    .select2-container .select2-selection--single .select2-selection__rendered {
+        line-height: 42px;
+    }
+    .select2-container .select2-selection--single .select2-selection__arrow {
+        height: 42px;
+    }
+    .select2-results__option {
+        padding: 10px 12px;
+        font-size: 15px;
+    }
+
+    /* ---- Pickers stay on screen ---- */
+    .flatpickr-calendar {
+        max-width: calc(100vw - 16px);
+    }
+    .daterangepicker {
+        max-width: calc(100vw - 16px);
+    }
+
+    /* ---- Modals ---- */
+    .modal-dialog,
+    .modal-dialog.modal-lg,
+    .modal-dialog.modal-xl,
+    .modal-dialog.modal-sm {
+        max-width: calc(100vw - 20px);
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .modal .modal-content {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    .modal .modal-header,
+    .modal .modal-footer {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .modal .modal-footer > * {
+        margin: 0;
+    }
+    .modal img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* ---- DataTables controls ---- */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        float: none !important;
+        text-align: left;
+        width: 100%;
+        margin: 6px 0;
+    }
+    .dataTables_wrapper .dataTables_filter input {
+        width: 100%;
+        margin-left: 0;
+    }
+    .dataTables_wrapper .dataTables_paginate {
+        text-align: center;
+    }
+    .dataTables_wrapper .dataTables_paginate .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+        row-gap: 6px;
+    }
+    .dataTables_wrapper .page-link {
+        min-width: 38px;
+        text-align: center;
+    }
+    .dataTables_wrapper > .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* ---- Tabs / pills: swipe instead of overflow ---- */
+    #kt_app_main .nav-tabs,
+    #kt_app_main .nav-pills,
+    #kt_app_main .nav-line-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    #kt_app_main .nav-tabs::-webkit-scrollbar,
+    #kt_app_main .nav-pills::-webkit-scrollbar,
+    #kt_app_main .nav-line-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    #kt_app_main .nav-tabs .nav-item,
+    #kt_app_main .nav-pills .nav-item,
+    #kt_app_main .nav-line-tabs .nav-item {
+        flex: 0 0 auto;
+    }
+    #kt_app_main .nav-tabs .nav-link,
+    #kt_app_main .nav-pills .nav-link {
+        white-space: nowrap;
+    }
+
+    /* ---- Dropdown menus stay inside the viewport ---- */
+    #kt_app_main .dropdown-menu {
+        max-width: calc(100vw - 24px);
+    }
+
+    /* ---- Route / staff cards ---- */
+    .staff_routes_group_name {
+        text-overflow: ellipsis;
+    }
+    .new_yorks-cards_wrapper_compact {
+        max-width: 100%;
+    }
+    .cards_dashboard_index_wrapper .staff_routes_group {
+        width: 100%;
+    }
+
+    /* ---- Route-report hover tooltips: viewport-safe ---- */
+    .tooltip_hover {
+        max-width: calc(100vw - 32px) !important;
+        white-space: normal;
+    }
+}
+
+/* ---------------------------------------------------------------------
+   2. PHONE  (<= 767.98px)
+   --------------------------------------------------------------------- */
+@media (max-width: 767.98px) {
+
+    /* ---- Tables that are NOT inside .table-responsive: swipe sideways ---- */
+    #kt_app_main table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    /* ...but leave properly wrapped tables (and DataTables) as real tables */
+    #kt_app_main .table-responsive table,
+    #kt_app_main .dataTables_wrapper table,
+    #kt_app_main .dataTables_scrollBody table,
+    #kt_app_main .dataTables_scrollHead table {
+        display: table;
+        overflow: visible;
+    }
+    #kt_app_main .dataTables_wrapper,
+    #kt_app_main .table-responsive {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    #kt_app_main table th,
+    #kt_app_main table td {
+        vertical-align: middle;
+    }
+    /* action buttons inside table cells: compact so rows stay readable */
+    #kt_app_main table .btn,
+    #kt_app_main table .btn_global {
+        min-height: 34px;
+        padding: 6px 10px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    /* ---- Every column stacks ---- */
+    #kt_app_main .row > [class*="col-md-"],
+    #kt_app_main .row > [class*="col-lg-"],
+    #kt_app_main .row > [class*="col-xl-"] {
+        max-width: 100%;
+    }
+
+    /* ---- Cards: tighter ---- */
+    #kt_app_main .card-body,
+    #kt_app_main .card-header {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    /* ---- Buttons in action rows: full-width & stacked ---- */
+    #kt_app_main .modal-footer .btn,
+    .modal .modal-footer .btn_global {
+        flex: 1 1 100%;
+    }
+    #kt_app_main form .btn_global.btn_blue[type="submit"],
+    #kt_app_main form button.btn_global[type="submit"] {
+        max-width: 100%;
+    }
+
+    /* ---- Definition-style rows (label : value) wrap cleanly ---- */
+    #kt_app_main .d-flex.justify-content-between {
+        flex-wrap: wrap;
+        gap: 6px 12px;
+    }
+    #kt_app_main .d-flex.justify-content-between > * {
+        min-width: 0;
+    }
+
+    /* ---- Notification dropdown & header search: keep on screen ---- */
+    .custom_notification {
+        max-width: calc(100vw - 24px);
+    }
+
+    /* ---- SweetAlert ---- */
+    .swal2-popup {
+        max-width: calc(100vw - 24px) !important;
+        width: calc(100vw - 24px);
+    }
+    .swal2-popup .swal2-actions button {
+        margin: 4px;
+    }
+
+    /* ---- Preloader / scroll-to-top ---- */
+    #kt_scrolltop {
+        right: 14px;
+        bottom: 14px;
+    }
+
+    /* ---- Page title & headings never overflow ---- */
+    #kt_app_main h1,
+    #kt_app_main h2,
+    #kt_app_main h3,
+    #kt_app_main h4,
+    #kt_app_main h5,
+    #kt_app_main h6 {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+}
+
+/* ---------------------------------------------------------------------
+   3. SMALL PHONE  (<= 575.98px)
+   --------------------------------------------------------------------- */
+@media (max-width: 575.98px) {
+
+    #kt_app_main .custom_container {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+    #kt_app_main .custom_div,
+    #kt_app_main .shadow_box_wrapper {
+        padding: 12px;
+    }
+
+    /* Two-up chip / radio rows collapse to one column when very narrow */
+    #kt_app_main .price_list_wrapper .price_list_flex {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tables a touch smaller */
+    #kt_app_main table th,
+    #kt_app_main table td {
+        font-size: 13px;
+    }
+
+    /* Pagination dots tighter */
+    .dataTables_wrapper .page-link {
+        min-width: 34px;
+        padding: 6px 8px;
+    }
+
+    .modal .modal-content {
+        padding: 12px;
+    }
+}
+
+/* =====================================================================
+   PAGE: Routes / Assigned Routes  (staffroutes/index)
+   The route cards carry an inline style="width: 24%" that stays active
+   on phones (inline beats Bootstrap's stacking), squeezing four cards
+   into one row. Overridden here with !important — no markup change.
+   ===================================================================== */
+@media (max-width: 991.98px) {
+    /* tablet: 3 cards per row */
+    .routes_section .route-card {
+        width: 33.3333% !important;
+        max-width: 33.3333%;
+        flex: 0 0 auto;
+    }
+    .routes_section .route-card .new_yorks-cards_wrapper {
+        height: 100%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    /* phone: 2 cards per row */
+    .routes_section .route-card {
+        width: 50% !important;
+        max-width: 50%;
+    }
+
+    /* staff view: no nested scrollbox on touch, let the page scroll */
+    .routes_custom_row {
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+
+    /* Header: title on its own line, search full width beneath it */
+    #kt_app_header_wrapper > .custom_justify_between.custom_search_wrapper {
+        flex-wrap: wrap;
+        row-gap: 10px;
+    }
+    #kt_app_header_wrapper > .custom_justify_between.custom_search_wrapper > h2.navbar_PageTitle {
+        flex: 1 0 100%;
+        overflow: visible;
+        white-space: normal;
+    }
+    #kt_app_header_wrapper > .custom_justify_between.custom_search_wrapper > .custom_search {
+        flex: 1 0 100%;
+        margin-left: 0;
+    }
+    .custom_search_wrapper .custom_search form,
+    .custom_search_wrapper .custom_search input.search_input {
+        width: 100%;
+    }
+
+    /* Filter / Create Route row */
+    .routes_section .custom_justify_between {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 575.98px) {
+    /* small phone: one card per row, full width */
+    .routes_section .route-card {
+        width: 100% !important;
+        max-width: 100%;
+    }
+    .routes_section .custom_row {
+        row-gap: 14px;
+    }
+    /* Card contents breathe at full width */
+    .new_yorks-cards_wrapper div h2 {
+        font-size: 20px !important;
+        line-height: 1.25;
+    }
+    .new_yorks-cards_wrapper .jobs_icon_wrapper div label,
+    .new_yorks-cards_wrapper .jobs_icon_wrapper div span {
+        white-space: normal;
+    }
+    .routes_section .icons_custom_wrapper,
+    .routes_section .custom_icon_wrapperss {
+        gap: 18px;
+    }
+    /* tap targets for toggle / edit / delete icons */
+    .routes_section .custom_icon_wrapperss i {
+        font-size: 20px;
+        padding: 4px;
+    }
+}
+
+/* =====================================================================
+   PAGE: Routes Reports  (dashboard/route_report)
+   The page's own inline <style> loads AFTER this file, so selectors here
+   are made more specific (and !important where an inline rule competes).
+   ===================================================================== */
+@media (max-width: 767.98px) {
+
+    /* ---- Filter bar: stack, full width, nothing overflows the card ---- */
+    .route_report_section .custom_div > .custom_justify_between {
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap: nowrap;
+        gap: 14px;
+    }
+    .route_report_section .routes_head_content {
+        flex: 0 0 auto;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 12px;
+    }
+    .route_report_section .routes_head_content > .txt_field,
+    .route_report_section .routes_head_content > .custom_select_route {
+        flex: 1 1 100%;
+        min-width: 0 !important;
+        width: 100%;
+    }
+    .route_report_section .routes_head_content .select2-container {
+        width: 100% !important;
+    }
+    /* month switcher: [<]  [ calendar  Month ]  [>] across the full width */
+    .route_report_section .months-pagination {
+        flex: 1 1 100%;
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        gap: 10px;
+    }
+    .route_report_section .months-pagination .dropdown_months_wrapper {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .route_report_section .months-pagination .dropdown_months_wrapper > .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    .route_report_section .months-pagination .pag-btn {
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+    }
+    /* action buttons: Export All fills the row, refresh stays a circle */
+    .route_report_section .custom_div > .custom_justify_between > .custom_flex:last-child {
+        width: 100%;
+        gap: 10px;
+    }
+    .route_report_section .exportAllWeeksBtn {
+        flex: 1 1 auto;
+        margin-right: 0 !important;     /* inline style="margin-right:10px" */
+        justify-content: center;
+    }
+    .route_report_section button.btn_global.btn_dark_blue.clearAllFiltersBtn {
+        flex: 0 0 48px;
+        width: 48px;
+        height: 48px;
+        padding: 0;
+    }
+    .route_report_section button.clearAllFiltersBtn i {
+        font-size: 20px;
+    }
+    /* decorative hover label for the refresh button is not useful on touch */
+    .route_report_section .clearAllFiltersBtn .tooltip_hover {
+        display: none !important;
+    }
+
+    /* ---- Table: swipe sideways, keep the Route column pinned ---- */
+    .route_report_section .route_report_table .table-responsive {
+        border-radius: 10px;
+    }
+    .route_report_section .route_report_table table.table {
+        min-width: 760px;               /* keep columns readable; wrapper scrolls */
+    }
+    .route_report_section .route_report_table .table-responsive thead th:first-child,
+    .route_report_section .route_report_table .table-responsive tr.route-invoice > td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: #fff;
+        box-shadow: 4px 0 8px -4px rgba(50, 52, 106, 0.18);
+        min-width: 96px;
+        max-width: 130px;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+    .route_report_section .route_report_table thead th {
+        white-space: nowrap;
+    }
+    /* week banner + Export Excel button: comfortable */
+    .route_report_section .week-header-row h3 {
+        font-size: 1rem;
+    }
+    .route_report_section .week-header-row .exportWeekBtn {
+        white-space: nowrap;
+    }
+    .route_report_section .week-spacer-row {
+        height: 16px !important;
+    }
+
+    /* ---- Hover popups (Total Sales, Cash, Unpaid...): become a bottom card
+            pinned to the screen so they never run off the sides ---- */
+    .route_report_section .route_report_table .table_hover .tooltip_hover {
+        position: fixed !important;
+        left: 12px !important;
+        right: 12px !important;
+        top: auto !important;
+        bottom: 12px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        max-height: 55vh !important;
+        margin: 0 !important;
+        transform: none !important;
+        z-index: 2000 !important;
+    }
+    .route_report_section .route_report_table .table_hover .tooltip_hover::before,
+    .route_report_section .route_report_table .table_hover .tooltip_hover::after {
+        display: none;
+    }
+    .route_report_section .route_report_table .table_hover:hover h3 {
+        transform: none;
+    }
+    .route_report_section .sales-tooltip .customer-name {
+        max-width: 55vw;
+    }
+}
+
+@media (max-width: 400px) {
+    .route_report_section .route_report_table table.table {
+        min-width: 700px;
+    }
+    .route_report_section .route_report_table .table-responsive th,
+    .route_report_section .route_report_table .table-responsive td {
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+}
+
+/* =====================================================================
+   PAGE: CMS  (dashboard/admin/cms)
+   ===================================================================== */
+@media (max-width: 767.98px) {
+
+    /* ---- Tabs: tighter so all five fit / swipe smoothly ---- */
+    .cms_tabs_wrapper ul.nav-tabs {
+        column-gap: 8px;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+    }
+    .cms_tabs_wrapper ul.nav-tabs li button {
+        padding: 9px 14px;
+        font-size: 13.5px;
+        white-space: nowrap;
+    }
+
+    /* ---- Section headings ---- */
+    .section_one_wrapper h2 {
+        font-size: 20px;
+        line-height: 1.25;
+        margin-top: 26px;
+        margin-bottom: 16px;
+    }
+    .cms_sec .cms_whole_wrapper .custom_row {
+        row-gap: 14px;
+    }
+
+    /* ---- Rich-text (Summernote) editors ---- */
+    .cms_sec .note-editor,
+    .cms_sec .note-editor.note-frame {
+        max-width: 100%;
+    }
+    .cms_sec .note-editor .note-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 2px;
+    }
+    .cms_sec .note-editor .note-toolbar .note-btn-group {
+        margin: 0;
+    }
+    .cms_sec .note-editor .note-btn {
+        min-height: 34px;
+        min-width: 34px;
+    }
+    .cms_sec .note-editor .note-editing-area,
+    .cms_sec .note-editor .note-editable {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+    .cms_sec .note-editor .note-editable {
+        font-size: 16px !important;     /* avoid iOS focus-zoom */
+    }
+    /* Summernote image / link dialogs */
+    .note-modal .note-modal-content {
+        width: auto !important;
+        max-width: calc(100vw - 20px);
+        margin: 20px 10px !important;
+    }
+    .note-modal .note-modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    /* ---- Image tiles: two per row, tidy gaps ---- */
+    .cms_sec .cms_img_wrapper {
+        column-gap: 16px;
+        row-gap: 22px;
+        align-items: flex-start;
+    }
+    .cms_sec .cms_img_wrapper > .txt_field {
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 100%;
+    }
+    .cms_sec .image-input-wrapper {
+        width: min(150px, 100%);
+    }
+
+    /* edit / remove buttons: bigger tap targets, stacked at the tile's
+       top-right corner (Metronic centres them with translate(-50%,-50%)) */
+    #kt_app_body .cms_sec .edit_icon {
+        width: 32px;
+        height: 32px;
+        left: calc(100% - 20px);
+        top: 20px;
+    }
+    #kt_app_body .cms_sec .edit_icon i {
+        font-size: 12px;
+    }
+    #kt_app_body .cms_sec .edit_icon.remove_icon {
+        left: calc(100% - 20px);
+        top: 58px;
+    }
+
+    /* ---- "Title" rows with add-more / remove ---- */
+    .cms_sec .add_more_cms_wrapper {
+        column-gap: 12px;
+        flex-wrap: wrap;
+        row-gap: 12px;
+    }
+    .cms_sec .add_more_cms_wrapper .txt_field {
+        flex: 1 1 100%;
+    }
+    .cms_sec .add_more_cms_wrapper .add_more_cms {
+        min-width: 0;
+        width: auto;
+    }
+    .cms_sec .cms_img_wrapper .txt_field:has(.custom_justify) .btn_remove_image_container {
+        width: 28px;
+        height: 28px;
+        flex: 0 0 28px;
+    }
+    .add_more_cms_bogs_btn_wrapper {
+        flex-wrap: wrap;
+    }
+
+    /* ---- Save / submit buttons ---- */
+    .cms_sec .cms_submit_btn_wrapper {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding-top: 24px;
+    }
+    .cms_sec .cms_submit_btn_wrapper .btn_global {
+        flex: 1 1 calc(50% - 10px);
+        justify-content: center;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .cms_sec .cms_submit_btn_wrapper .btn_global {
+        flex: 1 1 100%;
+    }
+}

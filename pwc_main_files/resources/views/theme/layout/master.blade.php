@@ -34,6 +34,7 @@
     <link href="{{ asset('dashboard') }}/css/notifications.css?v={{ @filemtime(public_path('dashboard/css/notifications.css')) }}" rel="stylesheet" />
 {{--dev--}}
     <link href="{{ asset('dashboard') }}/css/mobile.css?v={{ @filemtime(public_path('dashboard/css/mobile.css')) }}" rel="stylesheet" />
+    <link href="{{ asset('dashboard') }}/css/mobile-fixes.css?v={{ @filemtime(public_path('dashboard/css/mobile-fixes.css')) }}" rel="stylesheet" />
     @stack('css')
 </head>
 <!--end::Head-->
