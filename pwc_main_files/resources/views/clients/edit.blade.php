@@ -98,24 +98,17 @@
                                             <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4 select_frequency">
                                                 <div class="txt_field form-floating">
                                                     <select class="form-select note-type-select" name="service_frequency" id="">
-                                                        <option value="" disabled @selected(empty($client->service_frequency))>
-                                                            Frequency *</option>
-                                                        <option value="normalWeek" @selected($client->service_frequency == 'normalWeek')>Weekly
-                                                        </option>
-                                                        <option value="biMonthly" @selected($client->service_frequency == 'biMonthly')>biMonthly
-                                                        </option>
-                                                        <option value="monthly" @selected($client->service_frequency == 'monthly')>Monthly
-                                                        </option>
-                                                        {{-- <option value="eightWeek" @selected($client->service_frequency == 'eightWeek')>8 Weeks
-                                                        </option>
-                                                        <option value="quarterly" @selected($client->service_frequency == 'quarterly')>12 Weeks
-                                                        </option>
-                                                        <option value="biAnnually" @selected($client->service_frequency == 'biAnnually')>24 Weeks
-                                                        </option> --}}
-                                                        <option value="annually" @selected($client->service_frequency == 'annually')>52 Weeks
-                                                        </option>
+                                                        <option value="" disabled @selected(empty($client->service_frequency))> Repeat Every *</option>
+                                                        <option value="normalWeek" @selected($client->service_frequency == 'normalWeek')>Weekly </option>
+                                                        <option value="fourWeek" @selected($client->service_frequency == 'fourWeek')>4 Weeks </option>
+                                                        <option value="eightWeek" @selected($client->service_frequency == 'eightWeek')>8 Weeks</option>
+                                                        <option value="quarterly" @selected($client->service_frequency == 'quarterly')>12 Weeks</option>
+                                                        <option value="biAnnually" @selected($client->service_frequency == 'biAnnually')>24 Weeks</option>
+                                                        <option value="biMonthly" @selected($client->service_frequency == 'biMonthly')>biMonthly </option>
+                                                        <option value="monthly" @selected($client->service_frequency == 'monthly')>Monthly </option>
+                                                        <option value="annually" @selected($client->service_frequency == 'annually')>52 Weeks</option>
                                                     </select>
-                                                    <label for="">Frequency</label>
+                                                    <label for="">Repeat Every </label>
                                                 </div>
                                             </div>
                                             <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4 second_start_date" style="{{ in_array($client->service_frequency, ['biMonthly', 'biAnnually']) ? '' : 'display:none' }}">

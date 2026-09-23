@@ -191,7 +191,14 @@ Route::get('/clear-all', function () {
     Artisan::call('route:clear');
     Artisan::call('cache:clear');
     Artisan::call('view:clear');
-    return '<div style="text-align:center;"> <h1 style="text-align:center;">Config Cache & Permission Cache Cleared.</h1><h3><a href="/">Go to home</a></h3></div>';
+    $home = url('/');
+    return '<div style="text-align:center;font-family:sans-serif;margin-top:40px;">'
+        . '<h1>Config Cache & Permission Cache Cleared.</h1>'
+        . '<h3>Redirecting to home in <span id="cd">5</span> seconds...</h3>'
+        . '<h3><a href="' . $home . '">Go to home now</a></h3></div>'
+        . '<script>var t=5,el=document.getElementById("cd");setInterval(function(){t--;if(t>=0)el.textContent=t;},1000);'
+        . 'setTimeout(function(){window.location.href=' . json_encode($home) . ';},5000);</script>'
+        . '<noscript><meta http-equiv="refresh" content="5;url=' . $home . '"></noscript>';
 });
 
 Route::resource("testimonials", "\App\Http\Controllers\TestimonialsController")->middleware("auth");

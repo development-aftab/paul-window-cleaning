@@ -87,14 +87,16 @@
                                                     <select class="form-select note-type-select" name="service_frequency[0]" id="">
                                                         {{--                                                        <option value="" disabled selected>Frequency </option> --}}
                                                         <option value="normalWeek">Weekly</option>
+                                                        <option value="fourWeek">4 Weeks</option>
+                                                        <option value="eightWeek">8 Weeks</option>
+                                                        <option value="quarterly">12 Weeks</option>
+                                                        <option value="biAnnually">24 Weeks</option>
                                                         <option value="biMonthly">biMonthly</option>
                                                         <option value="monthly">Monthly</option>
-                                                        {{--                                                        <option value="eightWeek">8 Weeks</option> --}}
-                                                        {{--                                                        <option value="quarterly">12 Weeks</option> --}}
-                                                        {{--                                                        <option value="biAnnually">24 Weeks</option> --}}
                                                         <option value="annually">52 Weeks</option>
+
                                                     </select>
-                                                    <label for="">Frequency *</label>
+                                                    <label for="">Repeat Every *</label>
                                                 </div>
                                             </div>
                                             <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4 second_start_date" style="display: none">
@@ -2419,12 +2421,12 @@
                 <div class="price_list editable_field">
                     <i class="fa-solid fa-pen-to-square edit_icon"></i>
                     <div class="input_text_filed_price_list">
-                        <input type="text" class="form-control" value="${customLabel}" 
+                        <input type="text" class="form-control" value="${customLabel}"
                                name="prices[${firstIndex}][${nameIndex}][side]">
                     </div>
                     <div class="txt_field price_list_icon">
                         <i class="price_list_icon_doller fa-solid fa-dollar-sign"></i>
-                        <input type="number" class="form-control" 
+                        <input type="number" class="form-control"
                                name="prices[${firstIndex}][${nameIndex}][number]" value="0">
                         <button type="button" class="btn_red btn_global delete_price_list">
                             <i class="fa-solid fa-trash"></i>
