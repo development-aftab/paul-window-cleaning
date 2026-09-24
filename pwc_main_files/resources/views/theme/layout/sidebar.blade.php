@@ -311,6 +311,7 @@
                             $isRoutes = request()->is('staffroutes*') || request()->is('client_cash*') || request()->is('view_client_cash*') || request()->is('client_invoice*') || request()->is('view_client_invoice*');
                             $isCompleteJobs = request()->is('complete-jobs*');
                             $isRouteReports = request()->is('route_report*');
+                            $isAnalytics = request()->is('analytics*');
                             $isDeposits = request()->is('deposits*');
                             $isUnpaid = request()->is('reports/unpaid*');
                             $isCms = request()->is('cms');
@@ -319,7 +320,7 @@
 
                             $staffOpen = $isStaffManagement || $isPayroll || $isStaffRequests;
                             $clientsOpen = $isInvoices || $isClients;
-                            $reportsOpen = $isCompleteJobs || $isRouteReports || $isDeposits || $isUnpaid;
+                            $reportsOpen = $isCompleteJobs || $isRouteReports || $isDeposits || $isUnpaid || $isAnalytics;
                             $frontPageOpen = $isCms || $isTestimonials || $isQuotes;
                         @endphp
                         <div class="menu-item ">
@@ -439,6 +440,14 @@
                                                aria-current="page">
                                                 <div class="sidebar_icon"><i class="fa-solid fa-chart-line"></i></div>
                                                 Route Reports
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ url('analytics') }}"
+                                               class="nav_list @if ($isAnalytics) active @endif"
+                                               aria-current="page">
+                                                <div class="sidebar_icon"><i class="fa-solid fa-chart-pie"></i></div>
+                                                Analytics
                                             </a>
                                         </li>
                                         <li>

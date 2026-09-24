@@ -11,7 +11,8 @@ use App\Http\Controllers\{
     UserController,
     CrudGeneratorController,
     QuickBooksController,
-    ReportController
+    ReportController,
+    AnalyticsController
 };
 
 Route::get('/', [WebsiteController::class, 'index']);
@@ -90,6 +91,13 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('route_report_ajax', 'routeReportAjax')->name('route.report.ajax');
         Route::get('route_report_export', 'routeReportExport')->name('route.report.export');
         Route::post('route_report_review/toggle', 'toggleRouteReportReview')->name('route.report.review.toggle');
+    });
+    Route::controller(AnalyticsController::class)->group(function () {
+        Route::get('analytics', 'index')->name('analytics');
+        Route::get('analytics/data', 'data')->name('analytics.data');
+        Route::get('analytics/template', 'template')->name('analytics.template');
+        Route::post('analytics/import', 'import')->name('analytics.import');
+        Route::post('analytics/history/delete-batch', 'deleteBatch')->name('analytics.history.delete');
     });
     Route::controller(UserController::class)->group(function () {
         Route::get('check_password', 'checkPassword')->name('check_password');
