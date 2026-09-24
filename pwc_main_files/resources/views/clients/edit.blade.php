@@ -77,7 +77,7 @@
                                                     <label for="commission_percentage">Commission Percentage </label>
                                                 </div>
                                             </div>
-                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4">
+                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4 first_start_date" style="{{ in_array($client->service_frequency, ['biMonthly', 'biAnnually']) ? '' : 'display:none' }}">{{-- Start Date: hidden unless 24 Weeks / biMonthly --}}
                                                 <div class=" d-flex align-items-start mb-3">
                                                     <div class="form-floating txt_field flex-grow-1 me-2">
                                                         @php
@@ -692,7 +692,7 @@
                                                     <label for="commission_percentage">Commission Percentage </label>
                                                 </div>
                                             </div>
-                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4">
+                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4 first_start_date" style="{{ in_array($client->service_frequency, ['biMonthly', 'biAnnually']) ? '' : 'display:none' }}">{{-- Start Date: hidden unless 24 Weeks / biMonthly --}}
                                                 <div class=" d-flex align-items-start mb-3">
                                                     <div class="form-floating txt_field flex-grow-1 me-2">
                                                         <input type="date" class="form-control" value="{{ $client->start_date ?? '' }}" name="start_date" id="startDate" placeholder="">
@@ -1911,11 +1911,14 @@
             // Show/hide second start date based on frequency selection
             $(document).on('change', '.select_frequency .note-type-select', function() {
                 var selectedValue = $(this).val();
+                var firstDateDiv = $(this).closest('.select_frequency').prev('.first_start_date');
                 var secondDateDiv = $(this).closest('.select_frequency').next('.second_start_date');
 
                 if (selectedValue === 'biMonthly' || selectedValue === 'biAnnually') {
+                    firstDateDiv.show();
                     secondDateDiv.show();
                 } else {
+                    firstDateDiv.hide(); // keep its value, it is still submitted
                     secondDateDiv.hide();
                     secondDateDiv.find('.startDateSecond').val('');
                 }
