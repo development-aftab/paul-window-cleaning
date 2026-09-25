@@ -74,7 +74,7 @@
                                                     <label for="client_name">Commission Percentage *</label>
                                                 </div>
                                             </div>
-                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4 first_start_date" style="display: none">{{-- Start Date: hidden by default, shown only for 24 Weeks / biMonthly --}}
+                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4">
                                                 <div class=" d-flex align-items-start mb-3">
                                                     <div class="form-floating txt_field flex-grow-1 me-2">
                                                         <input type="date" class="form-control startDate" name="start_date[0]" placeholder="" required>
@@ -87,6 +87,7 @@
                                                     <select class="form-select note-type-select" name="service_frequency[0]" id="">
                                                         {{--                                                        <option value="" disabled selected>Frequency </option> --}}
                                                         <option value="normalWeek">Weekly</option>
+                                                        <option value="twoWeek">2 Weeks</option>
                                                         <option value="fourWeek">4 Weeks</option>
                                                         <option value="eightWeek">8 Weeks</option>
                                                         <option value="quarterly">12 Weeks</option>
@@ -483,7 +484,7 @@
                                                                 <label for="client_name">Commission Percentage *</label>
                                                             </div>
                                                         </div>
-                                                        <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4 first_start_date" style="display: none">{{-- Start Date: hidden by default, shown only for 24 Weeks / biMonthly --}}
+                                                        <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4">
                                                             <div class=" d-flex align-items-start mb-3">
                                                                 <div class="form-floating txt_field flex-grow-1 me-2">
                                                                     <input type="date" class="form-control startDate" name="start_date[1]" placeholder="" required>
@@ -900,7 +901,7 @@
                                                     <label for="client_name">Commission Percentage</label>
                                                 </div>
                                             </div>
-                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4 first_start_date" style="display: none">{{-- Start Date: hidden by default, shown only for 24 Weeks / biMonthly --}}
+                                            <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4">
                                                 <div class=" d-flex align-items-start mb-3">
                                                     <div class="form-floating txt_field flex-grow-1 me-2">
                                                         <input type="date" class="form-control startDate" name="start_date[0]" id="startDate" placeholder="">
@@ -1309,7 +1310,7 @@
                                                                 <label for="client_name">Commission Percentage</label>
                                                             </div>
                                                         </div>
-                                                        <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4 first_start_date" style="display: none">{{-- Start Date: hidden by default, shown only for 24 Weeks / biMonthly --}}
+                                                        <div class="col-xxl-2 col-xl-4 col-lg-4 col-md-4">
                                                             <div class=" d-flex align-items-start mb-3">
                                                                 <div class="form-floating txt_field flex-grow-1 me-2">
                                                                     <input type="date" class="form-control startDate" name="start_date[1]" id="startDate" placeholder="">
@@ -1717,16 +1718,13 @@
             $(document).on('change', '.select_frequency .note-type-select', function() {
                 var selectedValue = $(this).val();
 
-                // Find the corresponding first / second date fields for this specific select
-                var firstDateDiv = $(this).closest('.select_frequency').prev('.first_start_date');
+                // Find the corresponding second date field for this specific select
                 var secondDateDiv = $(this).closest('.select_frequency').next('.second_start_date');
 
-                // Show only if biMonthly or biAnnually (24 Weeks) is selected
+                // Show only if biMonthly or biAnnually is selected
                 if (selectedValue === 'biMonthly' || selectedValue === 'biAnnually') {
-                    firstDateDiv.show();
                     secondDateDiv.show();
                 } else {
-                    firstDateDiv.hide(); // keep its value, it is still submitted
                     secondDateDiv.hide();
                     // Optional: Clear the date value when hiding
                     secondDateDiv.find('.startDateSecond').val('');
@@ -1736,14 +1734,11 @@
             // Initial check on page load for all existing selects
             $('.select_frequency .note-type-select').each(function() {
                 var selectedValue = $(this).val();
-                var firstDateDiv = $(this).closest('.select_frequency').prev('.first_start_date');
                 var secondDateDiv = $(this).closest('.select_frequency').next('.second_start_date');
 
                 if (selectedValue === 'biMonthly' || selectedValue === 'biAnnually') {
-                    firstDateDiv.show();
                     secondDateDiv.show();
                 } else {
-                    firstDateDiv.hide();
                     secondDateDiv.hide();
                 }
             });
