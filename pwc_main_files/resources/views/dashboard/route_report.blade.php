@@ -741,7 +741,13 @@
                                                         $routeName = $schedules->first()->clientName?->clientRouteStaff->first()->route->name ?? 'N/A';
                                                         $totalSales = $schedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
                                                         $cashSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'cash' && ($s->clientSchedulePayment->status ?? '') == 'paid' && ($s->clientSchedulePayment->option ?? '') != 'omit');
+                                                        // PREPAID-SERVICES START
+                                                        $cashSchedules = $cashSchedules->filter(fn($s) => strtolower($s->clientSchedulePayment->payment_method ?? '') !== 'prepaid');
+                                                        // PREPAID-SERVICES END
                                                         $cashRecord = $cashSchedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
+                                                        // PREPAID-SERVICES START
+                                                        $cashRecord += $cashSchedules->sum(fn($s) => \App\Models\ClientPrepaidService::extraForPayment($s->clientSchedulePayment->id ?? null));
+                                                        // PREPAID-SERVICES END
                                                         $weekString = 'week' . $dbWeekNum;
                                                         $matchingDeposits = $allDeposits->where('route_id', $routeId)->where('week', $weekString)->where('month', $selectedMonthName)->where('year', $selectedYear);
                                                         $totalDeposited = $matchingDeposits->sum('deposit_amount');
@@ -817,7 +823,8 @@
                                                                                 <span class="customer-info">
                                                                                     <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
                                                                                 </span>
-                                                                                <span class="customer-price">${{ number_format($s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0), 2) }}</span>
+                                                                                {{-- PREPAID-SERVICES: price includes any extra pre-paid cash collected on this visit --}}
+                                                                                <span class="customer-price">${{ number_format(($s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0)) + \App\Models\ClientPrepaidService::extraForPayment($s->clientSchedulePayment->id ?? null), 2) }}</span>
                                                                             </li>
                                                                         @empty
                                                                             <li class="empty-state">No Cash Records</li>

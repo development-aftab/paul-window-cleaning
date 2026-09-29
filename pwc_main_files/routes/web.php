@@ -124,6 +124,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('reports/unpaid-accounts', 'unpaidAccounts')->name('reports.unpaid');
         Route::post('reports/unpaid-accounts/mark-paid', 'markPaymentPaid')->name('reports.unpaid.mark-paid');
         Route::post('reports/unpaid-accounts/pay-with-zelle', 'payWithZelle')->name('reports.unpaid.pay-zelle');
+        Route::post('reports/unpaid-accounts/prepaid-used', 'markPrepaidUsed')->name('reports.unpaid.prepaid-used'); // PREPAID-SERVICES
+        Route::post('reports/unpaid-accounts/use-prepaid', 'usePrepaidForPayment')->name('reports.unpaid.use-prepaid'); // PREPAID-SERVICES
     });
 });
 

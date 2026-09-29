@@ -180,10 +180,101 @@ class ReportController extends Controller
             })->sortKeys();
         }
 
+        // PREPAID-SERVICES START: clients who paid in advance (shown in red at the top)
+        $prepaidGroups = collect();
+        $prepaidLeftByClient = collect(); // client_id => # pending pre-paid services (for the "Use Pre-Paid" button)
+        try {
+            \App\Models\ClientPrepaidService::ensureTable();
+            if (\Illuminate\Support\Facades\Schema::hasTable('client_prepaid_services')) {
+                // every credit row of clients that still have a balance, grouped per client
+                $prepaidQuery = \App\Models\ClientPrepaidService::with(['client.clientRouteStaff.route', 'schedule', 'staff'])
+                    ->whereIn('client_id', function ($q) {
+                        $q->select('client_id')->from('client_prepaid_services')->where('status', 'pending');
+                    });
+                if (!Auth::user()->hasRole('admin')) {
+                    $prepaidQuery->where('staff_id', Auth::id());
+                }
+                $prepaidGroups = $prepaidQuery->orderBy('created_at')->orderBy('slot_number')->get()->groupBy('client_id');
+                // client_id => remaining balance (for the "Use Pre-Paid" button)
+                $prepaidLeftByClient = \App\Models\ClientPrepaidService::where('status', 'pending')
+                    ->selectRaw('client_id, SUM(amount) AS bal')->groupBy('client_id')->pluck('bal', 'client_id')
+                    ->map(fn($v) => round((float) $v, 2));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Prepaid services (report) failed: ' . $e->getMessage());
+            $prepaidGroups = collect();
+            $prepaidLeftByClient = collect();
+        }
+        // PREPAID-SERVICES END
+
         return view('dashboard.reports.unpaid_accounts', compact(
-            'groupedData', 'zelleGroupedData', 'months', 'selectedMonth', 'previousMonth', 'nextMonth'
+            'groupedData', 'zelleGroupedData', 'months', 'selectedMonth', 'previousMonth', 'nextMonth', 'prepaidGroups', 'prepaidLeftByClient'
         ));
     }
+
+    // PREPAID-SERVICES START: staff tick off one pre-paid service after the next cleaning
+    public function markPrepaidUsed(Request $request)
+    {
+        $request->validate([
+            'prepaid_id' => 'required|string',
+        ]);
+
+        $service = \App\Models\ClientPrepaidService::find($request->prepaid_id);
+        if (!$service) {
+            return response()->json(['success' => false, 'message' => 'Pre-paid service not found.'], 404);
+        }
+
+        if (!Auth::user()->hasRole('admin') && $service->staff_id != Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'You are not authorized to update this pre-paid service.'], 403);
+        }
+
+        if ($service->status === 'used') {
+            return response()->json(['success' => false, 'message' => 'This pre-paid service is already checked off.'], 422);
+        }
+
+        $service->update([
+            'status' => 'used',
+            'used_at' => now(),
+            'used_by' => Auth::id(),
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Pre-paid service checked off.']);
+    }
+
+    /**
+     * "Use Pre-Paid" on an unpaid visit ("Completed but did not receive payment" because the client paid earlier):
+     * settles the visit from the client's pre-payment and ticks off one pre-paid service.
+     * Works like "Pay with Zelle": status paid + payment_status paid (so it's never cash to deposit),
+     * payment_method 'Prepaid' (so Route Reports doesn't count it as cash received).
+     */
+    public function usePrepaidForPayment(Request $request)
+    {
+        $request->validate([
+            'payment_id' => 'required|exists:client_payments,id',
+        ]);
+
+        $payment = ClientPayment::with('clientSchedule')->findOrFail($request->payment_id);
+
+        if ($payment->status === 'paid') {
+            return response()->json(['success' => false, 'message' => 'This visit is already marked as paid.'], 422);
+        }
+
+        if (!Auth::user()->hasRole('admin') && $payment->clientSchedule?->staff_id != Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'You are not authorized to update this payment.'], 403);
+        }
+
+        if (\App\Models\ClientPrepaidService::balanceForClient($payment->client_id) <= 0) {
+            return response()->json(['success' => false, 'message' => 'This client has no pre-paid balance left.'], 422);
+        }
+
+        $taken = \App\Models\ClientPrepaidService::settleFromBalance($payment);
+        if ($taken <= 0) {
+            return response()->json(['success' => false, 'message' => 'Could not use the pre-paid balance for this visit.'], 422);
+        }
+
+        return response()->json(['success' => true, 'message' => '$' . number_format($taken, 2) . ' used from the pre-paid balance.']);
+    }
+    // PREPAID-SERVICES END
 
     public function markPaymentPaid(Request $request)
     {

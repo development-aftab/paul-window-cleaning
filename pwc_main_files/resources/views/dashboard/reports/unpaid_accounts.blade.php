@@ -140,6 +140,45 @@
     .ua-tab-pane.active {
         display: block;
     }
+
+    /* PREPAID-SERVICES START */
+    .prepaid-card {
+        border: 2px solid #e11d48 !important;
+    }
+    .prepaid-card .prepaid-title,
+    .prepaid-card .prepaid-red {
+        color: #e11d48 !important;
+    }
+    .prepaid-slots {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .prepaid-slot {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid rgba(225, 29, 72, 0.35);
+        background: rgba(225, 29, 72, 0.05);
+        border-radius: 6px;
+        padding: 6px 10px;
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: #e11d48;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .prepaid-slot.used {
+        border-color: #d1d5db;
+        background: #f3f4f6;
+        color: #6b7280;
+        cursor: default;
+    }
+    .prepaid-slot input {
+        cursor: pointer;
+    }
+    /* PREPAID-SERVICES END */
 </style>
 @endpush
 
@@ -205,6 +244,84 @@
         @endif
 
         <div class="ua-tab-pane active" id="ua-tab-unpaid">
+
+        {{-- PREPAID-SERVICES START: clients who paid in advance ("Paid extra for [#] dates") --}}
+        @if(isset($prepaidGroups) && $prepaidGroups->isNotEmpty())
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-flush shadow-sm mb-5 prepaid-card">
+                    <div class="card-header pt-5">
+                        <h3 class="card-title align-items-start flex-column">
+                            <span class="card-label fw-bolder fs-3 mb-1 prepaid-title"><i class="fa-solid fa-wallet prepaid-red"></i> Pre-Paid Accounts</span>
+                            <span class="text-muted fs-7">Client paid in advance. At the next cleaning, staff choose "Paid on prior date of service" and that visit's price is taken from the balance automatically.</span>
+                        </h3>
+                    </div>
+                    <div class="card-body py-3">
+                        <div class="table-responsive">
+                            <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
+                                <thead>
+                                    <tr class="fw-bolder text-muted">
+                                        <th class="min-w-150px">Client</th>
+                                        <th class="min-w-125px">Route</th>
+                                        <th class="min-w-150px">Paid in Advance</th>
+                                        <th class="min-w-200px">Used</th>
+                                        <th class="min-w-100px text-end">Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($prepaidGroups as $prepaidRows)
+                                        @php
+                                            $pFirst = $prepaidRows->first();
+                                            $pRoute = $pFirst->client?->clientRouteStaff?->first()?->route?->name ?? 'N/A';
+                                            $pPaid = $prepaidRows->sum('amount');
+                                            $pBalance = $prepaidRows->where('status', 'pending')->sum('amount');
+                                            $pUsed = $prepaidRows->where('status', 'used');
+                                            $pCollections = $prepaidRows->groupBy('payment_id');
+                                        @endphp
+                                        <tr>
+                                            <td>
+                                                <span class="fw-bold d-block fs-6 prepaid-red">{{ optional($pFirst->client)->name ?? 'N/A' }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-dark fw-bold d-block fs-6">{{ $pRoute }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold d-block fs-6 prepaid-red">${{ number_format($pPaid, 2) }}</span>
+                                                @foreach($pCollections as $pCol)
+                                                    @php
+                                                        $pc = $pCol->first();
+                                                        $pcDate = optional($pc->schedule)->service_date ?? $pc->created_at;
+                                                        $pcStaff = optional($pc->staff)->first_name ?? optional($pc->staff)->name;
+                                                    @endphp
+                                                    <span class="text-muted fs-7 d-block">${{ number_format($pCol->sum('amount'), 2) }} on {{ $pcDate ? \Carbon\Carbon::parse($pcDate)->format('m-d-Y') : 'N/A' }}{{ $pcStaff ? ' by ' . $pcStaff : '' }}</span>
+                                                @endforeach
+                                            </td>
+                                            <td>
+                                                @if($pUsed->isEmpty())
+                                                    <span class="text-muted fs-7">Not used yet</span>
+                                                @else
+                                                    <span class="text-dark fw-bold d-block fs-6">${{ number_format($pUsed->sum('amount'), 2) }}</span>
+                                                    @foreach($pUsed->groupBy('used_payment_id') as $pUse)
+                                                        <span class="text-muted fs-7 d-block">${{ number_format($pUse->sum('amount'), 2) }} on {{ $pUse->first()->used_at ? $pUse->first()->used_at->format('m-d-Y') : 'N/A' }}</span>
+                                                    @endforeach
+                                                @endif
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="fw-bolder d-block fs-4 prepaid-red">${{ number_format($pBalance, 2) }}</span>
+                                                <span class="text-muted fs-7">left</span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+        {{-- PREPAID-SERVICES END --}}
+
         <div class="row">
             <div class="col-md-12">
                 @forelse($groupedData as $staffName => $schedules)
@@ -269,6 +386,13 @@
                                                             Save
                                                         </button>
                                                     @endif
+                                                    {{-- PREPAID-SERVICES START --}}
+                                                    @if(optional($schedule->clientSchedulePayment)->id && (($prepaidLeftByClient ?? collect())[$schedule->client_id] ?? 0) > 0)
+                                                        <button type="button" class="btn btn-sm use-prepaid-btn mt-1" style="background:#e11d48;color:#fff;white-space:nowrap;" data-payment-id="{{ $schedule->clientSchedulePayment->id }}" data-client-name="{{ $schedule->clientName->name ?? 'this client' }}" data-left="{{ number_format($prepaidLeftByClient[$schedule->client_id], 2) }}">
+                                                            <i class="fa-solid fa-wallet" style="color:#fff;"></i> Use Pre-Paid (${{ number_format($prepaidLeftByClient[$schedule->client_id], 2) }} left)
+                                                        </button>
+                                                    @endif
+                                                    {{-- PREPAID-SERVICES END --}}
                                                 </td>
                                             @elseif(auth()->user()->hasRole('admin'))
                                                 <td class="text-end">
@@ -403,6 +527,94 @@
         if (window.location.hash === '#ua-tab-zelle') {
             showUaTab('#ua-tab-zelle');
         }
+
+        // PREPAID-SERVICES START: settle an unpaid visit from the client's pre-payment
+        $(document).on('click', '.use-prepaid-btn', function() {
+            const button = $(this);
+
+            Swal.fire({
+                title: 'Use Pre-Paid?',
+                text: button.data('client-name') + ' already paid in advance. Take the price of this visit from their pre-paid balance ($' + button.data('left') + ' left)?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, use pre-paid',
+                cancelButtonText: 'Cancel',
+            }).then(function(result) {
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                button.prop('disabled', true);
+
+                $.ajax({
+                    url: '{{ route('reports.unpaid.use-prepaid') }}',
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        payment_id: button.data('payment-id'),
+                    },
+                    success: function(response) {
+                        Swal.fire({ title: 'Success!', text: response.message, icon: 'success', timer: 1500, showConfirmButton: false })
+                            .then(function() { window.location.reload(); });
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseJSON?.message || 'Failed to update. Please try again.';
+                        Swal.fire({ title: 'Error!', text: message, icon: 'error' });
+                        button.prop('disabled', false);
+                    },
+                });
+            });
+        });
+
+        // tick off one pre-paid service
+        $(document).on('change', '.prepaid-use-checkbox', function() {
+            const box = $(this);
+            if (!box.prop('checked')) {
+                return;
+            }
+
+            Swal.fire({
+                title: 'Check off pre-paid service?',
+                text: 'Mark service ' + box.data('slot') + ' for ' + box.data('client-name') + ' as done? This can\'t be undone.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, check it off',
+                cancelButtonText: 'Cancel',
+            }).then(function(result) {
+                if (!result.isConfirmed) {
+                    box.prop('checked', false);
+                    return;
+                }
+
+                box.prop('disabled', true);
+
+                $.ajax({
+                    url: '{{ route('reports.unpaid.prepaid-used') }}',
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        prepaid_id: box.data('prepaid-id'),
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false,
+                        }).then(function() {
+                            window.location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        const message = xhr.responseJSON?.message || 'Failed to update. Please try again.';
+                        Swal.fire({ title: 'Error!', text: message, icon: 'error' });
+                        box.prop('checked', false).prop('disabled', false);
+                    },
+                });
+            });
+        });
+        // PREPAID-SERVICES END
 
         $(document).on('click', '.pay-zelle-btn', function() {
             const button = $(this);

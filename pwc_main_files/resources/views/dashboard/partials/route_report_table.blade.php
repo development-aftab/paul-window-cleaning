@@ -63,7 +63,13 @@
                 // Cash Logic
                 // Exclude entries admin marked "Pay with Zelle" (paid outside, not cash in hand)
                 $cashSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'cash' && ($s->clientSchedulePayment->status ?? '') == 'paid' && ($s->clientSchedulePayment->option ?? '') != 'omit' && strtolower($s->clientSchedulePayment->payment_method ?? '') !== 'zelle');
+                // PREPAID-SERVICES START: visits settled with "Use Pre-Paid" are not cash in hand
+                $cashSchedules = $cashSchedules->filter(fn($s) => strtolower($s->clientSchedulePayment->payment_method ?? '') !== 'prepaid');
+                // PREPAID-SERVICES END
                 $cashRecord = $cashSchedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
+                // PREPAID-SERVICES START: extra cash collected for future services ("Paid extra for [#] dates")
+                $cashRecord += $cashSchedules->sum(fn($s) => \App\Models\ClientPrepaidService::extraForPayment($s->clientSchedulePayment->id ?? null));
+                // PREPAID-SERVICES END
 
                 // Deposits
                 $matchingDeposits = $allDeposits->where('route_id', $routeId)->where('week', $weekString)->where('month', $selectedMonthName)->where('year', $selectedYear);
@@ -159,8 +165,14 @@
                                     <li class="customer-card">
                                         <span class="customer-info">
                                             <span class="customer-name">{{ $s->clientName->name ?? 'Client' }}</span>
+                                            {{-- PREPAID-SERVICES START --}}
+                                            @php $prepaidExtra = \App\Models\ClientPrepaidService::extraForPayment($s->clientSchedulePayment->id ?? null); @endphp
+                                            @if ($prepaidExtra > 0)
+                                                <span class="payment-tag" style="background:#e11d48;color:#fff;">+ ${{ number_format($prepaidExtra, 2) }} pre-paid</span>
+                                            @endif
+                                            {{-- PREPAID-SERVICES END --}}
                                         </span>
-                                        <span class="customer-price">${{ number_format($s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0), 2) }}</span>
+                                        <span class="customer-price">${{ number_format(($s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0)) + \App\Models\ClientPrepaidService::extraForPayment($s->clientSchedulePayment->id ?? null), 2) }}</span>
                                     </li>
                                 @empty
                                     <li class="empty-state">No Cash Records</li>

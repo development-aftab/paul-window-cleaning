@@ -489,6 +489,12 @@
                     newPrice = 0;
                 }
 
+                // PREPAID-SERVICES START: already paid in advance -> no cash collected today
+                if ($('#priorDate').prop('checked')) {
+                    newPrice = 0;
+                }
+                // PREPAID-SERVICES END
+
                 // Update UI
                 $('.pricePlus').text('$' + newPrice.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
                 $('input[name="final_price"]').val(newPrice);
@@ -499,6 +505,12 @@
             $('#partiallyCompleted, #workCompleted, #extraPaid, #omit, #com_no_change, #recievedPayment').change(function() {
                 updatePrice();
             });
+
+            // PREPAID-SERVICES START
+            $('#priorDate').change(function() {
+                updatePrice();
+            });
+            // PREPAID-SERVICES END
 
             // Listen to input field changes
             $('input[name="price_charged_one"], input[name="price_charged_two"], input[name="amount"]').on('input', function() {

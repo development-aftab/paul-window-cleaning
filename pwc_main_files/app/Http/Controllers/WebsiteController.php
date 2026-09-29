@@ -3356,6 +3356,18 @@ class WebsiteController extends Controller
             'payment_status' => ($request->payment_type == "invoice" && $request->option != 'no_payment') ? 'paid' : 'pending',
         ]);
 
+        // PREPAID-SERVICES START: "Paid extra for [#] dates" -> pre-paid services for this client
+        try {
+            \App\Models\ClientPrepaidService::recordFromNewPayment($value, $request);
+            // "Paid on prior date of service" -> use the client's pre-paid credit automatically
+            if (\App\Models\ClientPrepaidService::isPriorDateVisit($request)) {
+                \App\Models\ClientPrepaidService::useForPriorDateVisit($value);
+            }
+        } catch (\Throwable $e) {
+            Log::error('Prepaid services (save) failed: ' . $e->getMessage());
+        }
+        // PREPAID-SERVICES END
+
         $schedule = ClientSchedule::find($request->schedule_id);
 
         $reorded = ClientSchedule::where('id', $request->schedule_id)->update([
@@ -3420,6 +3432,15 @@ class WebsiteController extends Controller
             'payment_status' => ($request->payment_type == "invoice" && $request->option != 'no_payment') ? 'paid' : 'pending',
             'edited_after_submission' => true,
         ]);
+
+        // PREPAID-SERVICES START
+        try {
+            \App\Models\ClientPrepaidService::syncFromEditedPayment($payment, $request);
+            \App\Models\ClientPrepaidService::syncPriorDateOnEdit($payment->fresh(), $request);
+        } catch (\Throwable $e) {
+            Log::error('Prepaid services (edit) failed: ' . $e->getMessage());
+        }
+        // PREPAID-SERVICES END
 
         ClientSchedule::where('id', $request->schedule_id)->update([
             'service_date' => $request->service_date ?? $schedule->service_date,
@@ -3935,7 +3956,13 @@ class WebsiteController extends Controller
                     $totalSales = $schedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
                     // Exclude entries admin marked "Pay with Zelle" (paid outside, not cash in hand)
                     $cashSchedules = $schedules->filter(fn($s) => ($s->clientSchedulePayment->payment_type ?? '') == 'cash' && ($s->clientSchedulePayment->status ?? '') == 'paid' && ($s->clientSchedulePayment->option ?? '') != 'omit' && strtolower($s->clientSchedulePayment->payment_method ?? '') !== 'zelle');
+                    // PREPAID-SERVICES START: visits settled with "Use Pre-Paid" are not cash in hand
+                    $cashSchedules = $cashSchedules->filter(fn($s) => strtolower($s->clientSchedulePayment->payment_method ?? '') !== 'prepaid');
+                    // PREPAID-SERVICES END
                     $cashRecord = $cashSchedules->sum(fn($s) => $s->calculateMergedInvoiceAmount() ?: ($s->clientSchedulePayment->final_price ?? 0));
+                    // PREPAID-SERVICES START: extra cash collected for future services
+                    $cashRecord += $cashSchedules->sum(fn($s) => \App\Models\ClientPrepaidService::extraForPayment($s->clientSchedulePayment->id ?? null));
+                    // PREPAID-SERVICES END
 
                     // Calculate HRs from Staff Log Hours (matched by route_id and week_start_date)
                     $weekStartDate = null;
